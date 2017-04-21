@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="650.0" prefWidth="942.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.MP3TaggerVC">
+   <children>
+      <SplitPane dividerPositions="0.23370786516853934" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="470.0" prefWidth="942.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <items>
+          <AnchorPane minHeight="0.0" minWidth="50.0" prefWidth="100.0">
+               <children>
+                  <ListView fx:id="songListLV" onDragDropped="#songListLVDropped" onDragOver="#songListLVDragOver" onMouseDragged="#songListLVOnMouseDragged" onMousePressed="#songListLVOnMousePressed" prefWidth="217.0" AnchorPane.bottomAnchor="26.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                  <Button layoutY="548.0" mnemonicParsing="false" onAction="#clearListOnAction" prefHeight="25.0" prefWidth="217.0" text="Clear All" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+               </children>
+            </AnchorPane>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="515.0" prefWidth="717.0">
+               <children>
+                  <Label fx:id="albumArtMetaLabel" alignment="CENTER" layoutX="106.0" layoutY="260.0" prefWidth="250.0" text="Image Info" AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="265.0" />
+                  <ImageView fx:id="albumArtIV" fitHeight="250.0" fitWidth="250.0" layoutX="14.0" layoutY="23.0" onDragDropped="#albumArtIVOnDropped" onDragOver="#albumArtIVOnDragOver" pickOnBounds="true" preserveRatio="true" AnchorPane.topAnchor="10.0" />
+                  <Label layoutX="280.0" layoutY="6.0" text="FileName" AnchorPane.topAnchor="6.0" />
+                  <Label layoutX="280.0" layoutY="62.0" text="Title" AnchorPane.topAnchor="54.0" />
+                  <ComboBox id="fileNameCB" fx:id="fileNameCB" editable="true" layoutX="280.0" layoutY="40.0" AnchorPane.leftAnchor="280.0" AnchorPane.rightAnchor="17.0" AnchorPane.topAnchor="24.0" />
+                  <ComboBox id="titleCB" fx:id="titleCB" editable="true" layoutX="280.0" layoutY="30.0" AnchorPane.leftAnchor="280.0" AnchorPane.rightAnchor="17.0" AnchorPane.topAnchor="72.0" />
+                  <Label layoutX="280.0" layoutY="100.0" text="Artist" AnchorPane.topAnchor="102.0" />
+                  <ComboBox id="artistCB" fx:id="artistCB" editable="true" layoutX="280.0" layoutY="120.0" AnchorPane.leftAnchor="280.0" AnchorPane.rightAnchor="17.0" AnchorPane.topAnchor="120.0" />
+                  <Label layoutX="280.0" layoutY="150.0" text="Album" AnchorPane.topAnchor="150.0" />
+                  <ComboBox id="albumCB" fx:id="albumCB" editable="true" layoutX="280.0" layoutY="170.0" AnchorPane.leftAnchor="280.0" AnchorPane.rightAnchor="17.0" AnchorPane.topAnchor="168.0" />
+                  <Label layoutX="280.0" layoutY="200.0" text="Album Artist" AnchorPane.topAnchor="198.0" />
+                  <ComboBox id="albumArtistCB" fx:id="albumArtistCB" editable="true" layoutX="280.0" layoutY="220.0" AnchorPane.leftAnchor="280.0" AnchorPane.rightAnchor="17.0" AnchorPane.topAnchor="216.0" />
+                  <Label layoutX="280.0" layoutY="250.0" text="Track" AnchorPane.topAnchor="246.0" />
+                  <ComboBox id="trackCB" fx:id="trackCB" editable="true" layoutX="280.0" layoutY="270.0" prefHeight="25.0" prefWidth="75.0" AnchorPane.topAnchor="264.0" />
+                  <Label layoutX="375.0" layoutY="250.0" text="Year" AnchorPane.topAnchor="246.0" />
+                  <ComboBox id="yearCB" fx:id="yearCB" editable="true" layoutX="375.0" layoutY="270.0" prefHeight="25.0" prefWidth="95.0" AnchorPane.topAnchor="264.0" />
+                  <Label layoutX="490.0" layoutY="250.0" text="Genre" AnchorPane.topAnchor="246.0" />
+                  <ComboBox id="genreCB" fx:id="genreCB" editable="true" layoutX="490.0" layoutY="270.0" prefHeight="25.0" prefWidth="120.0" AnchorPane.topAnchor="264.0" />
+                  <Label layoutX="10.0" layoutY="293.0" text="Comment" AnchorPane.topAnchor="294.0" />
+                  <ComboBox id="commentCB" fx:id="commentCB" editable="true" layoutX="10.0" layoutY="313.0" prefWidth="690.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="17.0" AnchorPane.topAnchor="312.0" />
+                  <TabPane layoutX="5.0" layoutY="351.0" prefHeight="223.0" prefWidth="711.0" side="BOTTOM" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.topAnchor="351.0">
+                    <tabs>
+                      <Tab text="Untitled Tab 2">
+                        <content>
+                          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                 <children>
+                                    <ListView fx:id="vgmdbInfoLV" layoutX="200.0" layoutY="27.0" onMouseClicked="#vgmdbInfoLVOnMouseClicked" prefHeight="194.0" prefWidth="510.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="200.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0" />
+                                    <ImageView fx:id="vgmdbAlbumArtIV" fitHeight="200.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                 </children></AnchorPane>
+                        </content>
+                      </Tab>
+                      <Tab text="Untitled Tab 1">
+                        <content>
+                          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="120.0" prefWidth="711.0">
+                                 <children>
+                                    <ListView layoutX="-18.0" layoutY="35.0" prefHeight="152.0" prefWidth="711.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0" />
+                                    <Label fx:id="suggestionCurrentLabel" layoutX="14.0" layoutY="14.0" text="Label" />
+                                    <TextField fx:id="suggestionCurrentTF" layoutX="14.0" layoutY="31.0" prefHeight="25.0" prefWidth="263.0" />
+                                    <Label fx:id="suggestionPredictionLabel" layoutX="14.0" layoutY="63.0" text="Label" />
+                                    <ComboBox fx:id="suggestionPredictionCB" layoutX="14.0" layoutY="80.0" prefHeight="25.0" prefWidth="265.0" />
+                                 </children></AnchorPane>
+                        </content>
+                      </Tab>
+                    </tabs>
+                  </TabPane>
+                  <TextField id="searchAlbumTF" fx:id="searchAlbumTF" layoutX="566.0" layoutY="622.0" onAction="#searchAlbumTFOnEnterPressed" prefHeight="25.0" prefWidth="250.0" AnchorPane.bottomAnchor="3.0" AnchorPane.rightAnchor="1.0" />
+               </children>
+            </AnchorPane>
+        </items>
+      </SplitPane>
+   </children>
+</AnchorPane>
