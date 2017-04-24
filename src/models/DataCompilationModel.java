@@ -434,8 +434,7 @@ public class DataCompilationModel
     
     public void save()
     {
-        System.out.println("@@@" + titleEditorText.get());
-        // go through eat element and set tag
+        // go through each element and set tag
         audioFilesModel.setDataForTag(Tag.FileName, tagToEditorTextMapping.get(Tag.FileName).get());
         audioFilesModel.setDataForTag(Tag.Title, tagToEditorTextMapping.get(Tag.Title).get());
         audioFilesModel.setDataForTag(Tag.Artist, tagToEditorTextMapping.get(Tag.Artist).get());
@@ -448,7 +447,7 @@ public class DataCompilationModel
         File artwork = Utilities.saveImage(albumArt.get());
         audioFilesModel.setAlbumArtFromFile(artwork);
         artwork.delete();
-        // albumArt is propagated to AudioFile when changes happen, so no need to set
+        audioFilesModel.setAlbumArtFromFile(Utilities.saveImage(albumArt.get()));
         audioFilesModel.save();
         
         dbManagement.setDataForTag(Tag.AlbumArtist, tagToEditorTextMapping.get(Tag.AlbumArtist).get());

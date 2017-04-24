@@ -413,7 +413,6 @@ public class MP3TaggerVC
             @Override
             public void handle(ActionEvent event)
             {
-                
                 model.setImage(ImageFrom.VGMDB, "null");
 //                albumArtIV.setImage(vgmdbParserModel.getAlbumArt());
             }

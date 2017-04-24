@@ -11,7 +11,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import application.Configuration;
+import models.Settings;
+import models.Settings.SettingsKey;
 import models.dataSuggestors.AudioFiles;
 import support.Utilities.Tag;
 
@@ -23,7 +24,13 @@ public class AudioFileJUnitTest
   public void setUp()
   {
       audio.setWorkingDirectory("TestResources");
-      Configuration.getInstance().turnOffPropagateSave();
+      Settings.getInstance().setSetting(SettingsKey.PROPAGATE_SAVE_ALBUM, "false");
+      Settings.getInstance().setSetting(SettingsKey.PROPAGATE_SAVE_ALBUM_ART, "false");
+      Settings.getInstance().setSetting(SettingsKey.PROPAGATE_SAVE_ALBUM_ARTIST, "false");
+      Settings.getInstance().setSetting(SettingsKey.PROPAGATE_SAVE_ARTIST, "false");
+      Settings.getInstance().setSetting(SettingsKey.PROPAGATE_SAVE_COMMENT, "false");
+      Settings.getInstance().setSetting(SettingsKey.PROPAGATE_SAVE_GENRE, "false");
+      Settings.getInstance().setSetting(SettingsKey.PROPAGATE_SAVE_YEAR, "false");
   }
   
   @After

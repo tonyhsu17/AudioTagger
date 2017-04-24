@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.CheckMenuItem?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.layout.BorderPane?>
 
-<BorderPane onKeyPressed="#keyPressed" prefHeight="650.0" prefWidth="950.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.MenuVC">
+<BorderPane onKeyPressed="#keyPressed" prefHeight="650.0" prefWidth="950.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.RootVC">
    <top>
       <MenuBar BorderPane.alignment="CENTER">
         <menus>
@@ -21,21 +19,9 @@
             <items>
               <MenuItem mnemonicParsing="false" text="Copy" />
                   <MenuItem mnemonicParsing="false" text="Paste" />
+                  <MenuItem mnemonicParsing="false" onAction="#openSettings" text="Preferences..." />
             </items>
           </Menu>
-            <Menu mnemonicParsing="false" text="Config">
-              <items>
-                  <CheckMenuItem mnemonicParsing="false" onAction="#togglePropSaveArtistConfig" selected="true" text="Propagate Artist Save" />
-                  <CheckMenuItem mnemonicParsing="false" onAction="#togglePropSaveAlbumConfig" selected="true" text="Propagate Album Save" />
-                  <CheckMenuItem mnemonicParsing="false" onAction="#togglePropSaveAlbumArtistConfig" selected="true" text="Propagate Album Artist Save" />
-                  <CheckMenuItem mnemonicParsing="false" onAction="#togglePropSaveYearConfig" selected="true" text="Propagate Year Save" />
-                  <CheckMenuItem mnemonicParsing="false" onAction="#togglePropSaveGenreConfig" selected="true" text="Propagate Genre Save" />
-                  <CheckMenuItem mnemonicParsing="false" onAction="#togglePropSaveCommentConfig" selected="true" text="Propagate Comment Save" />
-                  <CheckMenuItem mnemonicParsing="false" onAction="#togglePropSaveAlbumArtConfig" selected="true" text="Propagate Album Art Save" />
-                  <SeparatorMenuItem mnemonicParsing="false" />
-                  <MenuItem mnemonicParsing="false" onAction="#toggleAllPropagateSaveConfig" text="Toggle All" />
-              </items>
-            </Menu>
           <Menu mnemonicParsing="false" text="Help">
             <items>
               <MenuItem mnemonicParsing="false" text="About" />

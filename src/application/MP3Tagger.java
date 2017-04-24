@@ -16,7 +16,7 @@ public class MP3Tagger extends Application
     private Stage primaryStage;
     private BorderPane rootLayout;
     
-    MenuVC menuVC;
+    RootVC rootVC;
     MP3TaggerVC mp3TaggerVC;
 
     @Override
@@ -40,7 +40,7 @@ public class MP3Tagger extends Application
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getResource("../application/RootView.fxml"));
             rootLayout = (BorderPane)loader.load();
-            menuVC = loader.getController();
+            rootVC = loader.getController();
             
             // Show the scene containing the root layout.
             Scene scene = new Scene(rootLayout);
@@ -62,7 +62,7 @@ public class MP3Tagger extends Application
             loader.setLocation(getClass().getResource("../application/MP3TaggerView.fxml"));
             AnchorPane view = (AnchorPane)loader.load();
             mp3TaggerVC = loader.getController();
-            menuVC.setMP3TaggerVC(mp3TaggerVC);
+            rootVC.setMP3TaggerVC(mp3TaggerVC);
             
             rootLayout.setCenter(view);
 

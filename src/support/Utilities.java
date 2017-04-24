@@ -288,4 +288,16 @@ public class Utilities
         sb.append(list.get(i) + " & " + list.get(i + 1));
         return sb.toString();
     }
+    
+    public static boolean convertToBoolean(String str)
+    {
+        if(str.toLowerCase().startsWith("y") || str.toLowerCase().startsWith("t"))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
 }

@@ -1,11 +1,20 @@
 package application;
 
+import java.io.IOException;
+
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.input.KeyEvent;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import models.Settings;
 import support.Utilities.Tag;
 
-public class MenuVC
+public class RootVC
 {
     private MP3TaggerVC taggerVC;
     
@@ -13,7 +22,7 @@ public class MenuVC
     @FXML
     CheckMenuItem propSaveArtist;
     
-    public MenuVC()
+    public RootVC()
     {
     }
     
@@ -50,6 +59,30 @@ public class MenuVC
     }
     
     @FXML
+    private void openSettings(ActionEvent event)
+    {
+        try
+        {
+            Stage stage = new Stage();
+            Parent loader = FXMLLoader.load(getClass().getResource("../application/SettingsView.fxml"));
+            
+            stage.setScene(new Scene(loader));
+            stage.setTitle("Modal Window");
+            stage.initModality(Modality.WINDOW_MODAL);
+//            stage.initOwner(((MenuItem)event.getSource()).getScene().getWindow());
+            stage.show();
+            
+        }
+        catch (IOException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
+        
+    }
+    
+    @FXML
     private void toggleAllPropagateSaveConfig()
     {
         // meh options are still checked/not updated
@@ -62,45 +95,4 @@ public class MenuVC
 //        togglePropSaveAlbumArtConfig();
     }
     
-    @FXML
-    private void togglePropSaveArtistConfig()
-    {
-        Configuration.getInstance().togglePropagateSave(Tag.Artist);
-    }
-    
-    @FXML
-    private void togglePropSaveAlbumConfig()
-    {
-        Configuration.getInstance().togglePropagateSave(Tag.Album);
-    }
-    
-    @FXML
-    private void togglePropSaveAlbumArtistConfig()
-    {
-        Configuration.getInstance().togglePropagateSave(Tag.AlbumArt);
-    }
-    
-    @FXML
-    private void togglePropSaveYearConfig()
-    {
-        Configuration.getInstance().togglePropagateSave(Tag.Year);
-    }
-    
-    @FXML
-    private void togglePropSaveGenreConfig()
-    {
-        Configuration.getInstance().togglePropagateSave(Tag.Genre);
-    }
-    
-    @FXML
-    private void togglePropSaveCommentConfig()
-    {
-        Configuration.getInstance().togglePropagateSave(Tag.Comment);
-    }
-    
-    @FXML
-    private void togglePropSaveAlbumArtConfig()
-    {
-        Configuration.getInstance().togglePropagateSave(Tag.AlbumArt);
-    }
 }

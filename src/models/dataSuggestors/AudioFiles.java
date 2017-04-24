@@ -32,7 +32,8 @@ import org.jaudiotagger.tag.id3.ID3v24Frames;
 import org.jaudiotagger.tag.images.Artwork;
 import org.jaudiotagger.tag.images.ArtworkFactory;
 
-import application.Configuration;
+import models.Settings;
+import models.Settings.SettingsKey;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
@@ -307,37 +308,37 @@ public class AudioFiles implements DataSuggestorBase
         Image propAlbumArt = albumArt;    
         
         // select all tags from album
-        if(Configuration.getInstance().isAnyPropagateSaveOn())
+        if(Settings.getInstance().isAnyPropagateSaveOn())
         {
             selectTags(getAllIndexFromAlbum(selectedIndicies.get(0), false));
         }
         
         // set selected values back
-        if(Configuration.getInstance().isPropagateSaveOn(Tag.Artist))
+        if(Settings.getInstance().isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_ARTIST))
         {
             setDataForTag(Tag.Artist, propArtist);
         }
-        if(Configuration.getInstance().isPropagateSaveOn(Tag.Album))
+        if(Settings.getInstance().isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_ALBUM))
         {
             setDataForTag(Tag.Album, propAlbum);
         }
-        if(Configuration.getInstance().isPropagateSaveOn(Tag.AlbumArtist))
+        if(Settings.getInstance().isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_ALBUM_ARTIST))
         {
             setDataForTag(Tag.AlbumArtist, propAlbumArtist);
         }
-        if(Configuration.getInstance().isPropagateSaveOn(Tag.Year))
+        if(Settings.getInstance().isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_YEAR))
         {
             setDataForTag(Tag.Year, propYear);
         }
-        if(Configuration.getInstance().isPropagateSaveOn(Tag.Genre))
+        if(Settings.getInstance().isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_GENRE))
         {
             setDataForTag(Tag.Genre, propGenre);
         }
-        if(Configuration.getInstance().isPropagateSaveOn(Tag.Comment))
+        if(Settings.getInstance().isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_COMMENT))
         {
             setDataForTag(Tag.Comment, propComment);
         }
-        if(Configuration.getInstance().isPropagateSaveOn(Tag.AlbumArt))
+        if(Settings.getInstance().isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_ALBUM_ART))
         {
             File temp = Utilities.saveImage(propAlbumArt);
             setAlbumArtFromFile(temp);
@@ -646,7 +647,7 @@ public class AudioFiles implements DataSuggestorBase
                 e.printStackTrace();
             }
         }
-        if(selectedIndicies.size() == 1 && Configuration.getInstance().isAnyPropagateSaveOn())
+        if(selectedIndicies.size() == 1 && Settings.getInstance().isAnyPropagateSaveOn())
         {
             mockMultisave();
         }
