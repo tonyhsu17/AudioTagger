@@ -88,6 +88,7 @@ public class Utilities
     public static String[] splitBySeparators(String string)
     {
         String[] splitArtists = string.split("(, )|( & )");
+        // TODO get feat and etc to split by too
         return splitArtists;
     }
     

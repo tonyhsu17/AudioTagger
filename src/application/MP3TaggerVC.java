@@ -121,27 +121,45 @@ public class MP3TaggerVC
         // binds
         songListLV.itemsProperty().bindBidirectional(model.processingFilesProperty());
 
-        fileNameCB.itemsProperty().bindBidirectional(model.fileNamesProperty());
-        fileNameCB.editorProperty().getValue().textProperty().bindBidirectional(model.fileNameTextProperty());
-        titleCB.itemsProperty().bindBidirectional(model.titlesProperty());
-        titleCB.editorProperty().getValue().textProperty().bindBidirectional(model.titleTextProperty());
-        artistCB.itemsProperty().bindBidirectional(model.artistsProperty());
-        artistCB.editorProperty().getValue().textProperty().bindBidirectional(model.artistTextProperty());
-        albumCB.itemsProperty().bindBidirectional(model.albumsProperty());
-        albumCB.editorProperty().getValue().textProperty().bindBidirectional(model.albumTextProperty());
-        albumArtistCB.itemsProperty().bindBidirectional(model.albumArtistsProperty());
-        albumArtistCB.editorProperty().getValue().textProperty().bindBidirectional(model.albumArtistTextProperty());
-        trackCB.itemsProperty().bindBidirectional(model.tracksProperty());
-        trackCB.editorProperty().getValue().textProperty().bindBidirectional(model.trackTextProperty());
-        yearCB.itemsProperty().bindBidirectional(model.yearsProperty());
-        yearCB.editorProperty().getValue().textProperty().bindBidirectional(model.yearTextProperty());
-        genreCB.itemsProperty().bindBidirectional(model.genresProperty());
-        genreCB.editorProperty().getValue().textProperty().bindBidirectional(model.genreTextProperty());
-        commentCB.itemsProperty().bindBidirectional(model.commentsProperty());
-        commentCB.editorProperty().getValue().textProperty().bindBidirectional(model.commentTextProperty());
+        fileNameCB.itemsProperty().bindBidirectional(
+            model.getPropertyForTag(Tag.FileName).getDropDownListProperty());
+        fileNameCB.editorProperty().getValue().textProperty().bindBidirectional(
+            model.getPropertyForTag(Tag.FileName).getTextProperty());
+        titleCB.itemsProperty().bindBidirectional(
+            model.getPropertyForTag(Tag.Title).getDropDownListProperty());
+        titleCB.editorProperty().getValue().textProperty().bindBidirectional(
+            model.getPropertyForTag(Tag.Title).getTextProperty());
+        artistCB.itemsProperty().bindBidirectional(
+            model.getPropertyForTag(Tag.Artist).getDropDownListProperty());
+        artistCB.editorProperty().getValue().textProperty().bindBidirectional(
+            model.getPropertyForTag(Tag.Artist).getTextProperty());
+        albumCB.itemsProperty().bindBidirectional(
+            model.getPropertyForTag(Tag.Album).getDropDownListProperty());
+        albumCB.editorProperty().getValue().textProperty().bindBidirectional(
+            model.getPropertyForTag(Tag.Album).getTextProperty());
+        albumArtistCB.itemsProperty().bindBidirectional(
+            model.getPropertyForTag(Tag.AlbumArtist).getDropDownListProperty());
+        albumArtistCB.editorProperty().getValue().textProperty().bindBidirectional(
+            model.getPropertyForTag(Tag.AlbumArtist).getTextProperty());
+        trackCB.itemsProperty().bindBidirectional(
+            model.getPropertyForTag(Tag.Track).getDropDownListProperty());
+        trackCB.editorProperty().getValue().textProperty().bindBidirectional(
+            model.getPropertyForTag(Tag.Track).getTextProperty());
+        yearCB.itemsProperty().bindBidirectional(
+            model.getPropertyForTag(Tag.Year).getDropDownListProperty());
+        yearCB.editorProperty().getValue().textProperty().bindBidirectional(
+            model.getPropertyForTag(Tag.Year).getTextProperty());
+        genreCB.itemsProperty().bindBidirectional(
+            model.getPropertyForTag(Tag.Genre).getDropDownListProperty());
+        genreCB.editorProperty().getValue().textProperty().bindBidirectional(
+            model.getPropertyForTag(Tag.Genre).getTextProperty());
+        commentCB.itemsProperty().bindBidirectional(
+            model.getPropertyForTag(Tag.Comment).getDropDownListProperty());
+        commentCB.editorProperty().getValue().textProperty().bindBidirectional(
+            model.getPropertyForTag(Tag.FileName).getTextProperty());
         
         albumArtIV.imageProperty().bindBidirectional(model.albumArtProperty());
-        albumArtMetaLabel.textProperty().bind(model.albumArtMetaProperty());
+        albumArtMetaLabel.textProperty().bind(model.getPropertyForTag(Tag.AlbumArtMeta).getTextProperty());
         
         vgmdbInfoLV.itemsProperty().bind(vgmdbParserModel.vgmdbInfoProperty());
         vgmdbAlbumArtIV.imageProperty().bind(vgmdbParserModel.albumArtProperty());
@@ -449,7 +467,7 @@ public class MP3TaggerVC
             });
         }
         
-        vgmdbParserModel.searchByAlbum(model.getAlbums().get(0));
+        vgmdbParserModel.searchByAlbum(model.getPropertyForTag(Tag.Album).getTextProperty().get());
     }
     
 //    private void inputTextChanged()
@@ -502,7 +520,7 @@ public class MP3TaggerVC
         }
         catch (ClassCastException | NullPointerException | IndexOutOfBoundsException e) // catch invalid item casting
         {
-            pressedIndex = model.getFileNames().size();
+            pressedIndex = model.getSongList().size();
         }
     }
     
