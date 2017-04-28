@@ -47,7 +47,6 @@ public class DataCompilationModel
     }
 
     private ListProperty<String> fileNamesList;
-    private SimpleStringProperty fileNameEditorText;
 
     private ObjectProperty<Image> albumArt;
 
@@ -78,8 +77,7 @@ public class DataCompilationModel
     {
         audioFilesModel.setWorkingDirectory("");
         fileNamesList.clear();
-        fileNameEditorText.set("");
-
+        
         clearAllTags();
     }
 
@@ -122,9 +120,9 @@ public class DataCompilationModel
         else
         {
             String originalText = (String)audioFilesModel.getDataForTag(tag);
-            System.out.println("Originaltext: " + originalText);
+//            System.out.println("Originaltext: " + originalText);
             int size = addPossibleDataForTag(tag, originalText);
-            System.out.println("updated size: " + size);
+//            System.out.println("updated size: " + size);
             cb.done(size);
         }
     }
@@ -136,8 +134,6 @@ public class DataCompilationModel
         dropDownList.clear();
 
         fieldMap.get(tag).getTextProperty().set(editorText);
-
-        System.out.println("editor: " + fieldMap.get(tag).getTextProperty().get());
 
         // add original
         for(String str : additional)
