@@ -110,11 +110,6 @@ public class MP3TaggerVC
   
         initializeAlbumArtMenu();
     }
-    
-    private void reset()
-    {
-//        fileNameCB.editableProperty().getValue().;
-    }
 
     private void bindProperties()
     {
@@ -156,8 +151,7 @@ public class MP3TaggerVC
         commentCB.itemsProperty().bindBidirectional(
             model.getPropertyForTag(Tag.Comment).getDropDownListProperty());
         commentCB.editorProperty().getValue().textProperty().bindBidirectional(
-            model.getPropertyForTag(Tag.FileName).getTextProperty());
-        
+            model.getPropertyForTag(Tag.Comment).getTextProperty());
         albumArtIV.imageProperty().bindBidirectional(model.albumArtProperty());
         albumArtMetaLabel.textProperty().bind(model.getPropertyForTag(Tag.AlbumArtMeta).getTextProperty());
         
@@ -294,7 +288,7 @@ public class MP3TaggerVC
         });
         
         // KeyPressed
-        artistCB.getEditor().setOnKeyPressed(new EventHandler<KeyEvent>() {
+        artistCB.getEditor().setOnKeyReleased(new EventHandler<KeyEvent>() {
             @SuppressWarnings("unchecked")
             @Override
             public void handle(KeyEvent event)
@@ -307,7 +301,7 @@ public class MP3TaggerVC
                 });
             }
         });
-        albumArtistCB.getEditor().setOnKeyPressed(new EventHandler<KeyEvent>() {
+        albumArtistCB.getEditor().setOnKeyReleased(new EventHandler<KeyEvent>() {
             @SuppressWarnings("unchecked")
             @Override
             public void handle(KeyEvent event)
@@ -320,7 +314,7 @@ public class MP3TaggerVC
                 });
             }
         });
-        genreCB.getEditor().setOnKeyPressed(new EventHandler<KeyEvent>() {
+        genreCB.getEditor().setOnKeyReleased(new EventHandler<KeyEvent>() {
             @SuppressWarnings("unchecked")
             @Override
             public void handle(KeyEvent event)
