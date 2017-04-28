@@ -58,14 +58,14 @@ public class Utilities
         return -1;
     }
     
-    // return null if no string
     public static String[] splitName(String fullName)
     {
+        String[] splitName = {"", ""};
         if(fullName == null || fullName.isEmpty())
         {
-            return null;
+            return splitName;
         }
-        String[] splitName = fullName.split(" ");
+        splitName = fullName.split(" ");
         String lastName = "";
         String firstName = "";
         if(splitName.length > 1)
@@ -88,6 +88,7 @@ public class Utilities
     public static String[] splitBySeparators(String string)
     {
         String[] splitArtists = string.split("(, )|( & )");
+        // TODO get feat and etc to split by too
         return splitArtists;
     }
     

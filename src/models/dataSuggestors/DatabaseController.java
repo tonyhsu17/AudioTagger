@@ -768,7 +768,7 @@ public class DatabaseController implements DataSuggestorBase
                 {
                     // param first, last
                     String[] fullName = Utilities.splitName(values[0]);
-                    if(fullName != null)
+                    if(!fullName[0].isEmpty()) 
                     {
                         add(TableNames.Artist, fullName[0], fullName[1]);
                     }
