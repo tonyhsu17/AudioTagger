@@ -14,8 +14,7 @@ import support.Utilities.Tag;
  */
 public interface DataSuggestorBase
 {
-    public String getDataForTagTest(TagBase tag, String... values);
-    public String getDataForTag(Tag tag, String... values);
+    public String getDataForTag(TagBase<?> tag, String... extraArgs);
     public Image getAlbumArt();
     
     /**
@@ -23,14 +22,14 @@ public interface DataSuggestorBase
      * @param tag
      * @param value
      */
-    public void setDataForTag(Tag tag, String... values);
+    public void setDataForTag(TagBase<?> tag, String... values);
     public void setAlbumArtFromFile(File file);
     public void setAlbumArtFromURL(String url);
     public void save();
     
-    public List<String> getPossibleDataForTag(Tag tag, String values);
+    public List<String> getPossibleDataForTag(TagBase<?> tag, String values);
     
-    public TagBase[] getAdditionalTags(); // extra tags not in base tags
-    public TagBase[] getUsableTags(); // tags that useful
+    public TagBase<?>[] getAdditionalTags(); // extra tags not in base tags
+    public TagBase<?>[] getUsableTags(); // tags that useful
     
 }

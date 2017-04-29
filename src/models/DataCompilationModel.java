@@ -25,7 +25,6 @@ import models.dataSuggestors.DataSuggestorBase;
 import models.dataSuggestors.DatabaseController;
 import models.dataSuggestors.VGMDBParser;
 import models.dataSuggestors.DatabaseController.TableNames;
-import models.dataSuggestors.VGMDBParser.VGMDBTag;
 import support.GenreMapping;
 import support.Utilities;
 import support.Utilities.Tag;
@@ -95,7 +94,7 @@ public class DataCompilationModel
         addAudioModelDataToList();
 
         albumArt.set(audioFilesModel.getAlbumArt());
-        fieldMap.get(Tag.AlbumArtMeta).getTextProperty().set(audioFilesModel.getDataForTag(Tag.AlbumArtMeta));
+        fieldMap.get(Tag.ALBUM_ART_META).getTextProperty().set(audioFilesModel.getDataForTag(Tag.ALBUM_ART_META));
 
         cb.done("DONE");
     }
@@ -107,14 +106,14 @@ public class DataCompilationModel
         addAudioModelDataToList();
 
         albumArt.set(audioFilesModel.getAlbumArt());
-        fieldMap.get(Tag.AlbumArtMeta).getTextProperty().set(audioFilesModel.getDataForTag(Tag.AlbumArtMeta));
+        fieldMap.get(Tag.ALBUM_ART_META).getTextProperty().set(audioFilesModel.getDataForTag(Tag.ALBUM_ART_META));
 
         cb.done("DONE");
     }
 
     public void updateChoicesForTag(Tag tag, DataCompilationModelCallback cb)
     {
-        if(tag.equals(Tag.AlbumArt) || tag.equals(Tag.AlbumArtMeta))
+        if(tag.equals(Tag.ALBUM_ART) || tag.equals(Tag.ALBUM_ART_META))
         {
             cb.done(0);
         }
@@ -148,34 +147,34 @@ public class DataCompilationModel
         // now handle base on specific
         switch (tag)
         {
-            case Album:
+            case ALBUM:
                 addAdditionalPossibleAlbums(dropDownList);
                 break;
-            case AlbumArt:
+            case ALBUM_ART:
                 break;
-            case AlbumArtMeta:
+            case ALBUM_ART_META:
                 break;
-            case AlbumArtist:
+            case ALBUM_ARTIST:
                 addAdditionalPossibleAlbumArtists(dropDownList);
                 break;
-            case Artist:
+            case ARTIST:
                 addAdditionalPossibleArtists(dropDownList);
                 break;
-            case Comment:
+            case COMMENT:
                 addAdditionalPossibleComments(dropDownList);
                 break;
-            case FileName:
+            case FILE_NAME:
                 addAdditionalPossibleFileNames(dropDownList);
                 break;
-            case Genre:
+            case GENRE:
                 addAdditionalPossibleGenres(dropDownList);
                 break;
-            case Title:
+            case TITLE:
                 addAdditionalPossibleTitles(dropDownList);
                 break;
-            case Track:
+            case TRACK:
                 break;
-            case Year:
+            case YEAR:
                 addAdditionalPossibleYears(dropDownList);
                 break;
             default:
@@ -187,12 +186,12 @@ public class DataCompilationModel
 
     private void addAdditionalPossibleFileNames(List<String> dropDownList)
     {
-        DataCompliationField field = fieldMap.get(Tag.FileName);
+        DataCompliationField field = fieldMap.get(Tag.FILE_NAME);
         String textFieldText = field.getTextProperty().get();
         if(!textFieldText.isEmpty() && !Utilities.isKeyword(textFieldText))
         {
             String formatted = String.format("%02d", Integer.valueOf(textFieldText)) + " " +
-                fieldMap.get(Tag.Title).getTextProperty().get() + "." + audioFilesModel.getSelectedFileType();
+                fieldMap.get(Tag.TITLE).getTextProperty().get() + "." + audioFilesModel.getSelectedFileType();
             if(!dropDownList.contains(formatted))
             {
                 dropDownList.add(formatted);
@@ -207,7 +206,7 @@ public class DataCompilationModel
         {
             try
             {
-                String temp = vgmdbModel.getDataForTag(Tag.Track, audioFilesModel.getDataForTag(Tag.Track));
+                String temp = vgmdbModel.getDataForTag(Tag.TRACK, audioFilesModel.getDataForTag(Tag.TRACK));
                 if(temp != null && !temp.isEmpty() && !dropDownList.contains(temp))
                 {
                     dropDownList.add(temp);
@@ -222,10 +221,10 @@ public class DataCompilationModel
     // adding compilation
     private void addAdditionalPossibleArtists(List<String> dropDownList)
     {
-        DataCompliationField field = fieldMap.get(Tag.Artist);
+        DataCompliationField field = fieldMap.get(Tag.ARTIST);
         String textFieldText = field.getTextProperty().get();
         // add from db
-        List<String> possibleArtist = dbManagement.getPossibleDataForTag(Tag.Artist, textFieldText);
+        List<String> possibleArtist = dbManagement.getPossibleDataForTag(Tag.ARTIST, textFieldText);
         if(possibleArtist != null)
         {
             for(String str : possibleArtist)
@@ -240,7 +239,7 @@ public class DataCompilationModel
         // add from vgmdb
         if(vgmdbModel != null)
         {
-            String temp = vgmdbModel.getDataForTag(Tag.Artist, "");
+            String temp = vgmdbModel.getDataForTag(Tag.ARTIST, "");
             if(temp != null && !temp.isEmpty() && !dropDownList.contains(temp))
             {
                 dropDownList.add(temp);
@@ -255,7 +254,7 @@ public class DataCompilationModel
         {
             try
             {
-                String temp = vgmdbModel.getDataForTag(Tag.Album, "");
+                String temp = vgmdbModel.getDataForTag(Tag.ALBUM, "");
                 if(temp != null && !temp.isEmpty() && !dropDownList.contains(temp))
                 {
                     dropDownList.add(temp);
@@ -270,11 +269,11 @@ public class DataCompilationModel
     // adding compilation
     private void addAdditionalPossibleAlbumArtists(List<String> dropDownList)
     {
-        DataCompliationField field = fieldMap.get(Tag.AlbumArtist);
+        DataCompliationField field = fieldMap.get(Tag.ALBUM_ARTIST);
         String textFieldText = field.getTextProperty().get();
         // add from db
         List<String> possibleArtist =
-            dbManagement.getPossibleDataForTag(Tag.AlbumArtist, textFieldText);
+            dbManagement.getPossibleDataForTag(Tag.ALBUM_ARTIST, textFieldText);
         for(String str : possibleArtist)
         {
             if(!dropDownList.contains(str))
@@ -286,7 +285,7 @@ public class DataCompilationModel
         // add from vgmdb
         if(vgmdbModel != null)
         {
-            String temp = vgmdbModel.getDataForTag(Tag.AlbumArtist);
+            String temp = vgmdbModel.getDataForTag(Tag.ALBUM_ARTIST);
             if(temp != null && !temp.isEmpty() && !dropDownList.contains(temp))
             {
                 dropDownList.add(temp);
@@ -301,7 +300,7 @@ public class DataCompilationModel
         {
             try
             {
-                String temp = vgmdbModel.getDataForTag(Tag.Year, "");
+                String temp = vgmdbModel.getDataForTag(Tag.YEAR, "");
                 if(temp != null && !temp.isEmpty() && !dropDownList.contains(temp))
                 {
                     dropDownList.add(temp);
@@ -315,7 +314,7 @@ public class DataCompilationModel
 
     private void addAdditionalPossibleGenres(List<String> dropDownList)
     {
-        DataCompliationField field = fieldMap.get(Tag.Genre);
+        DataCompliationField field = fieldMap.get(Tag.GENRE);
         String textFieldText = field.getTextProperty().get();
         
         List<String> possibleGenres = GenreMapping.containsIgnoreCase(textFieldText);
@@ -333,12 +332,12 @@ public class DataCompilationModel
         // add from vgmdb
         if(vgmdbModel != null)
         {
-            String theme = vgmdbModel.getDataForTag(Tag.Comment, "");
+            String theme = vgmdbModel.getDataForTag(Tag.COMMENT, "");
             if(theme != null)
             {
-                String albumArtist = fieldMap.get(Tag.AlbumArtist).getTextProperty().get();
-                String album = fieldMap.get(Tag.Album).getTextProperty().get();
-                String artist = fieldMap.get(Tag.Artist).getTextProperty().get();
+                String albumArtist = fieldMap.get(Tag.ALBUM_ARTIST).getTextProperty().get();
+                String album = fieldMap.get(Tag.ALBUM).getTextProperty().get();
+                String artist = fieldMap.get(Tag.ARTIST).getTextProperty().get();
                 String formatted = albumArtist + " " + theme + " Single - " +
                     album + " [" + artist + "]";
                 if(!dropDownList.contains(formatted))
@@ -354,48 +353,48 @@ public class DataCompilationModel
     {
         for(Tag tag : Tag.values())
         {
-            if(!tag.equals(Tag.AlbumArt) && !tag.equals(Tag.AlbumArtMeta))
+            if(!tag.equals(Tag.ALBUM_ART) && !tag.equals(Tag.ALBUM_ART_META))
             {
                 fieldMap.get(tag).dropDownProperty.add(audioFilesModel.getDataForTag(tag));
             }
         }
         albumArt.setValue(audioFilesModel.getAlbumArt());
-        fieldMap.get(Tag.AlbumArtMeta).getTextProperty().set(audioFilesModel.getDataForTag(Tag.AlbumArtMeta));
+        fieldMap.get(Tag.ALBUM_ART_META).getTextProperty().set(audioFilesModel.getDataForTag(Tag.ALBUM_ART_META));
     }
 
     public void save()
     {
         // go through each element and set tag
-        audioFilesModel.setDataForTag(Tag.FileName, 
-            fieldMap.get(Tag.FileName).getTextProperty().get());
-        audioFilesModel.setDataForTag(Tag.Title, 
-            fieldMap.get(Tag.Title).getTextProperty().get());
-        audioFilesModel.setDataForTag(Tag.Artist, 
-            fieldMap.get(Tag.Artist).getTextProperty().get());
-        audioFilesModel.setDataForTag(Tag.Album, 
-            fieldMap.get(Tag.Album).getTextProperty().get());
-        audioFilesModel.setDataForTag(Tag.AlbumArtist, 
-            fieldMap.get(Tag.AlbumArt).getTextProperty().get());
-        audioFilesModel.setDataForTag(Tag.Track,
-            fieldMap.get(Tag.Track).getTextProperty().get());
-        audioFilesModel.setDataForTag(Tag.Year, 
-            fieldMap.get(Tag.Year).getTextProperty().get());
-        audioFilesModel.setDataForTag(Tag.Genre, 
-            fieldMap.get(Tag.Genre).getTextProperty().get());
-        audioFilesModel.setDataForTag(Tag.Comment, 
-            fieldMap.get(Tag.Comment).getTextProperty().get());
+        audioFilesModel.setDataForTag(Tag.FILE_NAME, 
+            fieldMap.get(Tag.FILE_NAME).getTextProperty().get());
+        audioFilesModel.setDataForTag(Tag.TITLE, 
+            fieldMap.get(Tag.TITLE).getTextProperty().get());
+        audioFilesModel.setDataForTag(Tag.ARTIST, 
+            fieldMap.get(Tag.ARTIST).getTextProperty().get());
+        audioFilesModel.setDataForTag(Tag.ALBUM, 
+            fieldMap.get(Tag.ALBUM).getTextProperty().get());
+        audioFilesModel.setDataForTag(Tag.ALBUM_ARTIST, 
+            fieldMap.get(Tag.ALBUM_ART).getTextProperty().get());
+        audioFilesModel.setDataForTag(Tag.TRACK,
+            fieldMap.get(Tag.TRACK).getTextProperty().get());
+        audioFilesModel.setDataForTag(Tag.YEAR, 
+            fieldMap.get(Tag.YEAR).getTextProperty().get());
+        audioFilesModel.setDataForTag(Tag.GENRE, 
+            fieldMap.get(Tag.GENRE).getTextProperty().get());
+        audioFilesModel.setDataForTag(Tag.COMMENT, 
+            fieldMap.get(Tag.COMMENT).getTextProperty().get());
         
         File artwork = Utilities.saveImage(albumArt.get());
         audioFilesModel.setAlbumArtFromFile(artwork);
         artwork.delete();
         audioFilesModel.save();
 
-        dbManagement.setDataForTag(Tag.AlbumArtist,
-            fieldMap.get(Tag.AlbumArtist).getTextProperty().get());
+        dbManagement.setDataForTag(Tag.ALBUM_ARTIST,
+            fieldMap.get(Tag.ALBUM_ARTIST).getTextProperty().get());
 
         String[] splitArtists = Utilities.splitBySeparators(
-            fieldMap.get(Tag.Artist).getTextProperty().get());
-        dbManagement.setDataForTag(Tag.Artist, splitArtists);
+            fieldMap.get(Tag.ARTIST).getTextProperty().get());
+        dbManagement.setDataForTag(Tag.ARTIST, splitArtists);
     }
 
     public void clearAllTags()

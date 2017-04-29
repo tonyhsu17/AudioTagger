@@ -738,49 +738,11 @@ public class DatabaseController implements DataSuggestorBase
             e.printStackTrace();
         }
     }
-    
-    @Override
-    public String getDataForTag(Tag tag, String... values)
-    {
-        return "";
-    }
 
     @Override
     public Image getAlbumArt()
     {
         return null;
-    }
-
-    @Override
-    public void setDataForTag(Tag tag, String... values)
-    {        
-        switch (tag)
-        {
-            case AlbumArtist:
-                add(TableNames.Anime, values[0]); 
-                break;
-            case Artist:
-                if(values.length == 1)
-                {
-                    // param first, last
-                    String[] fullName = Utilities.splitName(values[0]);
-                    if(!fullName[0].isEmpty()) 
-                    {
-                        add(TableNames.Artist, fullName[0], fullName[1]);
-                    }
-                } 
-                else
-                {
-                    // param name, artist1, artist2, ...
-                    //tagToEditorTextMapping.get(Tag.Artist).get()
-//                    System.err.println("GroupSaving not implemented");
-//                    System.exit(0);
-                    add(TableNames.Group, values); 
-                }                 
-                break;
-            default:
-                break;
-        }
     }
     
     public void save()
@@ -800,24 +762,6 @@ public class DatabaseController implements DataSuggestorBase
     }
 
     @Override
-    public List<String> getPossibleDataForTag(Tag tag, String string)
-    {
-        List<String> returnValue = null;
-        switch (tag)
-        {
-            case Artist:
-                String[] fullName = Utilities.splitName(string);
-                returnValue = getDBResultsForArtist(fullName[0], fullName[1]);
-                break;
-            case AlbumArtist:
-                returnValue = getDBResultsForAnime(string);
-            default:
-                break;
-        }
-        return returnValue;
-    }
-
-    @Override
     public Tag[] getAdditionalTags()
     {
         // TODO Auto-generated method stub
@@ -832,10 +776,50 @@ public class DatabaseController implements DataSuggestorBase
     }
 
     @Override
-    public String getDataForTagTest(TagBase tag, String... values)
+    public String getDataForTag(TagBase<?> tag, String... extraArgs)
     {
-        // TODO Auto-generated method stub
-        return null;
+        return "";
+    }
+
+    @Override
+    public void setDataForTag(TagBase<?> tag, String... values)
+    {
+        if(tag == Tag.ALBUM_ARTIST) {
+            add(TableNames.Anime, values[0]); 
+        }
+        else if(tag == Tag.ARTIST) {
+            if(values.length == 1)
+            {
+                // param first, last
+                String[] fullName = Utilities.splitName(values[0]);
+                if(!fullName[0].isEmpty()) 
+                {
+                    add(TableNames.Artist, fullName[0], fullName[1]);
+                }
+            } 
+            else
+            {
+                // param name, artist1, artist2, ...
+                //tagToEditorTextMapping.get(Tag.Artist).get()
+//                System.err.println("GroupSaving not implemented");
+//                System.exit(0);
+                add(TableNames.Group, values); 
+            }         
+        }
+    }
+
+    @Override
+    public List<String> getPossibleDataForTag(TagBase<?> tag, String values)
+    {
+        List<String> returnValue = null;
+        if(tag == Tag.ARTIST) {
+            String[] fullName = Utilities.splitName(values);
+            returnValue = getDBResultsForArtist(fullName[0], fullName[1]);
+        }
+        else if(tag == Tag.ALBUM_ARTIST) {
+            returnValue = getDBResultsForAnime(values);
+        }
+        return returnValue;
     }
     
     // ~~~~~~~~~~~~~~~~~ //

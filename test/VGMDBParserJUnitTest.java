@@ -27,11 +27,11 @@ public class VGMDBParserJUnitTest
     public void setUp() throws Exception
     {
         VGMDBParser parser = new VGMDBParser();
-        System.out.println("Tag: " + Tag.Album + " value: " + parser.getDataForTagTest(Tag.Album, ""));
+        System.out.println("Tag: " + Tag.ALBUM + " value: " + parser.getDataForTag(Tag.ALBUM, ""));
         TagBase[] addtional = parser.getAdditionalTags();
         for(TagBase t : addtional)
         {
-            System.out.println("Tag: " + t + " value: " + parser.getDataForTagTest(t, ""));
+            System.out.println("Tag: " + t + " value: " + parser.getDataForTag(t, ""));
         }
        
     }

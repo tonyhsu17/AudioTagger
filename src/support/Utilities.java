@@ -1,9 +1,6 @@
 package support;
 
-import java.awt.Graphics;
-import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
-import java.awt.image.ImageObserver;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -11,18 +8,11 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
-import org.apache.commons.io.FilenameUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import javafx.beans.property.adapter.JavaBeanBooleanProperty;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.scene.paint.Color;
-import support.Utilities.Tag;
 
 
 public class Utilities
@@ -32,8 +22,7 @@ public class Utilities
         
     
     public enum Tag implements TagBase<Tag> {
-        FileName, Title, Artist, Album, AlbumArtist, Track, Year, Genre, Comment, AlbumArt, AlbumArtMeta
-        
+        FILE_NAME, TITLE, ARTIST, ALBUM, ALBUM_ARTIST, TRACK, YEAR, GENRE, COMMENT, ALBUM_ART, ALBUM_ART_META,;
     }
     
     public static int findIntValue(String str)
