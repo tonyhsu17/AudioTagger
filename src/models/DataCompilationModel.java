@@ -55,6 +55,7 @@ public class DataCompilationModel
     private AudioFiles audioFilesModel;
     private DataSuggestorBase dbManagement;
     private VGMDBParser vgmdbModel;
+    private Interpreter interpreter;
 
     public DataCompilationModel()
     {

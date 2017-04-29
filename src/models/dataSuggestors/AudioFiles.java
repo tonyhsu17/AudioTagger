@@ -41,6 +41,7 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
 import javafx.scene.image.WritableImage;
 import support.GenreMapping;
+import support.TagBase;
 import support.Utilities;
 import support.Utilities.Tag;
 
@@ -663,5 +664,26 @@ public class AudioFiles implements DataSuggestorBase
     public Image getAlbumArt()
     {
         return albumArt;
+    }
+
+    @Override
+    public String getDataForTagTest(TagBase tag, String... values)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Tag[] getAdditionalTags()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Tag[] getUsableTags()
+    {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

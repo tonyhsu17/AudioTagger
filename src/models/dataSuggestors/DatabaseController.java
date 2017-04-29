@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import javafx.scene.image.Image;
+import support.TagBase;
 import support.Utilities;
 import support.Utilities.Tag;
 
@@ -22,11 +23,6 @@ import support.Utilities.Tag;
  */
 public class DatabaseController implements DataSuggestorBase
 {
-    public interface SuggestorCallback
-    {
-        public void topChoice(String str);
-    }
-
     private Statement statement;
     Connection conn = null;
     public static enum TableNames {
@@ -819,6 +815,27 @@ public class DatabaseController implements DataSuggestorBase
                 break;
         }
         return returnValue;
+    }
+
+    @Override
+    public Tag[] getAdditionalTags()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Tag[] getUsableTags()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String getDataForTagTest(TagBase tag, String... values)
+    {
+        // TODO Auto-generated method stub
+        return null;
     }
     
     // ~~~~~~~~~~~~~~~~~ //

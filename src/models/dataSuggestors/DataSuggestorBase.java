@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.List;
 
 import javafx.scene.image.Image;
+import support.TagBase;
 import support.Utilities.Tag;
 
 /**
@@ -13,6 +14,7 @@ import support.Utilities.Tag;
  */
 public interface DataSuggestorBase
 {
+    public String getDataForTagTest(TagBase tag, String... values);
     public String getDataForTag(Tag tag, String... values);
     public Image getAlbumArt();
     
@@ -27,4 +29,8 @@ public interface DataSuggestorBase
     public void save();
     
     public List<String> getPossibleDataForTag(Tag tag, String values);
+    
+    public TagBase[] getAdditionalTags(); // extra tags not in base tags
+    public TagBase[] getUsableTags(); // tags that useful
+    
 }

@@ -9,8 +9,10 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Formatter;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.Callable;
@@ -45,12 +47,17 @@ import javafx.scene.image.Image;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
+import support.TagBase;
 import support.Utilities;
 import support.Utilities.Tag;
 
 
 public class VGMDBParser implements DataSuggestorBase
 {
+    public enum AdditionalTag implements TagBase<AdditionalTag> {
+        IMAGE_URL,
+    }
+    
     public static enum VGMDBTag {
       ARTIST, ALBUM, TRACK_NUM, YEAR, SERIES, 
       IMAGE_URL, THEME,
@@ -84,7 +91,7 @@ public class VGMDBParser implements DataSuggestorBase
     private ObjectProperty<Image> albumArtThumb;
     private Image albumArt500x500;
     private String query;
-
+    
     public VGMDBParser()
     {
         httpClient = HttpClients.createDefault();
@@ -500,6 +507,57 @@ public class VGMDBParser implements DataSuggestorBase
     @Override
     public List<String> getPossibleDataForTag(Tag tag, String values)
     {
+        return null;
+    }
+
+    @Override
+    public String getDataForTagTest(TagBase tag, String... values)
+    {
+        String result = "";
+        TagBase<?> newTag = Utilities.getEnum(tag, AdditionalTag.class, Tag.class);
+        switch(newTag.name())
+        {
+            case "IMAGE_URL":
+                result = "url";
+                break;
+            case "Album":
+                result = "album";
+                break;
+            default:
+            break;
+        }
+        
+        return result;
+    }
+
+    private HashMap<TagBase, TagBase> tags() {
+        HashMap<TagBase, TagBase> asd = new HashMap<>();
+        for(Tag t : Tag.values())
+        {
+            asd.put(t, t);
+        }
+        for(AdditionalTag t : AdditionalTag.values())
+        {
+            asd.put(t, t);
+        }
+//        List<TagBase> resources = new ArrayList<TagBase>();
+//        resources.addAll(Arrays.asList(Tag.values()));
+//        resources.addAll(Arrays.asList(AdditionalTag.values()));
+        return asd;
+//        return resources.toArray((new TagBase[0]);
+    }
+    
+    @Override
+    public TagBase[] getAdditionalTags()
+    {
+        // TODO Auto-generated method stub
+        return AdditionalTag.values();
+    }
+
+    @Override
+    public TagBase[] getUsableTags()
+    {
+        // TODO Auto-generated method stub
         return null;
     }
 }
