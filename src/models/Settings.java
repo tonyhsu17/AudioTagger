@@ -5,10 +5,15 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
 import java.util.Scanner;
 
 import javafx.beans.property.SimpleStringProperty;
+import models.dataSuggestors.DataSuggestorBase;
+import support.TagBase;
 import support.Utilities;
 import support.Utilities.Tag;
 
@@ -33,15 +38,15 @@ public class Settings
         PROPAGATE_SAVE_GENRE("Propagate Save for Artist"),
         PROPAGATE_SAVE_COMMENT("Propagate Save for Artist"),
         PROPAGATE_SAVE_ALBUM_ART("Propagate Save for Artist"),
-        RULE_FILENAME("Autocomplete Filename with Rule"),
+        RULE_FILENAME("Autocomplete Filename"),
 //        RULE_TITLE("Autocomplete Title with Rule"),
 //        RULE_ARTIST("Autocomplete Artist with Rule"),
 //        RULE_ALBUM("Autocomplete Album with Rule"),
-//        RULE_ALBUM_ARTIST("Autocomplete Album Artist with Rule"),
+        RULE_ALBUM_ARTIST("Autocomplete Album Artist"),
 //        RULE_TRACK("Autocomplete Track with Rule"),
 //        RULE_YEAR("Autocomplete Year with Rule"),
 //        RULE_GENRE("Autocomplete Genere wih Rule"),
-        RULE_COMMENT("Autocomplete Comment with Rule");
+        RULE_COMMENT("Autocomplete Comment");
         
         String description;
         private SettingsKey(String description)
@@ -77,9 +82,6 @@ public class Settings
     
     private HashMap<SettingsKey, SettingsMap> map;
     
-    private byte sessionSettings;
-    
-    
 
     /** 
      * Private constructor to prevent instantiating multiple instances.
@@ -89,7 +91,6 @@ public class Settings
     {
         map = new HashMap<>();
         
-        sessionSettings = 0xF;
         settingsFile = new File(fileName);
         if(settingsFile.exists())
         {
@@ -115,7 +116,7 @@ public class Settings
 //        map.add(new SettingsMap(SettingsKey.RULE_TITLE, ""));
 //        map.add(new SettingsMap(SettingsKey.RULE_ARTIST, ""));
 //        map.add(new SettingsMap(SettingsKey.RULE_ALBUM, ""));
-//        map.add(new SettingsMap(SettingsKey.RULE_ALBUM_ARTIST, ""));
+        map.put(SettingsKey.RULE_ALBUM_ARTIST, new SettingsMap(SettingsKey.RULE_ALBUM_ARTIST, ""));
 //        map.add(new SettingsMap(SettingsKey.RULE_TRACK, ""));
 //        map.add(new SettingsMap(SettingsKey.RULE_YEAR, ""));
 //        map.add(new SettingsMap(SettingsKey.RULE_GENRE, ""));
@@ -214,6 +215,28 @@ public class Settings
                 break;
         }
         return flag;
+    }
+    
+    List<String> keywordTags;
+    
+    
+    public void setKeywordTags(HashMap<DataSuggestorBase, List<TagBase<?>>> mapping)
+    {
+        keywordTags = new ArrayList<String>();
+        for(Entry<DataSuggestorBase, List<TagBase<?>>> entry : mapping.entrySet())
+        {
+            for(TagBase tag : entry.getValue())
+            {
+                System.out.println("$" + entry.getKey().getDisplayKeywordTagClassName() + "." + tag.name());
+                keywordTags.add("$" + entry.getKey().getDisplayKeywordTagClassName() + "." + tag.name());
+            }
+        }
+        
+    }
+    
+    public List<String> getKeywordTags()
+    {
+        return keywordTags;
     }
     
     /** 

@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import javafx.scene.image.Image;
+import models.dataSuggestors.VGMDBParser.AdditionalTag;
 import support.TagBase;
 import support.Utilities;
 import support.Utilities.Tag;
@@ -740,6 +741,12 @@ public class DatabaseController implements DataSuggestorBase
     }
 
     @Override
+    public String getDisplayKeywordTagClassName()
+    {
+        return "Database";
+    }
+    
+    @Override
     public Image getAlbumArt()
     {
         return null;
@@ -752,27 +759,26 @@ public class DatabaseController implements DataSuggestorBase
     @Override
     public void setAlbumArtFromFile(File file)
     {
-        
     }
     
     @Override
     public void setAlbumArtFromURL(String url)
     {
-        
     }
 
     @Override
     public Tag[] getAdditionalTags()
     {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Tag[] getUsableTags()
+    public List<TagBase<?>> getKeywordTags()
     {
-        // TODO Auto-generated method stub
-        return null;
+        List<TagBase<?>> keywords = new ArrayList<>();
+        keywords.add(Tag.ARTIST);
+        keywords.add(Tag.ALBUM_ARTIST);
+        return keywords;
     }
 
     @Override

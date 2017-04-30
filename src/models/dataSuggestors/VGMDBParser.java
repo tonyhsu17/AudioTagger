@@ -463,15 +463,18 @@ public class VGMDBParser implements DataSuggestorBase
     }
 
     @Override
+    public String getDisplayKeywordTagClassName()
+    {
+        return "VGMDB";
+    }
+    
+    @Override
     public String getDataForTag(TagBase<?> tag, String... values)
     {
         String returnValue = "";
 //        TagBase<?> newTag = Utilities.getEnum(tag, AdditionalTag.class, Tag.class);
         if(tag == Tag.ALBUM) {
             returnValue = tagDataLookup.get(Tag.ALBUM);
-        }
-        else if(tag == Tag.ALBUM_ART_META) {
-         // TODO
         }
         else if(tag == Tag.ALBUM_ARTIST) {
 //            returnValue = tagDataLookup.get(VGMDBTag.SERIES);
@@ -533,8 +536,16 @@ public class VGMDBParser implements DataSuggestorBase
     }
 
     @Override
-    public TagBase[] getUsableTags()
+    public List<TagBase<?>> getKeywordTags()
     {
-        return null;
+        List<TagBase<?>> keywords = new ArrayList<>();
+        keywords.add(Tag.ALBUM);
+        keywords.add(Tag.ARTIST);
+        keywords.add(Tag.YEAR);
+        for(TagBase t : AdditionalTag.values())
+        {
+            keywords.add(t);
+        }
+        return keywords;
     }
 }

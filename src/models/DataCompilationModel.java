@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -25,7 +26,9 @@ import models.dataSuggestors.DataSuggestorBase;
 import models.dataSuggestors.DatabaseController;
 import models.dataSuggestors.VGMDBParser;
 import models.dataSuggestors.DatabaseController.TableNames;
+import models.dataSuggestors.VGMDBParser.AdditionalTag;
 import support.GenreMapping;
+import support.TagBase;
 import support.Utilities;
 import support.Utilities.Tag;
 
@@ -54,10 +57,16 @@ public class DataCompilationModel
     private AudioFiles audioFilesModel;
     private DataSuggestorBase dbManagement;
     private VGMDBParser vgmdbModel;
-    private Interpreter interpreter;
+    private EditorData editor;
 
     public DataCompilationModel()
     {
+        editor = new EditorData();
+        audioFilesModel = new AudioFiles();
+        dbManagement = new DatabaseController("");
+        
+//        editor.setDataForTag(tag, values);
+        
         fieldMap = new HashMap<>();
         for(Tag t : Tag.values())
         {
@@ -68,9 +77,12 @@ public class DataCompilationModel
 
         albumArt = new SimpleObjectProperty<Image>();
 
-        audioFilesModel = new AudioFiles();
-        dbManagement = new DatabaseController("");
+        
+        
+        
         audioFilesModel.setWorkingDirectory(TEMPFOLDER);
+        
+//        setPossibleKeywordTag();
     }
 
     public void reset()
@@ -84,6 +96,7 @@ public class DataCompilationModel
     public void setVGMDBParser(VGMDBParser parser)
     {
         vgmdbModel = parser;
+        setPossibleKeywordTag();
     }
 
     // get the tag data for the selected index
@@ -423,6 +436,90 @@ public class DataCompilationModel
             default:
                 break;
         }
+    }
+    
+    public void setPossibleKeywordTag()
+    {
+        // TODO future iteration, abstract VGMDB stuff into its own module (jar file)
+        // and load from that, so other sites and also be added in
+        HashMap<DataSuggestorBase, List<TagBase<?>>> mapping = new HashMap<>();
+        mapping.put(audioFilesModel, audioFilesModel.getKeywordTags());
+        mapping.put(dbManagement, dbManagement.getKeywordTags());
+        mapping.put(vgmdbModel, vgmdbModel.getKeywordTags());
+        mapping.put(editor, editor.getKeywordTags());
+        //TODO ADD EDITOR TEXT 
+        Settings.getInstance().setKeywordTags(mapping);
+    }
+    
+    public class EditorData implements DataSuggestorBase
+    {
+        
+        @Override
+        public String getDataForTag(TagBase<?> tag, String... extraArgs)
+        {
+            return null;
+        }
+
+        @Override
+        public Image getAlbumArt()
+        {
+            return null;
+        }
+
+        @Override
+        public void setDataForTag(TagBase<?> tag, String... values)
+        {
+        }
+
+        @Override
+        public void setAlbumArtFromFile(File file)
+        {
+        }
+
+        @Override
+        public void setAlbumArtFromURL(String url)
+        {
+        }
+
+        @Override
+        public void save()
+        {
+        }
+
+        @Override
+        public List<String> getPossibleDataForTag(TagBase<?> tag, String values)
+        {
+            return null;
+        }
+
+        @Override
+        public String getDisplayKeywordTagClassName()
+        {
+            return "Editor";
+        }
+
+        @Override
+        public List<TagBase<?>> getKeywordTags()
+        {
+            List<TagBase<?>> keywords = new ArrayList<>();
+            keywords.add(Tag.ALBUM);
+            keywords.add(Tag.ALBUM_ARTIST);
+            keywords.add(Tag.ARTIST);
+            keywords.add(Tag.COMMENT);
+            keywords.add(Tag.FILE_NAME);
+            keywords.add(Tag.GENRE);
+            keywords.add(Tag.TITLE);
+            keywords.add(Tag.TRACK);
+            keywords.add(Tag.YEAR);
+            return keywords;
+        }
+
+        @Override
+        public TagBase<?>[] getAdditionalTags()
+        {
+            return null;
+        }
+        
     }
 
     // ~~~~~~~~~~~~~~~~~ //

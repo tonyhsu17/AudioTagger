@@ -14,6 +14,8 @@ import support.Utilities.Tag;
  */
 public interface DataSuggestorBase
 {
+    
+    
     public String getDataForTag(TagBase<?> tag, String... extraArgs);
     public Image getAlbumArt();
     
@@ -28,8 +30,9 @@ public interface DataSuggestorBase
     public void save();
     
     public List<String> getPossibleDataForTag(TagBase<?> tag, String values);
+    public String getDisplayKeywordTagClassName();
+    public List<TagBase<?>> getKeywordTags(); // tags that can be used for string builder 
     
     public TagBase<?>[] getAdditionalTags(); // extra tags not in base tags
-    public TagBase<?>[] getUsableTags(); // tags that useful
     
 }

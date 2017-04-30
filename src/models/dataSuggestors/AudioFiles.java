@@ -34,6 +34,7 @@ import org.jaudiotagger.tag.images.ArtworkFactory;
 
 import models.Settings;
 import models.Settings.SettingsKey;
+import models.dataSuggestors.VGMDBParser.AdditionalTag;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
@@ -369,6 +370,12 @@ public class AudioFiles implements DataSuggestorBase
     }
     
     @Override
+    public String getDisplayKeywordTagClassName()
+    {
+        return "Audio";
+    }
+    
+    @Override
     public void setAlbumArtFromFile(File file)
     {
         try
@@ -583,10 +590,19 @@ public class AudioFiles implements DataSuggestorBase
     }
 
     @Override
-    public Tag[] getUsableTags()
+    public List<TagBase<?>> getKeywordTags()
     {
-        // TODO Auto-generated method stub
-        return null;
+        List<TagBase<?>> keywords = new ArrayList<>();
+        keywords.add(Tag.ALBUM);
+        keywords.add(Tag.ALBUM_ARTIST);
+        keywords.add(Tag.ARTIST);
+        keywords.add(Tag.COMMENT);
+        keywords.add(Tag.FILE_NAME);
+        keywords.add(Tag.GENRE);
+        keywords.add(Tag.TITLE);
+        keywords.add(Tag.TRACK);
+        keywords.add(Tag.YEAR);
+        return keywords;
     }
 
  // get the info for a specific tag
