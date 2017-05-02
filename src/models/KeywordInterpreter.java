@@ -1,6 +1,11 @@
 package models;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import models.dataSuggestors.AudioFiles;
+import models.dataSuggestors.DataSuggestorBase;
+import support.TagBase;
 
 /**
  * Interprets preferred formatting using settings.
@@ -9,17 +14,47 @@ import models.dataSuggestors.AudioFiles;
  */
 public class KeywordInterpreter
 {
-    Settings settings;
-    
-    public static final String TRACK_NUM = "%TRACK%";
-    public static final String TITLE = "%TITLE%";
-    public static final String ANIME = "%ANIME%";
-    public static final String ARTIST = "%ARTIST%";
-    public static final String SONG_TYPE = "%TYPE%";
+    StringBuffer rule;
+    List<Object[]> replaceValues;
     
     public KeywordInterpreter()
     {
-        settings = Settings.getInstance();
+        rule = new StringBuffer();
+        replaceValues = new ArrayList<Object[]>();
+    }
+    
+    public String getFormatRule()
+    {
+        return rule.toString();
+    }
+    
+    public void appendToRule(String str)
+    {
+        rule.append(str);
+    }
+    
+    public void appendToRule(String str, DataSuggestorBase objRef, TagBase<?> tag)
+    {
+        rule.append(str);
+        replaceValues.add(new Object[] {objRef, tag});
+    }
+    
+    public DataSuggestorBase getClass(int i)
+    {
+        if(i > 0 && i < replaceValues.size())
+        {
+            return (DataSuggestorBase)replaceValues.get(i)[0];
+        }
+        return null;
+    }
+    
+    public TagBase<?> getTag(int i)
+    {
+        if(i > 0 && i < replaceValues.size())
+        {
+            return (TagBase<?>)replaceValues.get(i)[1];
+        }
+        return null;
     }
     
     // KeywordInterpreter?
@@ -31,11 +66,5 @@ public class KeywordInterpreter
     // when dataCompilation wants the data
     //  goes to settingsModel and grabs the constructed keywordTagBuilder
     //  to build the string with proper values
-    
-    
-    public void test()
-    {
-        
-    }
     
 }

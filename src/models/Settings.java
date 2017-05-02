@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -46,7 +47,7 @@ public class Settings
 //        RULE_TRACK("Autocomplete Track with Rule"),
 //        RULE_YEAR("Autocomplete Year with Rule"),
 //        RULE_GENRE("Autocomplete Genere wih Rule"),
-        RULE_COMMENT("Autocomplete Comment");
+        RULE_COMMENT("Autocomplete Comment"),;
         
         String description;
         private SettingsKey(String description)
@@ -68,21 +69,35 @@ public class Settings
             return null;
         }
     }
-
-    public static final byte PROPAGATE_SAVE_ARTIST_MASK = 0x01;
-    public static final byte PROPAGATE_SAVE_ALBUM_MASK = 0x02;
-    public static final byte PROPAGATE_SAVE_ALBUM_ARTIST_MASK = 0x04;
-    public static final byte PROPAGATE_SAVE_YEAR_MASK = 0x08;
-    public static final byte PROPAGATE_SAVE_GENRE_MASK = 0x10;
-    public static final byte PROPAGATE_SAVE_COMMENT_MASK = 0x20;
-    public static final byte PROPAGATE_SAVE_ALBUM_ART_MASK = 0x40;
     
     private final String fileName = "audioTagger.cfg"; 
     private File settingsFile;
+    private HashMap<String, KeywordTagMetaData> keywordTagsDataMapping;
     
     private HashMap<SettingsKey, SettingsMap> map;
     
-
+    private class KeywordTagMetaData
+    {
+        private DataSuggestorBase dataClass;
+        private TagBase<?> tag;
+        
+        public KeywordTagMetaData(DataSuggestorBase dataClass, TagBase<?> tag)
+        {
+            this.dataClass = dataClass;
+            this.tag = tag;
+        }
+        
+        public DataSuggestorBase getSuggestorClass()
+        {
+            return dataClass;
+        }
+        
+        public TagBase<?> getTag()
+        {
+            return tag;
+        }
+    }
+    
     /** 
      * Private constructor to prevent instantiating multiple instances.
      *  Use getInstance() to get singleton.
@@ -94,12 +109,14 @@ public class Settings
         settingsFile = new File(fileName);
         if(settingsFile.exists())
         {
-            loadSettings();
+            resetToDefaults();
+//            loadSettings();
         }
         else
         {
             resetToDefaults();
         }
+        keywordTagsDataMapping = new HashMap<>();
     }
     
     private void resetToDefaults()
@@ -114,7 +131,7 @@ public class Settings
         map.put(SettingsKey.PROPAGATE_SAVE_ALBUM_ART, new SettingsMap(SettingsKey.PROPAGATE_SAVE_ALBUM_ART, "true"));
         map.put(SettingsKey.RULE_FILENAME, new SettingsMap(SettingsKey.RULE_FILENAME, ""));
 //        map.add(new SettingsMap(SettingsKey.RULE_TITLE, ""));
-//        map.add(new SettingsMap(SettingsKey.RULE_ARTIST, ""));
+//        map.put(SettingsKey.RULE_ARTIST, new SettingsMap(SettingsKey.RULE_ARTIST, ""));
 //        map.add(new SettingsMap(SettingsKey.RULE_ALBUM, ""));
         map.put(SettingsKey.RULE_ALBUM_ARTIST, new SettingsMap(SettingsKey.RULE_ALBUM_ARTIST, ""));
 //        map.add(new SettingsMap(SettingsKey.RULE_TRACK, ""));
@@ -217,26 +234,92 @@ public class Settings
         return flag;
     }
     
-    List<String> keywordTags;
+   
     
     
     public void setKeywordTags(HashMap<DataSuggestorBase, List<TagBase<?>>> mapping)
     {
-        keywordTags = new ArrayList<String>();
         for(Entry<DataSuggestorBase, List<TagBase<?>>> entry : mapping.entrySet())
         {
-            for(TagBase tag : entry.getValue())
+            for(TagBase<?> tag : entry.getValue())
             {
-                System.out.println("$" + entry.getKey().getDisplayKeywordTagClassName() + "." + tag.name());
-                keywordTags.add("$" + entry.getKey().getDisplayKeywordTagClassName() + "." + tag.name());
+//                System.out.println("$" + entry.getKey().getDisplayKeywordTagClassName() + "." + tag.name());
+                keywordTagsDataMapping.put("$" + entry.getKey().getDisplayKeywordTagClassName() + "." + tag.name(), 
+                    new KeywordTagMetaData(entry.getKey(), tag));
+            }
+        }
+    }
+    //Akame ga Kill ED Single - Konna Sekai, Shiritaku Nakatta. [Miku Sawai]
+    public KeywordInterpreter getRuleFor(Tag tag)
+    {
+        String rule = "";
+        // set rule
+        switch(tag)
+        {
+            case ALBUM:
+                break;
+            case ALBUM_ART:
+                break;
+            case ALBUM_ARTIST:
+                rule = map.get(SettingsKey.RULE_ALBUM_ARTIST).getValue();
+                break;
+            case ALBUM_ART_META:
+                break;
+            case ARTIST:
+                break;
+            case COMMENT:
+                rule = map.get(SettingsKey.RULE_COMMENT).getValue();
+                break;
+            case FILE_NAME:
+                rule = map.get(SettingsKey.RULE_FILENAME).getValue();
+                break;
+            case GENRE:
+                break;
+            case TITLE:
+                break;
+            case TRACK:
+                break;
+            case YEAR:
+                break;
+            default:
+                break;
+            
+        }
+        
+     // $VGMDB.SERIES $VGMDB.THEME Single - $Editor.TITLE [$Editor.ARTIST]
+        
+        // extrapolate each tag out
+        // return string as "%s %s Single - %s [%s]", arr[ of class + tag ] 
+        // using string formatter to fill in the valus
+        
+        KeywordInterpreter builder = new KeywordInterpreter();  // recombination of string
+        String[] splitRule = rule.split("[$]"); // split by prefix
+        // for each split
+        for(String parsed : splitRule)
+        {
+            // if the split is not empty
+            if(!parsed.isEmpty()) {
+                // check each keywordTag to find a match
+                for(String s : keywordTagsDataMapping.keySet())
+                {
+                    // if keywordTag matched with parsed text
+                    if(parsed.startsWith(s.substring(1), 0))
+                    {
+                        // replace keywordTag with string formatter %s
+                        builder.appendToRule("%s" + parsed.substring(s.length() - 1), 
+                            keywordTagsDataMapping.get(s).getSuggestorClass(),
+                            keywordTagsDataMapping.get(s).getTag());
+                    }
+                }
             }
         }
         
+        return builder;
     }
     
     public List<String> getKeywordTags()
     {
-        return keywordTags;
+        return new ArrayList<String>(keywordTagsDataMapping.keySet());
     }
     
     /** 
