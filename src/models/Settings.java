@@ -7,12 +7,15 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Scanner;
 
 import javafx.beans.property.SimpleStringProperty;
+import javafx.print.Collation;
 import models.dataSuggestors.DataSuggestorBase;
 import support.TagBase;
 import support.Utilities;
@@ -319,7 +322,9 @@ public class Settings
     
     public List<String> getKeywordTags()
     {
-        return new ArrayList<String>(keywordTagsDataMapping.keySet());
+        ArrayList<String> keys = new ArrayList<String>(keywordTagsDataMapping.keySet());
+        Collections.sort(keys);
+        return keys;
     }
     
     /** 

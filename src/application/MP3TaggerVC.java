@@ -36,6 +36,7 @@ import javafx.scene.text.Text;
 import models.DataCompilationModel;
 import models.DataCompilationModel.ImageFrom;
 import models.dataSuggestors.AudioFiles;
+import models.dataSuggestors.AudioTagComboBoxModel;
 import models.dataSuggestors.DatabaseController;
 import models.dataSuggestors.VGMDBParser;
 import support.Utilities;

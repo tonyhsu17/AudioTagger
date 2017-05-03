@@ -23,6 +23,11 @@ public class KeywordInterpreter
         replaceValues = new ArrayList<Object[]>();
     }
     
+    public boolean hasRule()
+    {
+        return !rule.toString().isEmpty();
+    }
+    
     public String getFormatRule()
     {
         return rule.toString();
