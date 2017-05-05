@@ -16,11 +16,13 @@ public class KeywordInterpreter
 {
     StringBuffer rule;
     List<Object[]> replaceValues;
+    List<String> replaceStrings;
     
     public KeywordInterpreter()
     {
         rule = new StringBuffer();
         replaceValues = new ArrayList<Object[]>();
+        replaceStrings = new ArrayList<String>();
     }
     
     public boolean hasRule()
@@ -46,7 +48,7 @@ public class KeywordInterpreter
     
     public DataSuggestorBase getClass(int i)
     {
-        if(i > 0 && i < replaceValues.size())
+        if(i >= 0 && i < replaceValues.size())
         {
             return (DataSuggestorBase)replaceValues.get(i)[0];
         }
@@ -55,13 +57,38 @@ public class KeywordInterpreter
     
     public TagBase<?> getTag(int i)
     {
-        if(i > 0 && i < replaceValues.size())
+        if(i >= 0 && i < replaceValues.size())
         {
             return (TagBase<?>)replaceValues.get(i)[1];
         }
         return null;
     }
     
+    public void setValue(int index, String value)
+    {
+        if(value == null)
+        {
+            value = "";
+        }
+        System.out.println("setValue: " + index + " " + value);
+        replaceStrings.add(index, value);
+    }
+    
+    public String buildString()
+    {
+        String temp = rule.toString();
+        
+        for(int i = 0; i < replaceValues.size(); i++)
+        {
+            temp = temp.replaceFirst("%s", replaceStrings.get(i));
+        }
+        return temp;
+    }
+    
+    public int getCount()
+    {
+        return replaceValues.size();
+    }
     // KeywordInterpreter?
     // when viewed path
     //  dataCompilationModel passes all possible keywordTags to SettingsModel

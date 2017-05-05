@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.imageio.ImageIO;
@@ -29,9 +30,12 @@ import models.dataSuggestors.DatabaseController;
 import models.dataSuggestors.VGMDBParser;
 import models.dataSuggestors.DatabaseController.TableNames;
 import models.dataSuggestors.VGMDBParser.AdditionalTag;
+import support.EventCenter;
 import support.GenreMapping;
+import support.Scheduler;
 import support.TagBase;
 import support.Utilities;
+import support.EventCenter.Events;
 import support.Utilities.Tag;
 
 
@@ -58,33 +62,36 @@ public class DataCompilationModel
     private AudioFiles audioFilesModel; // audio files meta
     private DataSuggestorBase dbManagement; // database for prediction of common tag fields
     private VGMDBParser vgmdbModel; // data handler for vgmdb website
-    
-    private List<KeywordInterpreter> editorAutoComplete; // store auto complete fields
+
+    private HashMap<Tag, KeywordInterpreter> editorAutoComplete; // store auto complete fields
+    private Scheduler editorAutoUpdater; // thread of each polling to update auto compete field
 
     public DataCompilationModel()
     {
         fieldMap = new AudioTagComboBoxModel();
         audioFilesModel = new AudioFiles();
         dbManagement = new DatabaseController("");
-        
+
         fileNamesList = new SimpleListProperty<String>();
         fileNamesList.set(FXCollections.observableArrayList());
 
         albumArt = new SimpleObjectProperty<Image>();
 
-        editorAutoComplete = new ArrayList<KeywordInterpreter>();
-        updateAutoComplete();
-        
+        editorAutoComplete = new HashMap<Tag, KeywordInterpreter>();
+//        updateAutoCompleteRules(); // activate when vgmdb parser set
+        EventCenter.getInstance().subscribeEvent(Events.SettingChanged, this, (obj) ->
+        {
+            updateAutoCompleteRules();
+        });
+
         audioFilesModel.setWorkingDirectory(TEMPFOLDER);
-        
-//        setPossibleKeywordTag();
     }
 
     public void reset()
     {
         audioFilesModel.setWorkingDirectory("");
         fileNamesList.clear();
-        
+
         clearAllTags();
     }
 
@@ -92,17 +99,62 @@ public class DataCompilationModel
     {
         vgmdbModel = parser;
         setPossibleKeywordTag();
+        updateAutoCompleteRules();
     }
-    
-    private void updateAutoComplete()
+
+    private void updateAutoCompleteRules()
     {
-        editorAutoComplete.clear();
-        for(Tag t : Tag.values())
+        if(editorAutoUpdater != null) // if thread exist, stop thread
+        {
+            editorAutoUpdater.stopThread();
+            editorAutoUpdater = null;
+        }
+
+        editorAutoComplete.clear(); // clear list and add/re-add rules
+        for(Tag t : Tag.values()) // for each tag
         {
             KeywordInterpreter temp = null;
+            // if there is a rule, add to list
             if((temp = Settings.getInstance().getRuleFor(t)) != null)
             {
-                editorAutoComplete.add(temp);
+                System.out.println("Adding rule for: " + t);
+                editorAutoComplete.put(t, temp);
+            }
+        }
+
+        // if there is at least one auto-complete, start polling to update field
+        if(editorAutoComplete.size() > 0)
+        {
+            // create polling in a separate thread
+            editorAutoUpdater = new Scheduler(1, () ->
+            {
+                updateAutoFills();
+            });
+            editorAutoUpdater.start();
+        }
+    }
+
+    private void updateAutoFills()
+    {
+        for(Entry<Tag, KeywordInterpreter> entry : editorAutoComplete.entrySet())
+        {
+            ComboBoxMeta meta = fieldMap.getMeta(entry.getKey()); // get combo box to modify
+            
+            if(meta.shouldStopAutoFill())
+            {
+                KeywordInterpreter builder = entry.getValue();
+                DataSuggestorBase classObj;
+                TagBase<?> tag;
+                
+                for(int i = 0; i < builder.getCount(); i++)
+                {
+                    classObj = builder.getClass(i);
+                    tag = builder.getTag(i);
+                    builder.setValue(i, classObj.getDataForTag(tag, ""));
+                }
+                
+                System.out.println("DecodedString: " + builder.buildString());
+                meta.getTextProperty().set(builder.buildString());
             }
         }
     }
@@ -140,10 +192,14 @@ public class DataCompilationModel
         }
         else
         {
+            System.out.println("TEXT: " + fieldMap.getMeta(tag).getTextProperty().get() + " " + fieldMap.getMeta(tag).getTextProperty().get().isEmpty());
+            fieldMap.getMeta(tag).setAllowAutoFill(fieldMap.getMeta(tag).getTextProperty().get().isEmpty() ? true : false);
             String originalText = (String)audioFilesModel.getDataForTag(tag);
-//            System.out.println("Originaltext: " + originalText);
+
             int size = addPossibleDataForTag(tag, originalText);
-//            System.out.println("updated size: " + size);
+            // stop auto-complete since there is human input 
+            // unless text is empty then revert back to allow auto-fill
+            
             cb.done(size);
         }
     }
@@ -293,8 +349,7 @@ public class DataCompilationModel
         ComboBoxMeta field = fieldMap.getMeta(Tag.ALBUM_ARTIST);
         String textFieldText = field.getTextProperty().get();
         // add from db
-        List<String> possibleArtist =
-            dbManagement.getPossibleDataForTag(Tag.ALBUM_ARTIST, textFieldText);
+        List<String> possibleArtist = dbManagement.getPossibleDataForTag(Tag.ALBUM_ARTIST, textFieldText);
         for(String str : possibleArtist)
         {
             if(!dropDownList.contains(str))
@@ -337,7 +392,7 @@ public class DataCompilationModel
     {
         ComboBoxMeta field = fieldMap.getMeta(Tag.GENRE);
         String textFieldText = field.getTextProperty().get();
-        
+
         List<String> possibleGenres = GenreMapping.containsIgnoreCase(textFieldText);
         for(String genre : possibleGenres)
         {
@@ -359,8 +414,7 @@ public class DataCompilationModel
                 String albumArtist = fieldMap.getMeta(Tag.ALBUM_ARTIST).getTextProperty().get();
                 String album = fieldMap.getMeta(Tag.ALBUM).getTextProperty().get();
                 String artist = fieldMap.getMeta(Tag.ARTIST).getTextProperty().get();
-                String formatted = albumArtist + " " + theme + " Single - " +
-                    album + " [" + artist + "]";
+                String formatted = albumArtist + " " + theme + " Single - " + album + " [" + artist + "]";
                 if(!dropDownList.contains(formatted))
                 {
                     dropDownList.add(formatted);
@@ -386,35 +440,24 @@ public class DataCompilationModel
     public void save()
     {
         // go through each element and set tag
-        audioFilesModel.setDataForTag(Tag.FILE_NAME, 
-            fieldMap.getMeta(Tag.FILE_NAME).getTextProperty().get());
-        audioFilesModel.setDataForTag(Tag.TITLE, 
-            fieldMap.getMeta(Tag.TITLE).getTextProperty().get());
-        audioFilesModel.setDataForTag(Tag.ARTIST, 
-            fieldMap.getMeta(Tag.ARTIST).getTextProperty().get());
-        audioFilesModel.setDataForTag(Tag.ALBUM, 
-            fieldMap.getMeta(Tag.ALBUM).getTextProperty().get());
-        audioFilesModel.setDataForTag(Tag.ALBUM_ARTIST, 
-            fieldMap.getMeta(Tag.ALBUM_ART).getTextProperty().get());
-        audioFilesModel.setDataForTag(Tag.TRACK,
-            fieldMap.getMeta(Tag.TRACK).getTextProperty().get());
-        audioFilesModel.setDataForTag(Tag.YEAR, 
-            fieldMap.getMeta(Tag.YEAR).getTextProperty().get());
-        audioFilesModel.setDataForTag(Tag.GENRE, 
-            fieldMap.getMeta(Tag.GENRE).getTextProperty().get());
-        audioFilesModel.setDataForTag(Tag.COMMENT, 
-            fieldMap.getMeta(Tag.COMMENT).getTextProperty().get());
-        
+        audioFilesModel.setDataForTag(Tag.FILE_NAME, fieldMap.getMeta(Tag.FILE_NAME).getTextProperty().get());
+        audioFilesModel.setDataForTag(Tag.TITLE, fieldMap.getMeta(Tag.TITLE).getTextProperty().get());
+        audioFilesModel.setDataForTag(Tag.ARTIST, fieldMap.getMeta(Tag.ARTIST).getTextProperty().get());
+        audioFilesModel.setDataForTag(Tag.ALBUM, fieldMap.getMeta(Tag.ALBUM).getTextProperty().get());
+        audioFilesModel.setDataForTag(Tag.ALBUM_ARTIST, fieldMap.getMeta(Tag.ALBUM_ART).getTextProperty().get());
+        audioFilesModel.setDataForTag(Tag.TRACK, fieldMap.getMeta(Tag.TRACK).getTextProperty().get());
+        audioFilesModel.setDataForTag(Tag.YEAR, fieldMap.getMeta(Tag.YEAR).getTextProperty().get());
+        audioFilesModel.setDataForTag(Tag.GENRE, fieldMap.getMeta(Tag.GENRE).getTextProperty().get());
+        audioFilesModel.setDataForTag(Tag.COMMENT, fieldMap.getMeta(Tag.COMMENT).getTextProperty().get());
+
         File artwork = Utilities.saveImage(albumArt.get());
         audioFilesModel.setAlbumArtFromFile(artwork);
         artwork.delete();
         audioFilesModel.save();
 
-        dbManagement.setDataForTag(Tag.ALBUM_ARTIST,
-            fieldMap.getMeta(Tag.ALBUM_ARTIST).getTextProperty().get());
+        dbManagement.setDataForTag(Tag.ALBUM_ARTIST, fieldMap.getMeta(Tag.ALBUM_ARTIST).getTextProperty().get());
 
-        String[] splitArtists = Utilities.splitBySeparators(
-            fieldMap.getMeta(Tag.ARTIST).getTextProperty().get());
+        String[] splitArtists = Utilities.splitBySeparators(fieldMap.getMeta(Tag.ARTIST).getTextProperty().get());
         dbManagement.setDataForTag(Tag.ARTIST, splitArtists);
     }
 
@@ -445,7 +488,7 @@ public class DataCompilationModel
                 break;
         }
     }
-    
+
     public void setPossibleKeywordTag()
     {
         // TODO future iteration, abstract VGMDB stuff into its own module (jar file)
@@ -457,7 +500,6 @@ public class DataCompilationModel
         mapping.put(fieldMap, fieldMap.getKeywordTags());
         Settings.getInstance().setKeywordTags(mapping);
     }
-    
 
     // ~~~~~~~~~~~~~~~~~ //
     // Getters & Setters //
@@ -508,5 +550,4 @@ public class DataCompilationModel
         return fieldMap.getMeta(t);
     }
 
-    
 }

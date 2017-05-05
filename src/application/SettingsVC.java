@@ -75,7 +75,6 @@ public class SettingsVC
     private void initialize()
     {
         System.out.println("settingsVC");
-//        data.add(Settings.getInstance().getKeyValuePair("Temp"));
         properties.setCellValueFactory(
             new PropertyValueFactory<Settings.SettingsMap, String>("keyDescription"));
         values.setCellValueFactory(
