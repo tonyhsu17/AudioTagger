@@ -192,7 +192,7 @@ public class DatabaseController implements DataSuggestorBase
                 List<Integer> groupId = new ArrayList<>();
                 // Individuals: first - dbFirst, last - dbLast
                 statements = conn.prepareStatement("SELECT ArtistFirst, ArtistLast, Id FROM " + TableNames.Artist + 
-                    " where LOWER(ArtistFirst) like ? OR LOWER(ArtistLast) like ? ORDER BY UseFrequency DESC FETCH NEXT 10 ROWS ONLY");
+                    " where LOWER(ArtistFirst) like ? AND LOWER(ArtistLast) like ? ORDER BY UseFrequency DESC FETCH NEXT 10 ROWS ONLY");
                 statements.setString(1, firstName + '%');
                 statements.setString(2, lastName + '%');
                 rs = statements.executeQuery();
@@ -210,7 +210,7 @@ public class DatabaseController implements DataSuggestorBase
                 
                 // Individuals: last - dbFirst, first - dbLast
                 statements = conn.prepareStatement("SELECT ArtistFirst, ArtistLast, Id FROM " + TableNames.Artist + 
-                    " where LOWER(ArtistFirst) like ? OR LOWER(ArtistLast) like ? ORDER BY UseFrequency DESC FETCH NEXT 10 ROWS ONLY");
+                    " where LOWER(ArtistFirst) like ? AND LOWER(ArtistLast) like ? ORDER BY UseFrequency DESC FETCH NEXT 10 ROWS ONLY");
                 statements.setString(1, lastName + '%');
                 statements.setString(2, firstName + '%');
                 rs = statements.executeQuery();
@@ -301,7 +301,6 @@ public class DatabaseController implements DataSuggestorBase
                                 possibleArtists.add(name);
                                 groupId.add(tempGroupId);
                             }
-                            rs.close();
                         }
                     }
                 }

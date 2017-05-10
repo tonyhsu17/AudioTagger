@@ -1,26 +1,15 @@
 package models;
 
-import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.IllegalFormatException;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.Set;
-
-import javax.imageio.ImageIO;
-
-import javafx.beans.binding.ListExpression;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
 import models.dataSuggestors.AudioFiles;
 import models.dataSuggestors.AudioTagComboBoxModel;
@@ -28,8 +17,6 @@ import models.dataSuggestors.AudioTagComboBoxModel.ComboBoxMeta;
 import models.dataSuggestors.DataSuggestorBase;
 import models.dataSuggestors.DatabaseController;
 import models.dataSuggestors.VGMDBParser;
-import models.dataSuggestors.DatabaseController.TableNames;
-import models.dataSuggestors.VGMDBParser.AdditionalTag;
 import support.EventCenter;
 import support.GenreMapping;
 import support.Scheduler;
@@ -78,7 +65,7 @@ public class DataCompilationModel
         albumArt = new SimpleObjectProperty<Image>();
 
         editorAutoComplete = new HashMap<Tag, KeywordInterpreter>();
-//        updateAutoCompleteRules(); // activate when vgmdb parser set
+        // updateAutoCompleteRules(); // activate when vgmdb parser set
         EventCenter.getInstance().subscribeEvent(Events.SettingChanged, this, (obj) ->
         {
             updateAutoCompleteRules();
@@ -139,21 +126,21 @@ public class DataCompilationModel
         for(Entry<Tag, KeywordInterpreter> entry : editorAutoComplete.entrySet())
         {
             ComboBoxMeta meta = fieldMap.getMeta(entry.getKey()); // get combo box to modify
-            
+
             if(meta.shouldStopAutoFill())
             {
                 KeywordInterpreter builder = entry.getValue();
                 DataSuggestorBase classObj;
                 TagBase<?> tag;
-                
+
                 for(int i = 0; i < builder.getCount(); i++)
                 {
                     classObj = builder.getClass(i);
                     tag = builder.getTag(i);
                     builder.setValue(i, classObj.getDataForTag(tag, ""));
                 }
-                
-                System.out.println("DecodedString: " + builder.buildString());
+
+//                System.out.println("DecodedString: " + builder.buildString());
                 meta.getTextProperty().set(builder.buildString());
             }
         }
@@ -192,14 +179,15 @@ public class DataCompilationModel
         }
         else
         {
-            System.out.println("TEXT: " + fieldMap.getMeta(tag).getTextProperty().get() + " " + fieldMap.getMeta(tag).getTextProperty().get().isEmpty());
+            System.out.println(
+                "TEXT: " + fieldMap.getMeta(tag).getTextProperty().get() + " " + fieldMap.getMeta(tag).getTextProperty().get().isEmpty());
             fieldMap.getMeta(tag).setAllowAutoFill(fieldMap.getMeta(tag).getTextProperty().get().isEmpty() ? true : false);
             String originalText = (String)audioFilesModel.getDataForTag(tag);
 
             int size = addPossibleDataForTag(tag, originalText);
-            // stop auto-complete since there is human input 
+            // stop auto-complete since there is human input
             // unless text is empty then revert back to allow auto-fill
-            
+
             cb.done(size);
         }
     }
@@ -250,6 +238,13 @@ public class DataCompilationModel
                 addAdditionalPossibleTitles(dropDownList);
                 break;
             case TRACK:
+                try
+                {
+                    fieldMap.getMeta(tag).getTextProperty().set(String.format("%02d", editorText));
+                }
+                catch(IllegalFormatException e)
+                {
+                }
                 break;
             case YEAR:
                 addAdditionalPossibleYears(dropDownList);
@@ -265,15 +260,15 @@ public class DataCompilationModel
     {
         ComboBoxMeta field = fieldMap.getMeta(Tag.FILE_NAME);
         String textFieldText = field.getTextProperty().get();
-        if(!textFieldText.isEmpty() && !Utilities.isKeyword(textFieldText))
-        {
-            String formatted = String.format("%02d", Integer.valueOf(textFieldText)) + " " +
-                fieldMap.getMeta(Tag.TITLE).getTextProperty().get() + "." + audioFilesModel.getSelectedFileType();
-            if(!dropDownList.contains(formatted))
-            {
-                dropDownList.add(formatted);
-            }
-        }
+//        if(!textFieldText.isEmpty() && !Utilities.isKeyword(textFieldText))
+//        {
+//            String formatted = String.format("%02d", Integer.valueOf(textFieldText)) + " " +
+//                fieldMap.getMeta(Tag.TITLE).getTextProperty().get() + "." + audioFilesModel.getSelectedFileType();
+//            if(!dropDownList.contains(formatted))
+//            {
+//                dropDownList.add(formatted);
+//            }
+//        }
     }
 
     private void addAdditionalPossibleTitles(List<String> dropDownList)

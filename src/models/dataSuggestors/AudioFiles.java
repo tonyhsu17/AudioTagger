@@ -13,6 +13,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.IllegalFormatException;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -644,7 +645,8 @@ public class AudioFiles implements DataSuggestorBase
         }
         else if(tag == Tag.TRACK)
         {
-            returnValue = track;
+            
+            returnValue = String.format("%02d", Integer.valueOf(track));
         }
         else if(tag == Tag.YEAR)
         {

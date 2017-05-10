@@ -70,17 +70,19 @@ public class KeywordInterpreter
         {
             value = "";
         }
-        System.out.println("setValue: " + index + " " + value);
+//        System.out.println("setValue: " + index + " " + value);
         replaceStrings.add(index, value);
     }
     
     public String buildString()
     {
         String temp = rule.toString();
-        
+        String replaceVal;
+//        System.out.println("buildstr: " + replaceValues.size() + " stringReplace: " + replaceValues.size() );
         for(int i = 0; i < replaceValues.size(); i++)
         {
-            temp = temp.replaceFirst("%s", replaceStrings.get(i));
+            replaceVal = replaceStrings.get(i);
+            temp = temp.replaceFirst("%s", replaceVal != null ? replaceVal : "");
         }
         return temp;
     }
