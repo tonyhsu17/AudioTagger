@@ -1,5 +1,6 @@
 package models;
 
+import java.awt.RenderingHints.Key;
 import java.io.File;
 import java.util.HashMap;
 import java.util.IllegalFormatException;
@@ -126,7 +127,7 @@ public class DataCompilationModel
         for(Entry<Tag, KeywordInterpreter> entry : editorAutoComplete.entrySet())
         {
             ComboBoxMeta meta = fieldMap.getMeta(entry.getKey()); // get combo box to modify
-
+            
             if(meta.shouldStopAutoFill())
             {
                 KeywordInterpreter builder = entry.getValue();
@@ -146,6 +147,15 @@ public class DataCompilationModel
         }
     }
 
+    private void setAutoFills(boolean flag)
+    {
+        for(Entry<Tag, KeywordInterpreter> entry : editorAutoComplete.entrySet())
+        {
+            ComboBoxMeta meta = fieldMap.getMeta(entry.getKey()); // get combo box to modify
+            meta.setAllowAutoFill(flag);
+        }
+    }
+    
     // get the tag data for the selected index
     public void requestDataFor(int index, DataCompilationModelCallback cb)
     {
@@ -434,12 +444,14 @@ public class DataCompilationModel
 
     public void save()
     {
+        setAutoFills(false); //stop auto fill to prevent corruption
+        
         // go through each element and set tag
         audioFilesModel.setDataForTag(Tag.FILE_NAME, fieldMap.getMeta(Tag.FILE_NAME).getTextProperty().get());
         audioFilesModel.setDataForTag(Tag.TITLE, fieldMap.getMeta(Tag.TITLE).getTextProperty().get());
         audioFilesModel.setDataForTag(Tag.ARTIST, fieldMap.getMeta(Tag.ARTIST).getTextProperty().get());
         audioFilesModel.setDataForTag(Tag.ALBUM, fieldMap.getMeta(Tag.ALBUM).getTextProperty().get());
-        audioFilesModel.setDataForTag(Tag.ALBUM_ARTIST, fieldMap.getMeta(Tag.ALBUM_ART).getTextProperty().get());
+        audioFilesModel.setDataForTag(Tag.ALBUM_ARTIST, fieldMap.getMeta(Tag.ALBUM_ARTIST).getTextProperty().get());
         audioFilesModel.setDataForTag(Tag.TRACK, fieldMap.getMeta(Tag.TRACK).getTextProperty().get());
         audioFilesModel.setDataForTag(Tag.YEAR, fieldMap.getMeta(Tag.YEAR).getTextProperty().get());
         audioFilesModel.setDataForTag(Tag.GENRE, fieldMap.getMeta(Tag.GENRE).getTextProperty().get());
@@ -450,10 +462,13 @@ public class DataCompilationModel
         artwork.delete();
         audioFilesModel.save();
 
+        
         dbManagement.setDataForTag(Tag.ALBUM_ARTIST, fieldMap.getMeta(Tag.ALBUM_ARTIST).getTextProperty().get());
 
         String[] splitArtists = Utilities.splitBySeparators(fieldMap.getMeta(Tag.ARTIST).getTextProperty().get());
         dbManagement.setDataForTag(Tag.ARTIST, splitArtists);
+        
+        setAutoFills(true);
     }
 
     public void clearAllTags()

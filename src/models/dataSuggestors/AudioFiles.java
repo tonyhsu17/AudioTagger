@@ -70,11 +70,13 @@ public class AudioFiles implements DataSuggestorBase
     private String albumArtMeta;
 
     private List<Integer> selectedIndicies; // index of selected file
+    private List<Integer> selectedIndiciesCopy; // copy of index of selected file, to revert back after saving
 
     public AudioFiles()
     {
         selectedFileNames = new SimpleListProperty<String>();
         selectedFileNames.set(FXCollections.observableArrayList());
+        
         reset();
     }
 
@@ -408,10 +410,19 @@ public class AudioFiles implements DataSuggestorBase
         }
     }
 
+    
+    
     // save new tags
     @Override
     public void save()
     {
+        // if save triggered, copy selected indicies for later reverting back incase multisave is on
+        if(selectedIndiciesCopy == null)
+        {
+            selectedIndiciesCopy = new ArrayList<Integer>();
+            selectedIndiciesCopy.addAll(selectedIndicies);
+        }
+        
         for(int i : selectedIndicies)
         {
             MP3File f = workingMP3Files.get(i);
@@ -548,8 +559,14 @@ public class AudioFiles implements DataSuggestorBase
 
                 if(!fileName.equals(originalName)) // saving to a different name
                 {
+                    String extension = ""; // add back extension if missing
+                    if(!fileName.endsWith(FilenameUtils.getExtension(originalName)))
+                    {
+                        extension = "." + FilenameUtils.getExtension(originalName);
+                    }
+                    
                     System.out.println("saving new name: " + path + File.separator + fileName);
-                    Files.copy(Paths.get(path + File.separator + originalName), Paths.get(path + File.separator + fileName),
+                    Files.copy(Paths.get(path + File.separator + originalName), Paths.get(path + File.separator + fileName + extension),
                         StandardCopyOption.REPLACE_EXISTING);
                     Files.delete(Paths.get(path + File.separator + originalName));
                 }
@@ -575,6 +592,15 @@ public class AudioFiles implements DataSuggestorBase
         {
             mockMultisave();
         }
+        // now revert indicies to original
+        // need to check for null as original call + mockMultiSave will trigger it twice
+        if(selectedIndiciesCopy != null)
+        {
+            selectedIndicies.clear();
+            selectedIndicies.addAll(selectedIndiciesCopy);
+            selectedIndiciesCopy = null; 
+        }
+        
     }
 
     @Override
@@ -645,8 +671,15 @@ public class AudioFiles implements DataSuggestorBase
         }
         else if(tag == Tag.TRACK)
         {
+            if(Utilities.isKeyword(track))
+            {
+                returnValue = track;
+            }
+            else
+            {
+                returnValue = String.format("%02d", Integer.valueOf(track));
+            }
             
-            returnValue = String.format("%02d", Integer.valueOf(track));
         }
         else if(tag == Tag.YEAR)
         {
