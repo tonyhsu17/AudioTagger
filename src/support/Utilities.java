@@ -1,21 +1,13 @@
 package support;
 
-import java.awt.Graphics;
-import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
-import java.awt.image.ImageObserver;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.imageio.ImageIO;
 
-import org.apache.commons.io.FilenameUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import javafx.beans.property.adapter.JavaBeanBooleanProperty;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -29,8 +21,8 @@ public class Utilities
     public static final String HEADER_ALBUM = "-- Folder: ";
         
     
-    public static enum Tag {
-        FileName, Title, Artist, Album, AlbumArtist, Track, Year, Genre, Comment, AlbumArt, AlbumArtMeta
+    public enum Tag implements TagBase<Tag> {
+        FILE_NAME, TITLE, ARTIST, ALBUM, ALBUM_ARTIST, TRACK, YEAR, GENRE, COMMENT, ALBUM_ART, ALBUM_ART_META,;
     }
     
     public static int findIntValue(String str)
@@ -300,5 +292,17 @@ public class Utilities
         {
             return false;
         }
+    }
+    
+    public static TagBase<?> getEnum(TagBase tag, Class<? extends TagBase<?>>... tagClasses) {
+        for (Class<? extends TagBase<?>> eachTagClass : Arrays.asList(tagClasses)) {
+            for (TagBase<?> fvg : eachTagClass.getEnumConstants()) {
+//                System.out.println("tag: " + fvg + " compareName: " + tag.name());
+                if (tag == fvg) {
+                    return fvg;
+                }
+            }
+        }
+        return null;
     }
 }

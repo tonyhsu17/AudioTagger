@@ -51,10 +51,19 @@ public class RootVC
     @FXML
     private void keyPressed(KeyEvent e)
     {
-        if(e.isControlDown() && e.getText().toLowerCase().equals("s"))
+        if(e.isControlDown())
         {
-            System.out.println("Hotkey Save");
-            taggerVC.saveTags();
+            switch(e.getText().toLowerCase())
+            {
+                case "s":
+                    System.out.println("Hotkey Save");
+                    taggerVC.saveTags();
+                    break;
+                case "r":
+                    System.out.println("Hotkey AutoFill Toggle");
+                    taggerVC.toggleAutoFill();
+                    break;
+            }
         }
     }
     

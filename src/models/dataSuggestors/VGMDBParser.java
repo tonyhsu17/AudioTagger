@@ -9,8 +9,10 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Formatter;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.Callable;
@@ -45,35 +47,58 @@ import javafx.scene.image.Image;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
+import support.TagBase;
 import support.Utilities;
 import support.Utilities.Tag;
 
 
 public class VGMDBParser implements DataSuggestorBase
 {
-    public static enum VGMDBTag {
-      ARTIST, ALBUM, TRACK_NUM, YEAR, SERIES, 
-      IMAGE_URL, THEME,
-      TRACK01, TRACK02, TRACK03, TRACK04, TRACK05,
-      TRACK06, TRACK07, TRACK08, TRACK09, TRACK10,
-      TRACK11, TRACK12, TRACK13, TRACK14, TRACK15,
-      TRACK16, TRACK17, TRACK18, TRACK19, TRACK20;
-      
-      public static VGMDBTag getTrackTag(int i)
-      {
-          String str = "TRACK" + String.format("%02d", i);
-          for(VGMDBTag t : VGMDBTag.values())
-          {
-              if(str.equals(t.name()))
-              {
-                  return t;
-              }
-          }
-        return null;
-      }
-    };
+    public enum AdditionalTag implements TagBase<AdditionalTag> {
+        SERIES, IMAGE_URL, THEME,
+        TRACK01, TRACK02, TRACK03, TRACK04, TRACK05,
+        TRACK06, TRACK07, TRACK08, TRACK09, TRACK10,
+        TRACK11, TRACK12, TRACK13, TRACK14, TRACK15,
+        TRACK16, TRACK17, TRACK18, TRACK19, TRACK20;
+        
+        public static AdditionalTag getTrackTag(int i)
+        {
+            String str = "TRACK" + String.format("%02d", i);
+            for(AdditionalTag t : AdditionalTag.values())
+            {
+                if(str.equals(t.name()))
+                {
+                    return t;
+                }
+            }
+          return null;
+        }
+    }
+    
+    
+//    public static enum VGMDBTag {
+//      ARTIST, ALBUM, TRACK_NUM, YEAR, SERIES, 
+//      IMAGE_URL, THEME,
+//      TRACK01, TRACK02, TRACK03, TRACK04, TRACK05,
+//      TRACK06, TRACK07, TRACK08, TRACK09, TRACK10,
+//      TRACK11, TRACK12, TRACK13, TRACK14, TRACK15,
+//      TRACK16, TRACK17, TRACK18, TRACK19, TRACK20;
+//      
+//      public static VGMDBTag getTrackTag(int i)
+//      {
+//          String str = "TRACK" + String.format("%02d", i);
+//          for(VGMDBTag t : VGMDBTag.values())
+//          {
+//              if(str.equals(t.name()))
+//              {
+//                  return t;
+//              }
+//          }
+//        return null;
+//      }
+//    };
     public static final String vgmdbParserURL = "http://vgmdb.info/";
-    private HashMap<VGMDBTag, String> tagDataLookup; // mapping of retrieved info
+    private HashMap<TagBase<?>, String> tagDataLookup; // mapping of retrieved info
     private CloseableHttpClient httpClient;
 
     private List<String[]> searchResults; // albumID from search results to be used to display album info
@@ -84,11 +109,11 @@ public class VGMDBParser implements DataSuggestorBase
     private ObjectProperty<Image> albumArtThumb;
     private Image albumArt500x500;
     private String query;
-
+    
     public VGMDBParser()
     {
         httpClient = HttpClients.createDefault();
-        tagDataLookup = new HashMap<VGMDBTag, String>();
+        tagDataLookup = new HashMap<TagBase<?>, String>();
         displayInfo = new SimpleListProperty<String>();
         displayInfo.set(FXCollections.observableArrayList());
         searchResults = new ArrayList<String[]>();
@@ -226,7 +251,7 @@ public class VGMDBParser implements DataSuggestorBase
                 !(name = nameVariences.optString("en")).isEmpty())
             {
                 displayInfo.add("Series: " + name);
-                tagDataLookup.put(VGMDBTag.SERIES, name);
+                tagDataLookup.put(AdditionalTag.SERIES, name);
             }
         }
 
@@ -255,7 +280,7 @@ public class VGMDBParser implements DataSuggestorBase
                 Image image = SwingFXUtils.toFXImage(buffImage, null);
                 albumArt500x500 = Utilities.scaleImage(image, 500, 500, true);
                 
-                tagDataLookup.put(VGMDBTag.IMAGE_URL, imageURL);
+                tagDataLookup.put(AdditionalTag.IMAGE_URL, imageURL);
             }
             catch (IOException e)
             {
@@ -270,7 +295,7 @@ public class VGMDBParser implements DataSuggestorBase
         {
             // "only my railgun / fripSide [Limited Edition]"
             displayInfo.add("Album: " + albumName.split(" / ", 2)[0]);
-            tagDataLookup.put(VGMDBTag.ALBUM, albumName.split(" / ", 2)[0]);
+            tagDataLookup.put(Tag.ALBUM, albumName.split(" / ", 2)[0]);
         }
 
         // Get artist
@@ -293,14 +318,14 @@ public class VGMDBParser implements DataSuggestorBase
             }
         }
         displayInfo.add("Artist(s): " + Utilities.getCommaSeparatedStringWithAnd(performerList));
-        tagDataLookup.put(VGMDBTag.ARTIST, Utilities.getCommaSeparatedStringWithAnd(performerList));
+        tagDataLookup.put(Tag.ARTIST, Utilities.getCommaSeparatedStringWithAnd(performerList));
 
         // Year
         String year;
         if(!(year = json.getString("release_date")).isEmpty())
         {
             displayInfo.add("Year: " + year.substring(0, 4)); // yyyy-mm-dd
-            tagDataLookup.put(VGMDBTag.YEAR, year.substring(0, 4));
+            tagDataLookup.put(Tag.YEAR, year.substring(0, 4));
         }
 
         // Track Info (TODO handle multiple disc in future
@@ -324,7 +349,7 @@ public class VGMDBParser implements DataSuggestorBase
                         !(title = titleVariences.optString("Japanese")).isEmpty())
                     {
                         displayInfo.add((i + 1) + " " + title);
-                        tagDataLookup.put(VGMDBTag.getTrackTag(i + 1), title);
+                        tagDataLookup.put(AdditionalTag.getTrackTag(i + 1), title);
                     }
                 }
             }
@@ -352,7 +377,7 @@ public class VGMDBParser implements DataSuggestorBase
         {
             int end = notes.toLowerCase().indexOf("opening");
             int value = Utilities.findIntValue(notes.substring(end - 6, end));
-            tagDataLookup.put(VGMDBTag.THEME, "OP" + (value != -1 ? value : ""));
+            tagDataLookup.put(AdditionalTag.THEME, "OP" + (value != -1 ? value : ""));
         }
         if(notes.toLowerCase().contains("ending"))
         {
@@ -360,13 +385,13 @@ public class VGMDBParser implements DataSuggestorBase
             int value = Utilities.findIntValue(notes.substring(end - 6, end));
             String theme;
             String foundTheme = "ED" + (value != -1 ? value : "");
-            if((theme = tagDataLookup.get(VGMDBTag.THEME)) != null)
+            if((theme = tagDataLookup.get(AdditionalTag.THEME)) != null)
             {
-                tagDataLookup.put(VGMDBTag.THEME, theme + " + " + foundTheme); 
+                tagDataLookup.put(AdditionalTag.THEME, theme + " + " + foundTheme); 
             }
             else
             {
-                tagDataLookup.put(VGMDBTag.THEME, foundTheme);
+                tagDataLookup.put(AdditionalTag.THEME, foundTheme);
             }
         }
         if(notes.toLowerCase().contains("insert"))
@@ -375,13 +400,13 @@ public class VGMDBParser implements DataSuggestorBase
             int value = Utilities.findIntValue(notes.substring(end - 6, end));
             String theme;
             String foundTheme = "IN" + (value != -1 ? value : "");
-            if((theme = tagDataLookup.get(VGMDBTag.THEME)) != null)
+            if((theme = tagDataLookup.get(AdditionalTag.THEME)) != null)
             {
-                tagDataLookup.put(VGMDBTag.THEME, theme + " + " + foundTheme); 
+                tagDataLookup.put(AdditionalTag.THEME, theme + " + " + foundTheme); 
             }
             else
             {
-                tagDataLookup.put(VGMDBTag.THEME, foundTheme);
+                tagDataLookup.put(AdditionalTag.THEME, foundTheme);
             }
         }
     }
@@ -438,48 +463,48 @@ public class VGMDBParser implements DataSuggestorBase
     }
 
     @Override
-    public String getDataForTag(Tag tag, String... values)
+    public String getDisplayKeywordTagClassName()
+    {
+        return "VGMDB";
+    }
+    
+    @Override
+    public String getDataForTag(TagBase<?> tag, String... values)
     {
         String returnValue = "";
-        switch (tag)
-        {
-            case Album:
-                returnValue = tagDataLookup.get(VGMDBTag.ALBUM);
-                break;
-            case AlbumArt:
-                break;
-            case AlbumArtMeta:
-                // TODO
-                break;
-            case AlbumArtist:
-                returnValue = tagDataLookup.get(VGMDBTag.SERIES);
-                break;
-            case Artist:
-                returnValue = tagDataLookup.get(VGMDBTag.ARTIST);
-                break;
-            case Comment:
-                returnValue = tagDataLookup.get(VGMDBTag.THEME);
-                break;
-            case FileName:
-                break;
-            case Genre:
-                break;
-            case Title:
-                break;
-            case Track:
-                returnValue = tagDataLookup.get(VGMDBTag.getTrackTag(Integer.valueOf(values[0])));
-                break;
-            case Year:
-                returnValue = tagDataLookup.get(VGMDBTag.YEAR);
-                break;
-            default:
-                break;
+//        TagBase<?> newTag = Utilities.getEnum(tag, AdditionalTag.class, Tag.class);
+        if(tag == Tag.ALBUM) {
+            returnValue = tagDataLookup.get(Tag.ALBUM);
+        }
+        else if(tag == Tag.ALBUM_ARTIST) {
+//            returnValue = tagDataLookup.get(VGMDBTag.SERIES);
+        }
+        else if(tag == Tag.ARTIST) {
+            returnValue = tagDataLookup.get(Tag.ARTIST);
+        }
+        else if(tag == Tag.COMMENT) {
+//            returnValue = tagDataLookup.get(AdditionalTag.THEME);
+        }
+        else if(tag == Tag.TRACK) {
+            returnValue = tagDataLookup.get(AdditionalTag.getTrackTag(Integer.valueOf(values[0])));
+        }
+        else if(tag == Tag.YEAR) {
+            returnValue = tagDataLookup.get(Tag.YEAR);
+        }
+        else if(tag == AdditionalTag.SERIES) {
+            returnValue = tagDataLookup.get(AdditionalTag.SERIES);
+        }
+        else if(tag == AdditionalTag.THEME) {
+            returnValue = tagDataLookup.get(AdditionalTag.THEME);
+        }
+        else if(tag == AdditionalTag.IMAGE_URL) {
+            returnValue = tagDataLookup.get(AdditionalTag.IMAGE_URL);
         }
         return returnValue;
     }
 
     @Override
-    public void setDataForTag(Tag tag, String... values)
+    public void setDataForTag(TagBase<?> tag, String... values)
     {
     }
 
@@ -488,6 +513,7 @@ public class VGMDBParser implements DataSuggestorBase
     {
     }
     
+    @Override
     public void setAlbumArtFromURL(String url)
     {  
     }
@@ -498,8 +524,28 @@ public class VGMDBParser implements DataSuggestorBase
     }
 
     @Override
-    public List<String> getPossibleDataForTag(Tag tag, String values)
+    public List<String> getPossibleDataForTag(TagBase<?> tag, String values)
     {
         return null;
+    }
+    
+    @Override
+    public TagBase[] getAdditionalTags()
+    {
+        return AdditionalTag.values();
+    }
+
+    @Override
+    public List<TagBase<?>> getKeywordTags()
+    {
+        List<TagBase<?>> keywords = new ArrayList<>();
+        keywords.add(Tag.ALBUM);
+        keywords.add(Tag.ARTIST);
+        keywords.add(Tag.YEAR);
+        for(TagBase t : AdditionalTag.values())
+        {
+            keywords.add(t);
+        }
+        return keywords;
     }
 }

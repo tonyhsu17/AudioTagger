@@ -36,6 +36,7 @@ import javafx.scene.text.Text;
 import models.DataCompilationModel;
 import models.DataCompilationModel.ImageFrom;
 import models.dataSuggestors.AudioFiles;
+import models.dataSuggestors.AudioTagComboBoxModel;
 import models.dataSuggestors.DatabaseController;
 import models.dataSuggestors.VGMDBParser;
 import support.Utilities;
@@ -117,43 +118,43 @@ public class MP3TaggerVC
         songListLV.itemsProperty().bindBidirectional(model.processingFilesProperty());
 
         fileNameCB.itemsProperty().bindBidirectional(
-            model.getPropertyForTag(Tag.FileName).getDropDownListProperty());
+            model.getPropertyForTag(Tag.FILE_NAME).getDropDownListProperty());
         fileNameCB.editorProperty().getValue().textProperty().bindBidirectional(
-            model.getPropertyForTag(Tag.FileName).getTextProperty());
+            model.getPropertyForTag(Tag.FILE_NAME).getTextProperty());
         titleCB.itemsProperty().bindBidirectional(
-            model.getPropertyForTag(Tag.Title).getDropDownListProperty());
+            model.getPropertyForTag(Tag.TITLE).getDropDownListProperty());
         titleCB.editorProperty().getValue().textProperty().bindBidirectional(
-            model.getPropertyForTag(Tag.Title).getTextProperty());
+            model.getPropertyForTag(Tag.TITLE).getTextProperty());
         artistCB.itemsProperty().bindBidirectional(
-            model.getPropertyForTag(Tag.Artist).getDropDownListProperty());
+            model.getPropertyForTag(Tag.ARTIST).getDropDownListProperty());
         artistCB.editorProperty().getValue().textProperty().bindBidirectional(
-            model.getPropertyForTag(Tag.Artist).getTextProperty());
+            model.getPropertyForTag(Tag.ARTIST).getTextProperty());
         albumCB.itemsProperty().bindBidirectional(
-            model.getPropertyForTag(Tag.Album).getDropDownListProperty());
+            model.getPropertyForTag(Tag.ALBUM).getDropDownListProperty());
         albumCB.editorProperty().getValue().textProperty().bindBidirectional(
-            model.getPropertyForTag(Tag.Album).getTextProperty());
+            model.getPropertyForTag(Tag.ALBUM).getTextProperty());
         albumArtistCB.itemsProperty().bindBidirectional(
-            model.getPropertyForTag(Tag.AlbumArtist).getDropDownListProperty());
+            model.getPropertyForTag(Tag.ALBUM_ARTIST).getDropDownListProperty());
         albumArtistCB.editorProperty().getValue().textProperty().bindBidirectional(
-            model.getPropertyForTag(Tag.AlbumArtist).getTextProperty());
+            model.getPropertyForTag(Tag.ALBUM_ARTIST).getTextProperty());
         trackCB.itemsProperty().bindBidirectional(
-            model.getPropertyForTag(Tag.Track).getDropDownListProperty());
+            model.getPropertyForTag(Tag.TRACK).getDropDownListProperty());
         trackCB.editorProperty().getValue().textProperty().bindBidirectional(
-            model.getPropertyForTag(Tag.Track).getTextProperty());
+            model.getPropertyForTag(Tag.TRACK).getTextProperty());
         yearCB.itemsProperty().bindBidirectional(
-            model.getPropertyForTag(Tag.Year).getDropDownListProperty());
+            model.getPropertyForTag(Tag.YEAR).getDropDownListProperty());
         yearCB.editorProperty().getValue().textProperty().bindBidirectional(
-            model.getPropertyForTag(Tag.Year).getTextProperty());
+            model.getPropertyForTag(Tag.YEAR).getTextProperty());
         genreCB.itemsProperty().bindBidirectional(
-            model.getPropertyForTag(Tag.Genre).getDropDownListProperty());
+            model.getPropertyForTag(Tag.GENRE).getDropDownListProperty());
         genreCB.editorProperty().getValue().textProperty().bindBidirectional(
-            model.getPropertyForTag(Tag.Genre).getTextProperty());
+            model.getPropertyForTag(Tag.GENRE).getTextProperty());
         commentCB.itemsProperty().bindBidirectional(
-            model.getPropertyForTag(Tag.Comment).getDropDownListProperty());
+            model.getPropertyForTag(Tag.COMMENT).getDropDownListProperty());
         commentCB.editorProperty().getValue().textProperty().bindBidirectional(
-            model.getPropertyForTag(Tag.Comment).getTextProperty());
+            model.getPropertyForTag(Tag.COMMENT).getTextProperty());
         albumArtIV.imageProperty().bindBidirectional(model.albumArtProperty());
-        albumArtMetaLabel.textProperty().bind(model.getPropertyForTag(Tag.AlbumArtMeta).getTextProperty());
+        albumArtMetaLabel.textProperty().bind(model.getPropertyForTag(Tag.ALBUM_ART_META).getTextProperty());
         
         vgmdbInfoLV.itemsProperty().bind(vgmdbParserModel.vgmdbInfoProperty());
         vgmdbAlbumArtIV.imageProperty().bind(vgmdbParserModel.albumArtProperty());
@@ -176,7 +177,7 @@ public class MP3TaggerVC
             {
                 TextField cb = (TextField)event.getSource();
                 int caretPos = cb.getCaretPosition();
-                model.updateChoicesForTag(Tag.FileName, (size) -> {
+                model.updateChoicesForTag(Tag.FILE_NAME, (size) -> {
                     ((ComboBox<String>)cb.getParent()).show();
                     cb.positionCaret(caretPos);
                 });
@@ -189,7 +190,7 @@ public class MP3TaggerVC
             {
                 TextField cb = (TextField)event.getSource();
                 int caretPos = cb.getCaretPosition();
-                model.updateChoicesForTag(Tag.Title, (size) -> {
+                model.updateChoicesForTag(Tag.TITLE, (size) -> {
                     ((ComboBox<String>)cb.getParent()).show();
                     cb.positionCaret(caretPos);
                 });
@@ -202,7 +203,7 @@ public class MP3TaggerVC
             {
                 TextField cb = (TextField)event.getSource();
                 int caretPos = cb.getCaretPosition();
-                model.updateChoicesForTag(Tag.Artist, (size) -> {
+                model.updateChoicesForTag(Tag.ARTIST, (size) -> {
                     cb.positionCaret(caretPos);
                     ((ComboBox<String>)cb.getParent()).show();
                 });
@@ -215,7 +216,7 @@ public class MP3TaggerVC
             {
                 TextField cb = (TextField)event.getSource();
                 int caretPos = cb.getCaretPosition();
-                model.updateChoicesForTag(Tag.Album, (size) -> {
+                model.updateChoicesForTag(Tag.ALBUM, (size) -> {
                     cb.positionCaret(caretPos);
                     ((ComboBox<String>)cb.getParent()).show();
                 }); 
@@ -228,7 +229,7 @@ public class MP3TaggerVC
             {
                 TextField cb = (TextField)event.getSource();
                 int caretPos = cb.getCaretPosition();
-                model.updateChoicesForTag(Tag.AlbumArtist, (size) -> {
+                model.updateChoicesForTag(Tag.ALBUM_ARTIST, (size) -> {
                     cb.positionCaret(caretPos);
                     ((ComboBox<String>)cb.getParent()).show();
                 });
@@ -241,7 +242,7 @@ public class MP3TaggerVC
             {
                 TextField cb = (TextField)event.getSource();
                 int caretPos = cb.getCaretPosition();
-                model.updateChoicesForTag(Tag.Track, (size) -> {
+                model.updateChoicesForTag(Tag.TRACK, (size) -> {
                     cb.positionCaret(caretPos);
                     ((ComboBox<String>)cb.getParent()).show();
                 });
@@ -254,7 +255,7 @@ public class MP3TaggerVC
             {
                 TextField cb = (TextField)event.getSource();
                 int caretPos = cb.getCaretPosition();
-                model.updateChoicesForTag(Tag.Year, (year) -> {
+                model.updateChoicesForTag(Tag.YEAR, (year) -> {
                     cb.positionCaret(caretPos);
                     ((ComboBox<String>)cb.getParent()).show();
                 });
@@ -267,7 +268,7 @@ public class MP3TaggerVC
             {
                 TextField cb = (TextField)event.getSource();
                 int caretPos = cb.getCaretPosition();
-                model.updateChoicesForTag(Tag.Genre, (size) -> {
+                model.updateChoicesForTag(Tag.GENRE, (size) -> {
                     cb.positionCaret(caretPos);
                     ((ComboBox<String>)cb.getParent()).show();
                 });
@@ -280,7 +281,7 @@ public class MP3TaggerVC
             {
                 TextField cb = (TextField)event.getSource();
                 int caretPos = cb.getCaretPosition();
-                model.updateChoicesForTag(Tag.Comment, (size) -> {
+                model.updateChoicesForTag(Tag.COMMENT, (size) -> {
                     cb.positionCaret(caretPos);
                     ((ComboBox<String>)cb.getParent()).show();
                 });
@@ -295,7 +296,7 @@ public class MP3TaggerVC
             {
                 TextField tf = (TextField)event.getSource();
                 ComboBox<String> cb = ((ComboBox<String>)tf.getParent());
-                model.updateChoicesForTag(Tag.Artist, (size) -> {
+                model.updateChoicesForTag(Tag.ARTIST, (size) -> {
                     cb.hide();
                     cb.show();
                 });
@@ -308,7 +309,7 @@ public class MP3TaggerVC
             {
                 TextField tf = (TextField)event.getSource();
                 ComboBox<String> cb = ((ComboBox<String>)tf.getParent());
-                model.updateChoicesForTag(Tag.AlbumArtist, (size) -> {
+                model.updateChoicesForTag(Tag.ALBUM_ARTIST, (size) -> {
                     cb.hide();
                     cb.show();
                 });
@@ -321,7 +322,7 @@ public class MP3TaggerVC
             {
                 TextField tf = (TextField)event.getSource();
                 ComboBox<String> cb = ((ComboBox<String>)tf.getParent());
-                model.updateChoicesForTag(Tag.Genre, (size) -> {
+                model.updateChoicesForTag(Tag.GENRE, (size) -> {
                     cb.hide();
                     cb.show();
                 });
@@ -461,7 +462,7 @@ public class MP3TaggerVC
             });
         }
         
-        vgmdbParserModel.searchByAlbum(model.getPropertyForTag(Tag.Album).getTextProperty().get());
+        vgmdbParserModel.searchByAlbum(model.getPropertyForTag(Tag.ALBUM).getTextProperty().get());
     }
     
 //    private void inputTextChanged()
@@ -495,6 +496,11 @@ public class MP3TaggerVC
     {
 //        inputTextChanged();
         model.save();
+    }
+    
+    public void toggleAutoFill()
+    {
+        model.toggleAutoFill();
     }
 
     // ~~~~~~~~~~~~~~~~~~~ // 

@@ -13,6 +13,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.IllegalFormatException;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -34,6 +35,7 @@ import org.jaudiotagger.tag.images.ArtworkFactory;
 
 import models.Settings;
 import models.Settings.SettingsKey;
+import models.dataSuggestors.VGMDBParser.AdditionalTag;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
@@ -41,6 +43,7 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
 import javafx.scene.image.WritableImage;
 import support.GenreMapping;
+import support.TagBase;
 import support.Utilities;
 import support.Utilities.Tag;
 
@@ -51,7 +54,7 @@ public class AudioFiles implements DataSuggestorBase
     ArrayList<MP3File> workingMP3Files;
     ArrayList<String> workingDirectories;
 
-    private ListProperty<String> selectedFileNames; 
+    private ListProperty<String> selectedFileNames;
 
     // currently selected information
     private String fileName;
@@ -65,22 +68,24 @@ public class AudioFiles implements DataSuggestorBase
     private String comment;
     private Image albumArt;
     private String albumArtMeta;
-    
-    private List<Integer> selectedIndicies; //index of selected file
-    
+
+    private List<Integer> selectedIndicies; // index of selected file
+    private List<Integer> selectedIndiciesCopy; // copy of index of selected file, to revert back after saving
+
     public AudioFiles()
     {
         selectedFileNames = new SimpleListProperty<String>();
         selectedFileNames.set(FXCollections.observableArrayList());
+        
         reset();
     }
-    
+
     private void reset()
     {
         selectedIndicies = new ArrayList<Integer>();
         workingMP3Files = new ArrayList<>();
         workingDirectories = new ArrayList<String>();
-        
+
         selectedFileNames.clear();
 
         fileName = "";
@@ -94,13 +99,13 @@ public class AudioFiles implements DataSuggestorBase
         comment = "";
         albumArtMeta = "";
     }
-    
+
     public void setWorkingDirectory(String folder)
     {
         reset();
-        appendWorkingDirectory(new File[] {new File(folder)});
+        appendWorkingDirectory(new File[] { new File(folder) });
     }
-    
+
     public void appendWorkingDirectory(File[] files)
     {
         List<File> directoriesQueue = new ArrayList<File>();
@@ -114,20 +119,21 @@ public class AudioFiles implements DataSuggestorBase
                 directoriesQueue.add(f);
             }
             // else if correct file
-            else if(FilenameUtils.getExtension(fullPath).equals("mp3") || 
-                FilenameUtils.getExtension(fullPath).equals("m4a")) // TODO the other formats too
+            else if(FilenameUtils.getExtension(fullPath).equals("mp3") || FilenameUtils.getExtension(fullPath).equals("m4a")) // TODO the
+                                                                                                                              // other
+                                                                                                                              // formats too
             {
                 filesInDirQueue.add(f);
             }
         }
-        
+
         if(!filesInDirQueue.isEmpty())
         {
             File firstFile = filesInDirQueue.get(0);
             workingDirectories.add(firstFile.getPath());
             selectedFileNames.add(Utilities.HEADER_ALBUM + FilenameUtils.getName(firstFile.getParent()));
             workingMP3Files.add(null); // add dummy value
-            
+
             for(File sub : filesInDirQueue)
             {
                 try
@@ -145,7 +151,7 @@ public class AudioFiles implements DataSuggestorBase
             }
             filesInDirQueue.clear();
         }
-        
+
         if(!directoriesQueue.isEmpty())
         {
             for(File dir : directoriesQueue)
@@ -154,19 +160,19 @@ public class AudioFiles implements DataSuggestorBase
             }
         }
     }
-    
+
     private List<Integer> getAllIndexFromAlbum(int n, boolean includeSelf)
     {
         List<Integer> indicies = new ArrayList<Integer>();
-        
+
         int lower = n - 1;
         int upper = n + 1;
-        
+
         if(includeSelf && !selectedFileNames.get(n).startsWith(Utilities.HEADER_ALBUM))
         {
             indicies.add(n);
         }
-        
+
         while(lower >= 0 && !selectedFileNames.get(lower).startsWith(Utilities.HEADER_ALBUM))
         {
             indicies.add(lower);
@@ -180,7 +186,7 @@ public class AudioFiles implements DataSuggestorBase
         System.out.println("Indicies Selected: " + Arrays.toString(indicies.toArray(new Integer[0])));
         return indicies;
     }
-    
+
     // set fields to the currently opened file
     public void selectTag(int index)
     {
@@ -189,7 +195,7 @@ public class AudioFiles implements DataSuggestorBase
         {
             if(selectedFileNames.get(index).startsWith(Utilities.HEADER_ALBUM))
             {
-                selectTag(index + 1); // initially set a tag, 
+                selectTag(index + 1); // initially set a tag,
                 // selectMultipleTags instead
                 List<Integer> indicies = getAllIndexFromAlbum(index + 1, true);
                 selectTags(indicies);
@@ -200,7 +206,7 @@ public class AudioFiles implements DataSuggestorBase
                 selectedIndicies.add(index);
                 MP3File f = workingMP3Files.get(index);
                 AbstractID3v2Tag tags = f.getID3v2Tag();
-                
+
                 fileName = FilenameUtils.getName(f.getFile().getPath());
                 title = tags.getFirst(FieldKey.TITLE);
                 artist = tags.getFirst(FieldKey.ARTIST);
@@ -210,10 +216,10 @@ public class AudioFiles implements DataSuggestorBase
                 year = tags.getFirst(FieldKey.YEAR);
                 genre = tags.getFirst(FieldKey.GENRE);
                 comment = tags.getFirst(FieldKey.COMMENT);
-                
-                Image image = getAlbumArt(tags); 
+
+                Image image = getAlbumArt(tags);
                 albumArt = image;
-                
+
                 // sizeInBytes= http://stackoverflow.com/questions/6250200/how-to-get-the-size-of-an-image-in-java
                 String mimeType = getAlbumImageMimeType(tags);
                 if(image != null)
@@ -223,7 +229,7 @@ public class AudioFiles implements DataSuggestorBase
             }
         }
     }
-    
+
     // set fields to the currently opened file
     public void selectTags(List<Integer> indicies)
     {
@@ -235,7 +241,7 @@ public class AudioFiles implements DataSuggestorBase
                 selectedIndicies.add(index);
                 MP3File f = workingMP3Files.get(index);
                 AbstractID3v2Tag tags = f.getID3v2Tag();
-                
+
                 fileName = Utilities.getComparedName(fileName, FilenameUtils.getName(f.getFile().getPath()));
                 title = Utilities.getComparedName(title, tags.getFirst(FieldKey.TITLE));
                 artist = Utilities.getComparedName(artist, tags.getFirst(FieldKey.ARTIST));
@@ -245,9 +251,9 @@ public class AudioFiles implements DataSuggestorBase
                 year = Utilities.getComparedName(year, tags.getFirst(FieldKey.YEAR));
                 genre = Utilities.getComparedName(genre, tags.getFirst(FieldKey.GENRE));
                 comment = Utilities.getComparedName(comment, tags.getFirst(FieldKey.COMMENT));
-                Image image = Utilities.getComparedImage(albumArt, getAlbumArt(tags)); 
+                Image image = Utilities.getComparedImage(albumArt, getAlbumArt(tags));
                 albumArt = image;
-                
+
                 // sizeInBytes= http://stackoverflow.com/questions/6250200/how-to-get-the-size-of-an-image-in-java
                 String mimeType = getAlbumImageMimeType(tags); // could be incorrect if image different
                 if(image != null)
@@ -257,23 +263,23 @@ public class AudioFiles implements DataSuggestorBase
             }
         }
     }
-    
+
     private String getAlbumImageMimeType(AbstractID3v2Tag tag)
     {
         List<Artwork> artworkList = tag.getArtworkList();
         if(!artworkList.isEmpty())
         {
             Artwork first = artworkList.get(0);
-//            System.out.println("mime: " + first.getMimeType());
+            // System.out.println("mime: " + first.getMimeType());
             return first.getMimeType();
         }
         return "";
     }
-    
+
     private Image getAlbumArt(AbstractID3v2Tag tag)
     {
         List<Artwork> artworkList = tag.getArtworkList();
-           
+
         try
         {
             if(!artworkList.isEmpty())
@@ -287,13 +293,13 @@ public class AudioFiles implements DataSuggestorBase
         }
         return null;
     }
-     
+
     /**
-     * used for propagating save data to multiple tags 
+     * used for propagating save data to multiple tags
      * very manual intensive...
      * make copy of checked tag
      * select all files from album
-     * set back checked tags 
+     * set back checked tags
      * saveTags()
      */
     private void mockMultisave()
@@ -305,38 +311,38 @@ public class AudioFiles implements DataSuggestorBase
         String propYear = year;
         String propGenre = genre;
         String propComment = comment;
-        Image propAlbumArt = albumArt;    
-        
+        Image propAlbumArt = albumArt;
+
         // select all tags from album
         if(Settings.getInstance().isAnyPropagateSaveOn())
         {
             selectTags(getAllIndexFromAlbum(selectedIndicies.get(0), false));
         }
-        
+
         // set selected values back
         if(Settings.getInstance().isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_ARTIST))
         {
-            setDataForTag(Tag.Artist, propArtist);
+            setDataForTag(Tag.ARTIST, propArtist);
         }
         if(Settings.getInstance().isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_ALBUM))
         {
-            setDataForTag(Tag.Album, propAlbum);
+            setDataForTag(Tag.ALBUM, propAlbum);
         }
         if(Settings.getInstance().isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_ALBUM_ARTIST))
         {
-            setDataForTag(Tag.AlbumArtist, propAlbumArtist);
+            setDataForTag(Tag.ALBUM_ARTIST, propAlbumArtist);
         }
         if(Settings.getInstance().isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_YEAR))
         {
-            setDataForTag(Tag.Year, propYear);
+            setDataForTag(Tag.YEAR, propYear);
         }
         if(Settings.getInstance().isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_GENRE))
         {
-            setDataForTag(Tag.Genre, propGenre);
+            setDataForTag(Tag.GENRE, propGenre);
         }
         if(Settings.getInstance().isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_COMMENT))
         {
-            setDataForTag(Tag.Comment, propComment);
+            setDataForTag(Tag.COMMENT, propComment);
         }
         if(Settings.getInstance().isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_ALBUM_ART))
         {
@@ -346,19 +352,16 @@ public class AudioFiles implements DataSuggestorBase
         }
         save();
     }
-    
 
-    
     // ~~~~~~~~~~~~~~~~~ //
     // Getters & Setters //
     // ~~~~~~~~~~~~~~~~~ //
-    
-    
+
     public ListProperty<String> fileNamesProperty()
     {
         return selectedFileNames;
     }
-    
+
     public final List<String> getFileNames()
     {
         return selectedFileNames.get();
@@ -368,87 +371,11 @@ public class AudioFiles implements DataSuggestorBase
     {
         return FilenameUtils.getExtension(fileName);
     }
-
-    // get the info for a specific tag
+    
     @Override
-    public String getDataForTag(Tag tag, String... values)
+    public String getDisplayKeywordTagClassName()
     {
-        String returnValue = "";
-        switch(tag)
-        {
-            case Album:
-                returnValue = album;
-                break;
-            case AlbumArtMeta:
-                returnValue = albumArtMeta;
-                break;
-            case AlbumArtist:
-                returnValue = albumArtist;
-                break;
-            case Artist:
-                returnValue = artist;
-                break;
-            case Comment:
-                returnValue = comment;
-                break;
-            case FileName:
-                returnValue = fileName;
-                break;
-            case Genre:
-                returnValue = genre;
-                break;
-            case Title:
-                returnValue = title;
-                break;
-            case Track:
-                returnValue = track;
-                break;
-            case Year:
-                returnValue = year;
-                break;
-            default:
-                System.out.println("no data for tag: " + tag);
-                break;
-        }
-        return returnValue;
-    }
-
-    // replace tagData with new tagData
-    @Override
-    public void setDataForTag(Tag tag, String... values)
-    {
-        switch(tag)
-        {
-            case Album:
-                album = values[0];
-                break;
-            case AlbumArtist:
-                albumArtist = values[0];
-                break;
-            case Artist:
-                artist = values[0];
-                break;
-            case Comment:
-                comment = values[0];
-                break;
-            case FileName:
-                fileName = values[0];
-                break;
-            case Genre:
-                genre = values[0];
-                break;
-            case Title:
-                title = values[0];
-                break;
-            case Track:
-                track = values[0];
-                break;
-            case Year:
-                year = values[0];
-                break;
-            default:
-                break;
-        }
+        return "Audio";
     }
     
     @Override
@@ -466,7 +393,7 @@ public class AudioFiles implements DataSuggestorBase
             e.printStackTrace();
         }
     }
-    
+
     @Override
     public void setAlbumArtFromURL(String url)
     {
@@ -483,15 +410,24 @@ public class AudioFiles implements DataSuggestorBase
         }
     }
 
+    
+    
     // save new tags
     @Override
     public void save()
     {
+        // if save triggered, copy selected indicies for later reverting back incase multisave is on
+        if(selectedIndiciesCopy == null)
+        {
+            selectedIndiciesCopy = new ArrayList<Integer>();
+            selectedIndiciesCopy.addAll(selectedIndicies);
+        }
+        
         for(int i : selectedIndicies)
         {
             MP3File f = workingMP3Files.get(i);
             AbstractID3v2Tag tags = f.getID3v2Tag(); // could probably do new tag to remove unnecessary tags
-//            ID3v23Tag newTags = new ID3v23Tag();
+            // ID3v23Tag newTags = new ID3v23Tag();
             if(title != null && !title.isEmpty() && !Utilities.isKeyword(title))
             {
                 try
@@ -603,9 +539,9 @@ public class AudioFiles implements DataSuggestorBase
                     e1.printStackTrace();
                 }
             }
-            
+
             f.setID3v2Tag(tags);
-            
+
             try
             {
                 String originalName = FilenameUtils.getName(f.getFile().getPath());
@@ -620,23 +556,28 @@ public class AudioFiles implements DataSuggestorBase
                 }
                 System.out.println("saving: " + path + File.separator + originalName);
                 f.save();
-                
+
                 if(!fileName.equals(originalName)) // saving to a different name
                 {
+                    String extension = ""; // add back extension if missing
+                    if(!fileName.endsWith(FilenameUtils.getExtension(originalName)))
+                    {
+                        extension = "." + FilenameUtils.getExtension(originalName);
+                    }
+                    
                     System.out.println("saving new name: " + path + File.separator + fileName);
-                    Files.copy(Paths.get(path + File.separator + originalName), 
-                        Paths.get(path + File.separator + fileName), 
+                    Files.copy(Paths.get(path + File.separator + originalName), Paths.get(path + File.separator + fileName + extension),
                         StandardCopyOption.REPLACE_EXISTING);
                     Files.delete(Paths.get(path + File.separator + originalName));
                 }
-//                f.save(new File(path + File.separator + fileName + ".temp"));
-//                Files.copy(Paths.get(path + File.separator + fileName + ".temp"), 
-//                        Paths.get(path + File.separator + fileName), 
-//                        StandardCopyOption.REPLACE_EXISTING);
-                
+                // f.save(new File(path + File.separator + fileName + ".temp"));
+                // Files.copy(Paths.get(path + File.separator + fileName + ".temp"),
+                // Paths.get(path + File.separator + fileName),
+                // StandardCopyOption.REPLACE_EXISTING);
+
                 if(!fileNamePrevious.isEmpty())
                 {
-                    // set back fileName to keyword so next loop 
+                    // set back fileName to keyword so next loop
                     // will use original name and not the same name
                     fileName = fileNamePrevious;
                 }
@@ -651,17 +592,156 @@ public class AudioFiles implements DataSuggestorBase
         {
             mockMultisave();
         }
-    }
-
-    @Override
-    public List<String> getPossibleDataForTag(Tag tag, String values)
-    {
-        return null;
+        // now revert indicies to original
+        // need to check for null as original call + mockMultiSave will trigger it twice
+        if(selectedIndiciesCopy != null)
+        {
+            selectedIndicies.clear();
+            selectedIndicies.addAll(selectedIndiciesCopy);
+            selectedIndiciesCopy = null; 
+        }
+        
     }
 
     @Override
     public Image getAlbumArt()
     {
         return albumArt;
+    }
+
+    @Override
+    public Tag[] getAdditionalTags()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<TagBase<?>> getKeywordTags()
+    {
+        List<TagBase<?>> keywords = new ArrayList<>();
+        keywords.add(Tag.ALBUM);
+        keywords.add(Tag.ALBUM_ARTIST);
+        keywords.add(Tag.ARTIST);
+        keywords.add(Tag.COMMENT);
+        keywords.add(Tag.FILE_NAME);
+        keywords.add(Tag.GENRE);
+        keywords.add(Tag.TITLE);
+        keywords.add(Tag.TRACK);
+        keywords.add(Tag.YEAR);
+        return keywords;
+    }
+
+ // get the info for a specific tag
+    @Override
+    public String getDataForTag(TagBase<?> tag, String... extraArgs)
+    {
+        String returnValue = "";
+        if(tag == Tag.ALBUM)
+        {
+            returnValue = album;
+        }
+        else if(tag == Tag.ALBUM_ART_META)
+        {
+            returnValue = albumArtMeta;
+        }
+        else if(tag == Tag.ALBUM_ARTIST)
+        {
+            returnValue = albumArtist;
+        }
+        else if(tag == Tag.ARTIST)
+        {
+            returnValue = artist;
+        }
+        else if(tag == Tag.COMMENT)
+        {
+            returnValue = comment;
+        }
+        else if(tag == Tag.FILE_NAME)
+        {
+            returnValue = fileName;
+        }
+        else if(tag == Tag.GENRE)
+        {
+            returnValue = genre;
+        }
+        else if(tag == Tag.TITLE)
+        {
+            returnValue = title;
+        }
+        else if(tag == Tag.TRACK)
+        {
+            if(Utilities.isKeyword(track))
+            {
+                returnValue = track;
+            }
+            else
+            {
+                returnValue = String.format("%02d", Integer.valueOf(track));
+            }
+            
+        }
+        else if(tag == Tag.YEAR)
+        {
+            returnValue = year;
+        }
+        else
+        {
+            System.out.println("no data for tag: " + tag);
+        }
+        return returnValue;
+    }
+
+ // replace tagData with new tagData
+    @Override
+    public void setDataForTag(TagBase<?> tag, String... values)
+    {
+        if(tag == Tag.ALBUM)
+        {
+            album = values[0];
+        }
+        else if(tag == Tag.ALBUM_ART_META)
+        {
+            albumArtMeta = values[0];
+        }
+        else if(tag == Tag.ALBUM_ARTIST)
+        {
+            albumArtist = values[0];
+        }
+        else if(tag == Tag.ARTIST)
+        {
+            artist = values[0];
+        }
+        else if(tag == Tag.COMMENT)
+        {
+            comment = values[0];
+        }
+        else if(tag == Tag.FILE_NAME)
+        {
+            fileName = values[0];
+        }
+        else if(tag == Tag.GENRE)
+        {
+            genre = values[0];
+        }
+        else if(tag == Tag.TITLE)
+        {
+            title = values[0];
+        }
+        else if(tag == Tag.TRACK)
+        {
+            track = values[0];
+        }
+        else if(tag == Tag.YEAR)
+        {
+            year = values[0];
+        }
+    }
+
+    @Override
+    public List<String> getPossibleDataForTag(TagBase<?> tag, String values)
+    {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

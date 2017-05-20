@@ -6,6 +6,10 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import models.dataSuggestors.VGMDBParser;
+import support.TagBase;
+import support.Utilities.Tag;
+
 public class VGMDBParserJUnitTest
 {
 
@@ -22,6 +26,14 @@ public class VGMDBParserJUnitTest
     @Before
     public void setUp() throws Exception
     {
+        VGMDBParser parser = new VGMDBParser();
+        System.out.println("Tag: " + Tag.ALBUM + " value: " + parser.getDataForTag(Tag.ALBUM, ""));
+        TagBase[] addtional = parser.getAdditionalTags();
+        for(TagBase t : addtional)
+        {
+            System.out.println("Tag: " + t + " value: " + parser.getDataForTag(t, ""));
+        }
+       
     }
 
     @After

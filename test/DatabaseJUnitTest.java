@@ -38,33 +38,33 @@ public class DatabaseJUnitTest
     @Test
     public void testAddAnime()
     {
-        db.setDataForTag(Tag.AlbumArtist, "Anime1");
+        db.setDataForTag(Tag.ALBUM_ARTIST, "Anime1");
         assertTrue(db.containsCaseSensitive(TableNames.Anime, "Anime1"));
     }
     
     public void testAddArtistFirst()
     {
-        db.setDataForTag(Tag.Artist, "ArtistFirst");
+        db.setDataForTag(Tag.ARTIST, "ArtistFirst");
         assertTrue(db.containsCaseSensitive(TableNames.Artist, "ArtistFirst", ""));
     }
     
     public void testAddArtistFull()
     {
-        db.setDataForTag(Tag.Artist, "ArtistFirst Last");
+        db.setDataForTag(Tag.ARTIST, "ArtistFirst Last");
         assertTrue(db.containsCaseSensitive(TableNames.Artist, "ArtistFirst", "Last"));
     }
     
     @Test
     public void testAddGroupWithKnownArtist()
     {
-        db.setDataForTag(Tag.Artist, "preadded");
-        db.setDataForTag(Tag.Artist, "next preadded");
-        db.setDataForTag(Tag.Artist, "GROUPY2");
+        db.setDataForTag(Tag.ARTIST, "preadded");
+        db.setDataForTag(Tag.ARTIST, "next preadded");
+        db.setDataForTag(Tag.ARTIST, "GROUPY2");
         
-        db.setDataForTag(Tag.Artist, "preadded", "next preadded");
+        db.setDataForTag(Tag.ARTIST, "preadded", "next preadded");
         assertTrue(db.containsCaseSensitive(TableNames.Group, "preadded & next preadded"));
         
-        db.setDataForTag(Tag.Artist, "GROUPY2", "preadded", "next preadded");
+        db.setDataForTag(Tag.ARTIST, "GROUPY2", "preadded", "next preadded");
         assertTrue(db.containsCaseSensitive(TableNames.Group, "GROUPY2, preadded & next preadded"));
         
         assertTrue(db.containsCaseSensitive(TableNames.Artist, "GROUPY2", ""));
@@ -75,7 +75,7 @@ public class DatabaseJUnitTest
    @Test 
     public void testAddGroupNewArtist()
     {
-        db.setDataForTag(Tag.Artist, "Ace of Tokiwadai", "Misaka", "Mikoto Misaka");
+        db.setDataForTag(Tag.ARTIST, "Ace of Tokiwadai", "Misaka", "Mikoto Misaka");
         assertTrue(db.containsCaseSensitive(TableNames.Group, "Ace of Tokiwadai, Misaka & Mikoto Misaka"));
         assertTrue(db.containsCaseSensitive(TableNames.Artist, "Misaka", ""));
         assertTrue(db.containsCaseSensitive(TableNames.Artist, "Mikoto", "Misaka"));
@@ -85,14 +85,14 @@ public class DatabaseJUnitTest
     @Test
     public void testGetPossibleAnime()
     {
-        db.setDataForTag(Tag.AlbumArtist, "A Certain Scientific Railgun");
-        db.setDataForTag(Tag.AlbumArtist, "A Certain Scientific Accelator");
-        List<String> str = db.getPossibleDataForTag(Tag.AlbumArtist, "A Certain");
+        db.setDataForTag(Tag.ALBUM_ARTIST, "A Certain Scientific Railgun");
+        db.setDataForTag(Tag.ALBUM_ARTIST, "A Certain Scientific Accelator");
+        List<String> str = db.getPossibleDataForTag(Tag.ALBUM_ARTIST, "A Certain");
         assertEquals(2, str.size());
         assertTrue(str.contains("A Certain Scientific Railgun"));
         assertTrue(str.contains("A Certain Scientific Accelator"));
         
-        str = db.getPossibleDataForTag(Tag.AlbumArtist, "A Certain");
+        str = db.getPossibleDataForTag(Tag.ALBUM_ARTIST, "A Certain");
         assertEquals(2, str.size());
         assertTrue(str.contains("A Certain Scientific Railgun"));
         assertTrue(str.contains("A Certain Scientific Accelator"));
@@ -101,19 +101,19 @@ public class DatabaseJUnitTest
     @Test
     public void testGetNoPossibleAnime()
     {
-        db.setDataForTag(Tag.AlbumArtist, "A Certain Scientific Railgun");
-        db.setDataForTag(Tag.AlbumArtist, "A Certain Scientific Accelator");
-        List<String> str = db.getPossibleDataForTag(Tag.AlbumArtist, "balh");
+        db.setDataForTag(Tag.ALBUM_ARTIST, "A Certain Scientific Railgun");
+        db.setDataForTag(Tag.ALBUM_ARTIST, "A Certain Scientific Accelator");
+        List<String> str = db.getPossibleDataForTag(Tag.ALBUM_ARTIST, "balh");
         assertEquals(0, str.size());
     }
     
     @Test
     public void testGetPossibleArtist()
     {
-        db.setDataForTag(Tag.Artist, "Ace of Tokiwadai");
-        db.setDataForTag(Tag.Artist, "Misaka");
-        db.setDataForTag(Tag.Artist, "Mikoto Misaka");
-        List<String> str = db.getPossibleDataForTag(Tag.Artist, "Misaka");
+        db.setDataForTag(Tag.ARTIST, "Ace of Tokiwadai");
+        db.setDataForTag(Tag.ARTIST, "Misaka");
+        db.setDataForTag(Tag.ARTIST, "Mikoto Misaka");
+        List<String> str = db.getPossibleDataForTag(Tag.ARTIST, "Misaka");
         assertEquals(3, str.size());
         assertTrue(str.contains("Ace of Tokiwadai"));
         assertTrue(str.contains("Misaka"));

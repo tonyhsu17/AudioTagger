@@ -10,12 +10,15 @@ import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
 
+import javafx.beans.property.ListProperty;
+import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.TableView;
@@ -42,6 +45,7 @@ public class SettingsVC
     Stage self;
     
     ObservableList<Settings.SettingsMap> data;
+    ListProperty<String> keywordTags;
 
     @FXML
     TableView<Settings.SettingsMap> table;
@@ -49,11 +53,17 @@ public class SettingsVC
     TableColumn<Settings.SettingsMap, String> properties;
     @FXML
     TableColumn<Settings.SettingsMap, String> values;
+    @FXML
+    ListView<String> variables;
+    
     
     public SettingsVC()
     {
         settings = Settings.getInstance();
         data = FXCollections.observableArrayList();
+        
+        keywordTags = new SimpleListProperty<String>();
+        keywordTags.set(FXCollections.observableArrayList());
     }
     
     public void setStage(Stage stage)
@@ -65,7 +75,6 @@ public class SettingsVC
     private void initialize()
     {
         System.out.println("settingsVC");
-//        data.add(Settings.getInstance().getKeyValuePair("Temp"));
         properties.setCellValueFactory(
             new PropertyValueFactory<Settings.SettingsMap, String>("keyDescription"));
         values.setCellValueFactory(
@@ -74,6 +83,8 @@ public class SettingsVC
         values.setCellFactory(TextFieldTableCell.forTableColumn());
         table.setItems(data);
         populateSettings();
+        keywordTags.addAll(settings.getKeywordTags());
+        variables.itemsProperty().bind(keywordTags);
     }
     
     private void populateSettings()

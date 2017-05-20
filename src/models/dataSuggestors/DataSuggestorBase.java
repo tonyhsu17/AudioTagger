@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.List;
 
 import javafx.scene.image.Image;
+import support.TagBase;
 import support.Utilities.Tag;
 
 /**
@@ -13,7 +14,9 @@ import support.Utilities.Tag;
  */
 public interface DataSuggestorBase
 {
-    public String getDataForTag(Tag tag, String... values);
+    
+    
+    public String getDataForTag(TagBase<?> tag, String... extraArgs);
     public Image getAlbumArt();
     
     /**
@@ -21,10 +24,15 @@ public interface DataSuggestorBase
      * @param tag
      * @param value
      */
-    public void setDataForTag(Tag tag, String... values);
+    public void setDataForTag(TagBase<?> tag, String... values);
     public void setAlbumArtFromFile(File file);
     public void setAlbumArtFromURL(String url);
     public void save();
     
-    public List<String> getPossibleDataForTag(Tag tag, String values);
+    public List<String> getPossibleDataForTag(TagBase<?> tag, String values);
+    public String getDisplayKeywordTagClassName();
+    public List<TagBase<?>> getKeywordTags(); // tags that can be used for string builder 
+    
+    public TagBase<?>[] getAdditionalTags(); // extra tags not in base tags
+    
 }

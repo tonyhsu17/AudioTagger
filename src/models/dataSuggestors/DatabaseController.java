@@ -12,6 +12,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import javafx.scene.image.Image;
+import models.dataSuggestors.VGMDBParser.AdditionalTag;
+import support.TagBase;
 import support.Utilities;
 import support.Utilities.Tag;
 
@@ -22,11 +24,6 @@ import support.Utilities.Tag;
  */
 public class DatabaseController implements DataSuggestorBase
 {
-    public interface SuggestorCallback
-    {
-        public void topChoice(String str);
-    }
-
     private Statement statement;
     Connection conn = null;
     public static enum TableNames {
@@ -195,7 +192,7 @@ public class DatabaseController implements DataSuggestorBase
                 List<Integer> groupId = new ArrayList<>();
                 // Individuals: first - dbFirst, last - dbLast
                 statements = conn.prepareStatement("SELECT ArtistFirst, ArtistLast, Id FROM " + TableNames.Artist + 
-                    " where LOWER(ArtistFirst) like ? OR LOWER(ArtistLast) like ? ORDER BY UseFrequency DESC FETCH NEXT 10 ROWS ONLY");
+                    " where LOWER(ArtistFirst) like ? AND LOWER(ArtistLast) like ? ORDER BY UseFrequency DESC FETCH NEXT 10 ROWS ONLY");
                 statements.setString(1, firstName + '%');
                 statements.setString(2, lastName + '%');
                 rs = statements.executeQuery();
@@ -213,7 +210,7 @@ public class DatabaseController implements DataSuggestorBase
                 
                 // Individuals: last - dbFirst, first - dbLast
                 statements = conn.prepareStatement("SELECT ArtistFirst, ArtistLast, Id FROM " + TableNames.Artist + 
-                    " where LOWER(ArtistFirst) like ? OR LOWER(ArtistLast) like ? ORDER BY UseFrequency DESC FETCH NEXT 10 ROWS ONLY");
+                    " where LOWER(ArtistFirst) like ? AND LOWER(ArtistLast) like ? ORDER BY UseFrequency DESC FETCH NEXT 10 ROWS ONLY");
                 statements.setString(1, lastName + '%');
                 statements.setString(2, firstName + '%');
                 rs = statements.executeQuery();
@@ -304,7 +301,6 @@ public class DatabaseController implements DataSuggestorBase
                                 possibleArtists.add(name);
                                 groupId.add(tempGroupId);
                             }
-                            rs.close();
                         }
                     }
                 }
@@ -742,49 +738,17 @@ public class DatabaseController implements DataSuggestorBase
             e.printStackTrace();
         }
     }
-    
-    @Override
-    public String getDataForTag(Tag tag, String... values)
-    {
-        return "";
-    }
 
+    @Override
+    public String getDisplayKeywordTagClassName()
+    {
+        return "Database";
+    }
+    
     @Override
     public Image getAlbumArt()
     {
         return null;
-    }
-
-    @Override
-    public void setDataForTag(Tag tag, String... values)
-    {        
-        switch (tag)
-        {
-            case AlbumArtist:
-                add(TableNames.Anime, values[0]); 
-                break;
-            case Artist:
-                if(values.length == 1)
-                {
-                    // param first, last
-                    String[] fullName = Utilities.splitName(values[0]);
-                    if(!fullName[0].isEmpty()) 
-                    {
-                        add(TableNames.Artist, fullName[0], fullName[1]);
-                    }
-                } 
-                else
-                {
-                    // param name, artist1, artist2, ...
-                    //tagToEditorTextMapping.get(Tag.Artist).get()
-//                    System.err.println("GroupSaving not implemented");
-//                    System.exit(0);
-                    add(TableNames.Group, values); 
-                }                 
-                break;
-            default:
-                break;
-        }
     }
     
     public void save()
@@ -794,29 +758,71 @@ public class DatabaseController implements DataSuggestorBase
     @Override
     public void setAlbumArtFromFile(File file)
     {
-        
     }
     
     @Override
     public void setAlbumArtFromURL(String url)
     {
-        
     }
 
     @Override
-    public List<String> getPossibleDataForTag(Tag tag, String string)
+    public Tag[] getAdditionalTags()
+    {
+        return null;
+    }
+
+    @Override
+    public List<TagBase<?>> getKeywordTags()
+    {
+        List<TagBase<?>> keywords = new ArrayList<>();
+        keywords.add(Tag.ARTIST);
+        keywords.add(Tag.ALBUM_ARTIST);
+        return keywords;
+    }
+
+    @Override
+    public String getDataForTag(TagBase<?> tag, String... extraArgs)
+    {
+        return "";
+    }
+
+    @Override
+    public void setDataForTag(TagBase<?> tag, String... values)
+    {
+        if(tag == Tag.ALBUM_ARTIST) {
+            add(TableNames.Anime, values[0]); 
+        }
+        else if(tag == Tag.ARTIST) {
+            if(values.length == 1)
+            {
+                // param first, last
+                String[] fullName = Utilities.splitName(values[0]);
+                if(!fullName[0].isEmpty()) 
+                {
+                    add(TableNames.Artist, fullName[0], fullName[1]);
+                }
+            } 
+            else
+            {
+                // param name, artist1, artist2, ...
+                //tagToEditorTextMapping.get(Tag.Artist).get()
+//                System.err.println("GroupSaving not implemented");
+//                System.exit(0);
+                add(TableNames.Group, values); 
+            }         
+        }
+    }
+
+    @Override
+    public List<String> getPossibleDataForTag(TagBase<?> tag, String values)
     {
         List<String> returnValue = null;
-        switch (tag)
-        {
-            case Artist:
-                String[] fullName = Utilities.splitName(string);
-                returnValue = getDBResultsForArtist(fullName[0], fullName[1]);
-                break;
-            case AlbumArtist:
-                returnValue = getDBResultsForAnime(string);
-            default:
-                break;
+        if(tag == Tag.ARTIST) {
+            String[] fullName = Utilities.splitName(values);
+            returnValue = getDBResultsForArtist(fullName[0], fullName[1]);
+        }
+        else if(tag == Tag.ALBUM_ARTIST) {
+            returnValue = getDBResultsForAnime(values);
         }
         return returnValue;
     }
