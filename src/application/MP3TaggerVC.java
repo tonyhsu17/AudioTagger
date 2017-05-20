@@ -497,6 +497,11 @@ public class MP3TaggerVC
 //        inputTextChanged();
         model.save();
     }
+    
+    public void toggleAutoFill()
+    {
+        model.toggleAutoFill();
+    }
 
     // ~~~~~~~~~~~~~~~~~~~ // 
     // FXML Event Handlers //

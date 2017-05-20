@@ -67,6 +67,7 @@ public class DataCompilationModel
 
         editorAutoComplete = new HashMap<Tag, KeywordInterpreter>();
         // updateAutoCompleteRules(); // activate when vgmdb parser set
+       
         EventCenter.getInstance().subscribeEvent(Events.SettingChanged, this, (obj) ->
         {
             updateAutoCompleteRules();
@@ -128,7 +129,7 @@ public class DataCompilationModel
         {
             ComboBoxMeta meta = fieldMap.getMeta(entry.getKey()); // get combo box to modify
             
-            if(meta.shouldStopAutoFill())
+            if(!meta.isPaused() && meta.shouldStopAutoFill())
             {
                 KeywordInterpreter builder = entry.getValue();
                 DataSuggestorBase classObj;
@@ -147,14 +148,24 @@ public class DataCompilationModel
         }
     }
 
-    private void setAutoFills(boolean flag)
+    private void setPauseAutoFill(boolean flag)
     {
         for(Entry<Tag, KeywordInterpreter> entry : editorAutoComplete.entrySet())
         {
             ComboBoxMeta meta = fieldMap.getMeta(entry.getKey()); // get combo box to modify
-            meta.setAllowAutoFill(flag);
+            meta.setPaused(flag);
         }
     }
+    
+    public void toggleAutoFill()
+    {
+        for(Entry<Tag, KeywordInterpreter> entry : editorAutoComplete.entrySet())
+        {
+            ComboBoxMeta meta = fieldMap.getMeta(entry.getKey()); // get combo box to modify
+            meta.setPaused(!meta.isPaused());
+        }
+    }
+
     
     // get the tag data for the selected index
     public void requestDataFor(int index, DataCompilationModelCallback cb)
@@ -444,7 +455,7 @@ public class DataCompilationModel
 
     public void save()
     {
-        setAutoFills(false); //stop auto fill to prevent corruption
+        setPauseAutoFill(true); //stop auto fill to prevent corruption
         
         // go through each element and set tag
         audioFilesModel.setDataForTag(Tag.FILE_NAME, fieldMap.getMeta(Tag.FILE_NAME).getTextProperty().get());
@@ -468,7 +479,7 @@ public class DataCompilationModel
         String[] splitArtists = Utilities.splitBySeparators(fieldMap.getMeta(Tag.ARTIST).getTextProperty().get());
         dbManagement.setDataForTag(Tag.ARTIST, splitArtists);
         
-        setAutoFills(true);
+        setPauseAutoFill(false);
     }
 
     public void clearAllTags()
@@ -559,5 +570,4 @@ public class DataCompilationModel
     {
         return fieldMap.getMeta(t);
     }
-
 }

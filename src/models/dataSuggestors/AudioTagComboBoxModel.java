@@ -102,6 +102,7 @@ public class AudioTagComboBoxModel implements DataSuggestorBase
         private ListProperty<String> dropDownProperty;
         private SimpleStringProperty textProperty;
         private boolean allowAutoFill;
+        private boolean paused;
 
         public ComboBoxMeta()
         {
@@ -109,6 +110,7 @@ public class AudioTagComboBoxModel implements DataSuggestorBase
             dropDownProperty.set(FXCollections.observableArrayList());
             textProperty = new SimpleStringProperty();
             allowAutoFill = true;
+            paused = true;
         }
         
         public ListProperty<String> getDropDownListProperty()
@@ -129,6 +131,16 @@ public class AudioTagComboBoxModel implements DataSuggestorBase
         public void setAllowAutoFill(boolean flag)
         {
             allowAutoFill = flag;
+        }
+        
+        public boolean isPaused()
+        {
+            return paused;
+        }
+        
+        public void setPaused(boolean flag)
+        {
+            paused = flag;
         }
         
         public void clear()

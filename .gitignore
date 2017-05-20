@@ -54,3 +54,4 @@ testDB/
 bin/ 
 
 derby.log
+audioTagger.cfg
