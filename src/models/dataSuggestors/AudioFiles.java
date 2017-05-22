@@ -557,16 +557,17 @@ public class AudioFiles implements DataSuggestorBase
                 System.out.println("saving: " + path + File.separator + originalName);
                 f.save();
 
-                if(!fileName.equals(originalName)) // saving to a different name
+                String extension = ""; // add back extension if missing
+                if(!fileName.endsWith(FilenameUtils.getExtension(originalName)))
                 {
-                    String extension = ""; // add back extension if missing
-                    if(!fileName.endsWith(FilenameUtils.getExtension(originalName)))
-                    {
-                        extension = "." + FilenameUtils.getExtension(originalName);
-                    }
-                    
+                    extension = "." + FilenameUtils.getExtension(originalName);
+                }
+                fileName += extension;
+                
+                if(!fileName.equals(originalName)) // saving to a different name
+                {                    
                     System.out.println("saving new name: " + path + File.separator + fileName);
-                    Files.copy(Paths.get(path + File.separator + originalName), Paths.get(path + File.separator + fileName + extension),
+                    Files.copy(Paths.get(path + File.separator + originalName), Paths.get(path + File.separator + fileName),
                         StandardCopyOption.REPLACE_EXISTING);
                     Files.delete(Paths.get(path + File.separator + originalName));
                 }
