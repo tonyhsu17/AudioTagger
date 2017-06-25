@@ -1,11 +1,12 @@
 package models;
 
-import java.awt.RenderingHints.Key;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.IllegalFormatException;
 import java.util.List;
 import java.util.Map.Entry;
+
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleListProperty;
@@ -19,11 +20,11 @@ import models.dataSuggestors.DataSuggestorBase;
 import models.dataSuggestors.DatabaseController;
 import models.dataSuggestors.VGMDBParser;
 import support.EventCenter;
+import support.EventCenter.Events;
 import support.GenreMapping;
 import support.Scheduler;
 import support.TagBase;
 import support.Utilities;
-import support.EventCenter.Events;
 import support.Utilities.Tag;
 
 
@@ -135,15 +136,22 @@ public class DataCompilationModel
                 DataSuggestorBase classObj;
                 TagBase<?> tag;
 
-                for(int i = 0; i < builder.getCount(); i++)
+                // pass values into builder to construct the value with given tags and info
+                for(int i = 0; i < builder.getCount(); i++) 
                 {
                     classObj = builder.getClass(i);
                     tag = builder.getTag(i);
-                    builder.setValue(i, classObj.getDataForTag(tag, ""));
+                    builder.setValue(i, classObj.getDataForTag(tag, "")); // pass data to builder
                 }
-
-//                System.out.println("DecodedString: " + builder.buildString());
-                meta.getTextProperty().set(builder.buildString());
+                
+                String finalValue = builder.buildString(); // get the final results
+//                System.out.println("DecodedString: " + finalValue);
+//                meta.getTextProperty().set(finalValue); // set input box text
+                
+                // check db for caps matching text to replace
+                setTextFormattedFromDB(entry.getKey(), finalValue);
+                
+                //TODO create class that does text replacement (ie (karoke) -> (intrumental), (tv edit) -> (tv size) etc) 
             }
         }
     }
@@ -163,6 +171,45 @@ public class DataCompilationModel
         {
             ComboBoxMeta meta = fieldMap.getMeta(entry.getKey()); // get combo box to modify
             meta.setPaused(!meta.isPaused());
+        }
+    }
+    
+    private void setTextFormattedFromDB(Tag type, String value)
+    {
+        if(type == Tag.ALBUM_ARTIST)
+        {
+            String formattedText = dbManagement.getDataForTag(Tag.ALBUM_ARTIST, value);
+            
+            if(!formattedText.isEmpty()) {
+                System.out.println("ALBUM_ARTIST formattedText: " + formattedText);
+                getPropertyForTag(type).getTextProperty().set(formattedText);// set input box text 
+            }
+            
+        }
+        else if(type == Tag.ARTIST)
+        {
+            String[] artists = Utilities.splitBySeparators(value);
+            List<String> formattedArtists = new ArrayList<String>();
+            
+            for(String artist : artists) {
+                String[] byFirstLast = Utilities.splitName(artist);
+                String formattedText = dbManagement.getDataForTag(type, byFirstLast[0], byFirstLast[1]);
+                if(!formattedText.isEmpty()) {
+                    System.out.println("ARTIST formattedText: " + formattedText);
+                    formattedArtists.add(formattedText);
+                }
+            }
+            
+            String formattedText = Utilities.getCommaSeparatedStringWithAnd(formattedArtists);
+            if(!formattedText.isEmpty()) {
+                System.out.println("ARTIST formattedText: " + formattedText);
+                getPropertyForTag(type).getTextProperty().set(formattedText);  
+            }
+                      
+        }
+        else
+        {
+            getPropertyForTag(type).getTextProperty().set(value);
         }
     }
 
@@ -200,15 +247,13 @@ public class DataCompilationModel
         }
         else
         {
-            System.out.println(
-                "TEXT: " + fieldMap.getMeta(tag).getTextProperty().get() + " " + fieldMap.getMeta(tag).getTextProperty().get().isEmpty());
             fieldMap.getMeta(tag).setAllowAutoFill(fieldMap.getMeta(tag).getTextProperty().get().isEmpty() ? true : false);
             String originalText = (String)audioFilesModel.getDataForTag(tag);
 
             int size = addPossibleDataForTag(tag, originalText);
             // stop auto-complete since there is human input
             // unless text is empty then revert back to allow auto-fill
-
+            setTextFormattedFromDB(tag, originalText);
             cb.done(size);
         }
     }
@@ -219,8 +264,6 @@ public class DataCompilationModel
         List<String> dropDownList = fieldMap.getMeta(tag).getDropDownListProperty().get();
         dropDownList.clear();
 
-        fieldMap.getMeta(tag).getTextProperty().set(editorText);
-
         // add original
         for(String str : additional)
         {
@@ -229,6 +272,7 @@ public class DataCompilationModel
                 dropDownList.add(str);
             }
         }
+        fieldMap.getMeta(tag).getTextProperty().set(editorText);
 
         // now handle base on specific
         switch (tag)

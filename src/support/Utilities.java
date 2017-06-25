@@ -13,6 +13,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.scene.paint.Color;
+import support.structure.Range;
 
 
 public class Utilities
@@ -23,6 +24,19 @@ public class Utilities
     
     public enum Tag implements TagBase<Tag> {
         FILE_NAME, TITLE, ARTIST, ALBUM, ALBUM_ARTIST, TRACK, YEAR, GENRE, COMMENT, ALBUM_ART, ALBUM_ART_META,;
+    }
+    
+    
+    public static Range getRange(String fullText, int caretPosition, String selectedText)
+    {
+        if(selectedText.isEmpty()) {
+            return new Range(caretPosition, caretPosition);
+        } 
+        else
+        {
+            int start = fullText.indexOf(selectedText);
+            return new Range(start, start + selectedText.length());
+        }
     }
     
     public static int findIntValue(String str)
@@ -292,17 +306,5 @@ public class Utilities
         {
             return false;
         }
-    }
-    
-    public static TagBase<?> getEnum(TagBase tag, Class<? extends TagBase<?>>... tagClasses) {
-        for (Class<? extends TagBase<?>> eachTagClass : Arrays.asList(tagClasses)) {
-            for (TagBase<?> fvg : eachTagClass.getEnumConstants()) {
-//                System.out.println("tag: " + fvg + " compareName: " + tag.name());
-                if (tag == fvg) {
-                    return fvg;
-                }
-            }
-        }
-        return null;
     }
 }

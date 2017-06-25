@@ -170,6 +170,40 @@ public class DatabaseController implements DataSuggestorBase
             e.printStackTrace();
         }
     }
+    
+    private String getArtistInDB(String firstName, String lastName)
+    {
+        if(firstName == null || firstName.isEmpty())
+        {
+            return ""; 
+        }
+        else
+        {
+            firstName = firstName.toLowerCase(); // ignore case for comparing
+            lastName = lastName.toLowerCase();
+            
+            PreparedStatement statements;
+            ResultSet rs; 
+            try
+            {
+                List<Integer> artistId = new ArrayList<>();
+                List<Integer> groupId = new ArrayList<>();
+                // Individuals: first - dbFirst, last - dbLast
+                statements = conn.prepareStatement("SELECT ArtistFirst, ArtistLast, Id FROM " + TableNames.Artist + 
+                    " where LOWER(ArtistFirst) = ? AND LOWER(ArtistLast) = ?");
+                statements.setString(1, firstName);
+                statements.setString(2, lastName);
+                rs = statements.executeQuery();
+                if(rs.next())
+                {
+                    return (rs.getString(1) + " " + rs.getString(2)).trim();
+                }
+            } catch(SQLException e) {
+                
+            }
+        }
+        return "";
+    }
         
     private List<String> getDBResultsForArtist(String firstName, String lastName)
     {
@@ -292,7 +326,7 @@ public class DatabaseController implements DataSuggestorBase
                         if(!groupId.contains(tempGroupId))
                         {
                             statements = conn.prepareStatement("SELECT GroupName, Id FROM " + TableNames.Group + 
-                                " where Id = ? FETCH FIRST ROW ONLY");
+                                " where Id = ?");
                             statements.setInt(1, tempGroupId);
                             rs = statements.executeQuery();
                             if(rs.next())
@@ -316,6 +350,37 @@ public class DatabaseController implements DataSuggestorBase
             } 
         }
         return possibleArtists;
+    }
+    
+    private String getAnimeInDB(String anime)
+    {
+        if(anime == null || anime.isEmpty())
+        {
+            return ""; 
+        }
+        else
+        {
+            anime = anime.toLowerCase(); // ignore case for comparing
+            anime = anime.toLowerCase();
+            
+            PreparedStatement statements;
+            ResultSet rs; 
+            try
+            {
+                // Individuals: first - dbFirst, last - dbLast
+                statements = conn.prepareStatement("SELECT AnimeName FROM " + TableNames.Anime + 
+                    " where LOWER(AnimeName) = ?");
+                statements.setString(1, anime);
+                rs = statements.executeQuery();
+                if(rs.next())
+                {
+                    return rs.getString(1).trim();
+                }
+            } catch(SQLException e) {
+               e.printStackTrace(); 
+            }
+        }
+        return "";
     }
     
     private List<String> getDBResultsForAnime(String compareValue)
@@ -783,7 +848,14 @@ public class DatabaseController implements DataSuggestorBase
     @Override
     public String getDataForTag(TagBase<?> tag, String... extraArgs)
     {
-        return "";
+        String results = "";
+        if(tag == Tag.ALBUM_ARTIST && extraArgs.length == 1){
+            results = getAnimeInDB(extraArgs[0]);
+        }
+        else if(tag == Tag.ARTIST && extraArgs.length == 2) {
+            results = getArtistInDB(extraArgs[0], extraArgs[1]);
+        }        
+        return results;
     }
 
     @Override
