@@ -145,7 +145,7 @@ public class DataCompilationModel
                 }
                 
                 String finalValue = builder.buildString(); // get the final results
-//                System.out.println("DecodedString: " + finalValue);
+//                System.out.println("Entry: " + entry.getKey() + " DecodedString: " + finalValue);
 //                meta.getTextProperty().set(finalValue); // set input box text
                 
                 // check db for caps matching text to replace
@@ -181,10 +181,8 @@ public class DataCompilationModel
             String formattedText = dbManagement.getDataForTag(Tag.ALBUM_ARTIST, value);
             
             if(!formattedText.isEmpty()) {
-                System.out.println("ALBUM_ARTIST formattedText: " + formattedText);
-                getPropertyForTag(type).getTextProperty().set(formattedText);// set input box text 
+                value = formattedText;
             }
-            
         }
         else if(type == Tag.ARTIST)
         {
@@ -194,23 +192,21 @@ public class DataCompilationModel
             for(String artist : artists) {
                 String[] byFirstLast = Utilities.splitName(artist);
                 String formattedText = dbManagement.getDataForTag(type, byFirstLast[0], byFirstLast[1]);
-                if(!formattedText.isEmpty()) {
+                if(!formattedText.isEmpty()) { // if exist in db use that one
                     System.out.println("ARTIST formattedText: " + formattedText);
                     formattedArtists.add(formattedText);
+                } else { // else use original one
+                    formattedArtists.add(artist);
                 }
             }
             
             String formattedText = Utilities.getCommaSeparatedStringWithAnd(formattedArtists);
             if(!formattedText.isEmpty()) {
-                System.out.println("ARTIST formattedText: " + formattedText);
-                getPropertyForTag(type).getTextProperty().set(formattedText);  
-            }
-                      
+                value = formattedText;
+            }  
         }
-        else
-        {
-            getPropertyForTag(type).getTextProperty().set(value);
-        }
+        
+        getPropertyForTag(type).getTextProperty().set(value); // set the final value
     }
 
     
