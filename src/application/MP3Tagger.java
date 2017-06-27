@@ -5,6 +5,7 @@ import java.io.IOException;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.stage.Stage;
+import support.structure.Range;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
@@ -22,6 +23,7 @@ public class MP3Tagger extends Application
     @Override
     public void start(Stage primaryStage)
     {
+        Range asd = new Range(0, 5);
         this.primaryStage = primaryStage;
         this.primaryStage.setTitle("MP3Tagger");
 

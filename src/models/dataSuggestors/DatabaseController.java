@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import javafx.scene.image.Image;
+import models.Logger;
 import models.dataSuggestors.VGMDBParser.AdditionalTag;
 import support.TagBase;
 import support.Utilities;
@@ -22,7 +23,7 @@ import support.Utilities.Tag;
  * Group = More than one artist 
  * Artist = Single artist or Group Name
  */
-public class DatabaseController implements DataSuggestorBase
+public class DatabaseController implements DataSuggestorBase, Logger
 {
     private Statement statement;
     Connection conn = null;
@@ -86,7 +87,7 @@ public class DatabaseController implements DataSuggestorBase
             Class.forName(driver).newInstance();
             conn = DriverManager.getConnection(protocol + dbName + ";create=true", null);
             if (conn != null) {
-                System.out.println("Connected to the database: " + dbName);
+                info("Connected to the database: " + dbName);
             }
             // We want to control transactions manually. Autocommit is on by default in JDBC.
 //            conn.setAutoCommit(false);
@@ -131,7 +132,7 @@ public class DatabaseController implements DataSuggestorBase
 //            " AlbumSearchIgnoreList VARCHAR(255) PRIMARY KEY)");
         if(sucess)
         {
-            System.out.println("YAY");
+            info("Connected to db");
         }
     }
     
@@ -149,7 +150,7 @@ public class DatabaseController implements DataSuggestorBase
             }
             else
             {
-                System.out.println(e.getMessage());
+                error(e.getMessage());
                 return false;
             }
            
@@ -338,14 +339,13 @@ public class DatabaseController implements DataSuggestorBase
                         }
                     }
                 }
-                System.out.println("DB Artist Search Results:\n" + Arrays.toString(possibleArtists.toArray(new String[0]))); 
+                debug("DB Artist Search Results:\n" + Arrays.toString(possibleArtists.toArray(new String[0]))); 
                 rs.close();
             }
             catch (SQLException e)
             {
-                // TODO Auto-generated catch block
+                error("termination");
                 e.printStackTrace();
-                System.out.println("ERROR");
                 System.exit(1);
             } 
         }
@@ -415,8 +415,8 @@ public class DatabaseController implements DataSuggestorBase
             catch (SQLException e)
             {
                 // TODO Auto-generated catch block
+                error("termination");
                 e.printStackTrace();
-                System.out.println("ERROR");
                 System.exit(1);
             } 
         }
@@ -509,7 +509,7 @@ public class DatabaseController implements DataSuggestorBase
             case AlbumSearchIgnoreList: // AlbumSearchIgnoreList VARCHAR(255)
                 if(values.length != 1)
                 {
-                    System.out.println("Invalid num of args for: " + table + " w/ length: " + values.length);
+                    debug("Invalid num of args for: " + table + " w/ length: " + values.length);
                 }
                 fullValues.add(values[0]);
                 executeInsert(table, fullValues);
@@ -517,7 +517,7 @@ public class DatabaseController implements DataSuggestorBase
             case Anime: // AnimeName
                 if(values.length != 1)
                 {
-                    System.out.println("Invalid num of args for: " + table + " w/ length: " + values.length);
+                    debug("Invalid num of args for: " + table + " w/ length: " + values.length);
                 }
                 fullValues.add(id);
                 fullValues.add(values[0]);
@@ -527,7 +527,7 @@ public class DatabaseController implements DataSuggestorBase
             case Artist: // ArtistFirst, ArtistLast
                 if(values.length != 2)
                 {
-                    System.out.println("Invalid num of args for: " + table + " w/ length: " + values.length);
+                    debug("Invalid num of args for: " + table + " w/ length: " + values.length);
                 }
                 fullValues.add(id);
                 fullValues.add(values[0]);
@@ -539,7 +539,7 @@ public class DatabaseController implements DataSuggestorBase
                 //self called to add this one from group insert
                 if(values.length != 2)
                 {
-                    System.out.println("Invalid num of args for: " + table + " w/ length: " + values.length);
+                    debug("Invalid num of args for: " + table + " w/ length: " + values.length);
                 }
                 
                 fullValues.add(values[0]);
@@ -549,7 +549,7 @@ public class DatabaseController implements DataSuggestorBase
             case Group:
                 if(values.length < 2)
                 {
-                    System.out.println("Invalid num of args for: " + table + " w/ length: " + values.length);
+                    debug("Invalid num of args for: " + table + " w/ length: " + values.length);
                 }
                 
                 // create idHash
@@ -568,7 +568,7 @@ public class DatabaseController implements DataSuggestorBase
                     artistIds.add(artistId);
                 }                
                 fullValues.add(id);
-                System.out.println("@@@: " + Utilities.getCommaSeparatedStringWithAnd(Arrays.asList(values)));
+                debug(Utilities.getCommaSeparatedStringWithAnd(Arrays.asList(values)));
                 fullValues.add(Utilities.getCommaSeparatedStringWithAnd(Arrays.asList(values)));
                 fullValues.add(idHash.toString());
                 fullValues.add("0");
@@ -656,8 +656,8 @@ public class DatabaseController implements DataSuggestorBase
         catch (SQLException e)
         {
             // TODO Auto-generated catch block
+            error("termination");
             e.printStackTrace();
-            System.out.println(values.size());
             System.exit(1);
         }
         return 0;
@@ -787,7 +787,7 @@ public class DatabaseController implements DataSuggestorBase
     // DEBUG USE
     public void deleteAllTables()
     {
-        System.out.println("--DB: Deleting All Tables");
+        info("Deleting All Tables");
         try
         {
 //            statement.execute("DROP TABLE " + TableNames.AlbumSearchIgnoreList);

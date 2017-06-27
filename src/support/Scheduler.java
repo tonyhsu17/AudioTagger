@@ -5,7 +5,9 @@ import java.awt.event.ActionListener;
 
 import javax.swing.Timer;
 
-public class Scheduler extends Thread
+import models.Logger;
+
+public class Scheduler extends Thread implements Logger
 {
     
     public interface SchedulerAction {
@@ -61,7 +63,7 @@ public class Scheduler extends Thread
     @Override
     public void run()
     {
-        System.out.println("Thread running");
+        info("Thread running");
         timer.start();
     }
 }

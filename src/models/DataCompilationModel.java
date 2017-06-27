@@ -28,7 +28,7 @@ import support.Utilities;
 import support.Utilities.Tag;
 
 
-public class DataCompilationModel
+public class DataCompilationModel implements Logger
 {
     static final String TEMPFOLDER =
         "D:\\Music\\Japanese - Test\\Anime Album Collection\\To Aru Kagaku no Railgun [Collection]\\To Aru Kagaku no Railgun\\Only My Railgun";
@@ -107,7 +107,7 @@ public class DataCompilationModel
             // if there is a rule, add to list
             if((temp = Settings.getInstance().getRuleFor(t)) != null)
             {
-                System.out.println("Adding rule for: " + t);
+                info("Adding rule for: " + t);
                 editorAutoComplete.put(t, temp);
             }
         }
@@ -203,7 +203,7 @@ public class DataCompilationModel
                 String[] byFirstLast = Utilities.splitName(artist);
                 String formattedText = dbManagement.getDataForTag(type, byFirstLast[0], byFirstLast[1]);
                 if(!formattedText.isEmpty()) { // if exist in db use that one
-                    System.out.println("ARTIST formattedText: " + formattedText);
+                    debug("ARTIST formattedText: " + formattedText);
                     formattedArtists.add(formattedText);
                 } else { // else use original one
                     formattedArtists.add(artist);

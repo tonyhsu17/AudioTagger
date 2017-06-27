@@ -31,6 +31,7 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
+import models.Logger;
 import models.Settings;
 import models.Settings.SettingsKey;
 import support.TagBase;
@@ -38,7 +39,7 @@ import support.Utilities;
 import support.Utilities.Tag;
 
 
-public class AudioFiles implements DataSuggestorBase
+public class AudioFiles implements DataSuggestorBase, Logger
 {
     ArrayList<MP3File> workingMP3Files;
     ArrayList<String> workingDirectories;
@@ -133,7 +134,7 @@ public class AudioFiles implements DataSuggestorBase
                 }
                 catch (IOException | TagException | ReadOnlyFileException | CannotReadException | InvalidAudioFrameException e)
                 {
-                    System.out.println("failed on: " + sub.getPath());
+                    error("failed on: " + sub.getPath());
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
@@ -172,14 +173,14 @@ public class AudioFiles implements DataSuggestorBase
             indicies.add(upper);
             upper++;
         }
-        System.out.println("Indicies Selected: " + Arrays.toString(indicies.toArray(new Integer[0])));
+        debug("Indicies Selected: " + Arrays.toString(indicies.toArray(new Integer[0])));
         return indicies;
     }
 
     // set fields to the currently opened file
     public void selectTag(int index)
     {
-        System.out.println("SelectFeild: " + index);
+        debug("SelectFeild: " + index);
         if(index >= 0 && index < workingMP3Files.size())
         {
             if(selectedFileNames.get(index).startsWith(Utilities.HEADER_ALBUM))
@@ -543,7 +544,7 @@ public class AudioFiles implements DataSuggestorBase
                     // revert to original name
                     fileName = FilenameUtils.getName(f.getFile().getPath());
                 }
-                System.out.println("saving: " + path + File.separator + originalName);
+                info("saving: " + path + File.separator + originalName);
                 f.save();
 
                 String extension = ""; // add back extension if missing
@@ -555,7 +556,7 @@ public class AudioFiles implements DataSuggestorBase
                 
                 if(!fileName.equals(originalName)) // saving to a different name
                 {                    
-                    System.out.println("saving new name: " + path + File.separator + fileName);
+                    info("saving new name: " + path + File.separator + fileName);
                     Files.copy(Paths.get(path + File.separator + originalName), Paths.get(path + File.separator + fileName),
                         StandardCopyOption.REPLACE_EXISTING);
                     Files.delete(Paths.get(path + File.separator + originalName));
@@ -677,7 +678,7 @@ public class AudioFiles implements DataSuggestorBase
         }
         else
         {
-            System.out.println("no data for tag: " + tag);
+            info("no data for tag: " + tag);
         }
         return returnValue;
     }
