@@ -69,6 +69,7 @@
                     </tabs>
                   </TabPane>
                   <TextField id="searchAlbumTF" fx:id="searchAlbumTF" layoutX="566.0" layoutY="622.0" onAction="#searchAlbumTFOnEnterPressed" prefHeight="25.0" prefWidth="250.0" AnchorPane.bottomAnchor="3.0" AnchorPane.rightAnchor="1.0" />
+                  <Label fx:id="autofillEnabledLabel" text="HELLO WORLD" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="350.0" />
                </children>
             </AnchorPane>
         </items>

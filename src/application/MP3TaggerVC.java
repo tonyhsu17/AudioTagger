@@ -74,6 +74,9 @@ public class MP3TaggerVC
     private ListView<String> vgmdbInfoLV;
     @FXML
     private ImageView vgmdbAlbumArtIV;
+    
+    @FXML
+    private Label autofillEnabledLabel;
 
     int pressedIndex; // used for mouse dragging range
     // HashMap<String, KeyAndName> idToName; // TextFieldId to SuggestorKey and DisplayName
@@ -389,7 +392,13 @@ public class MP3TaggerVC
     public void toggleAutoFill()
     {
         model.toggleAutoFill();
+        setAutoFillLabel(model.isAutoFillEnabled() ? "Autofill Enabled" : "Autofill disabled");
     }
+    
+    private void setAutoFillLabel(String msg)
+    {
+        autofillEnabledLabel.setText(msg);
+    } 
 
     // ~~~~~~~~~~~~~~~~~~~ //
     // FXML Event Handlers //

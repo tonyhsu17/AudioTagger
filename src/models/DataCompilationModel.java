@@ -155,6 +155,16 @@ public class DataCompilationModel
             }
         }
     }
+    
+    public boolean isAutoFillEnabled()
+    {
+        for(Entry<Tag, KeywordInterpreter> entry : editorAutoComplete.entrySet())
+        {
+            ComboBoxMeta meta = fieldMap.getMeta(entry.getKey()); // get combo box to modify
+            return !meta.isPaused();
+        }
+        return false;
+    }
 
     private void setPauseAutoFill(boolean flag)
     {
@@ -243,13 +253,13 @@ public class DataCompilationModel
         }
         else
         {
+         // stop auto-complete since there is human input
+            // unless text is empty then revert back to allow auto-fill
             fieldMap.getMeta(tag).setAllowAutoFill(fieldMap.getMeta(tag).getTextProperty().get().isEmpty() ? true : false);
             String originalText = (String)audioFilesModel.getDataForTag(tag);
 
             int size = addPossibleDataForTag(tag, originalText);
-            // stop auto-complete since there is human input
-            // unless text is empty then revert back to allow auto-fill
-            setTextFormattedFromDB(tag, originalText);
+            
             cb.done(size);
         }
     }
@@ -259,7 +269,7 @@ public class DataCompilationModel
         String editorText = fieldMap.getMeta(tag).getTextProperty().get();
         List<String> dropDownList = fieldMap.getMeta(tag).getDropDownListProperty().get();
         dropDownList.clear();
-
+        
         // add original
         for(String str : additional)
         {
@@ -268,8 +278,9 @@ public class DataCompilationModel
                 dropDownList.add(str);
             }
         }
-        fieldMap.getMeta(tag).getTextProperty().set(editorText);
-
+        
+        setTextFormattedFromDB(tag, editorText);
+        
         // now handle base on specific
         switch (tag)
         {
