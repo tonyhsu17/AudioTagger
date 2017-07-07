@@ -23,7 +23,6 @@ public class MP3Tagger extends Application
     @Override
     public void start(Stage primaryStage)
     {
-        Range asd = new Range(0, 5);
         this.primaryStage = primaryStage;
         this.primaryStage.setTitle("MP3Tagger");
 

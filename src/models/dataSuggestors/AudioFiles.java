@@ -406,6 +406,7 @@ public class AudioFiles implements DataSuggestorBase, Logger
     @Override
     public void save()
     {
+        info("Starting Save: " + Arrays.toString(selectedIndicies.toArray(new Integer[0])));
         // if save triggered, copy selected indicies for later reverting back incase multisave is on
         if(selectedIndiciesCopy == null)
         {
@@ -556,15 +557,22 @@ public class AudioFiles implements DataSuggestorBase, Logger
                 
                 if(!fileName.equals(originalName)) // saving to a different name
                 {                    
-                    info("saving new name: " + path + File.separator + fileName);
-                    Files.copy(Paths.get(path + File.separator + originalName), Paths.get(path + File.separator + fileName),
+                    // copy file to new file ame
+                    String newNamePath = path + File.separator + fileName;
+                    info("saving new name: " + newNamePath);
+                    Files.copy(Paths.get(path + File.separator + originalName), Paths.get(newNamePath),
                         StandardCopyOption.REPLACE_EXISTING);
+                    // delete original file
                     Files.delete(Paths.get(path + File.separator + originalName));
+                    
+                    // update ui list view
+                    workingMP3Files.remove(i); // remove original file 
+                    workingMP3Files.add(i, new MP3File(new File(newNamePath))); // update to new file
+                    
+                    selectedFileNames.add(i, fileName); // add new filename into list
+                    selectedFileNames.remove(i + 1); // remove original filename, 
+                    // (order matters, causes an ui update and triggering a selectIndex which changes selected Index)
                 }
-                // f.save(new File(path + File.separator + fileName + ".temp"));
-                // Files.copy(Paths.get(path + File.separator + fileName + ".temp"),
-                // Paths.get(path + File.separator + fileName),
-                // StandardCopyOption.REPLACE_EXISTING);
 
                 if(!fileNamePrevious.isEmpty())
                 {
@@ -573,9 +581,8 @@ public class AudioFiles implements DataSuggestorBase, Logger
                     fileName = fileNamePrevious;
                 }
             }
-            catch (IOException | TagException e)
+            catch (IOException | TagException | ReadOnlyFileException | CannotReadException | InvalidAudioFrameException e)
             {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
