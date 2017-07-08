@@ -26,13 +26,14 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.text.Text;
 import models.DataCompilationModel;
 import models.DataCompilationModel.ImageFrom;
+import models.Logger;
 import models.dataSuggestors.VGMDBParser;
 import support.Utilities;
 import support.Utilities.Tag;
 import support.structure.Range;
 
 
-public class MP3TaggerVC
+public class MP3TaggerVC implements Logger
 {
     @FXML
     private ListView<String> songListLV;
@@ -280,7 +281,7 @@ public class MP3TaggerVC
             @Override
             public void handle(ActionEvent event)
             {
-                System.out.println("To be Implemented");
+                error("To be Implemented");
             }
         });
 
@@ -290,7 +291,7 @@ public class MP3TaggerVC
             @Override
             public void handle(ActionEvent event)
             {
-                System.out.println("To be Implemented");
+                error("To be Implemented");
             }
         });
 
@@ -300,7 +301,7 @@ public class MP3TaggerVC
             @Override
             public void handle(ActionEvent event)
             {
-                System.out.println("To be Implemented");
+                error("To be Implemented");
             }
         });
 
@@ -310,7 +311,7 @@ public class MP3TaggerVC
             @Override
             public void handle(ActionEvent event)
             {
-                System.out.println("To be Implemented");
+                error("To be Implemented");
             }
         });
 
@@ -320,7 +321,7 @@ public class MP3TaggerVC
             @Override
             public void handle(ActionEvent event)
             {
-                System.out.println("To be Implemented");
+                error("To be Implemented");
             }
         });
 
@@ -491,7 +492,7 @@ public class MP3TaggerVC
         if(board.hasFiles())
         {
             de.acceptTransferModes(TransferMode.ANY);
-            System.out.println("albumArtIVOnDragOver");
+            debug("albumArtIVOnDragOver");
         }
     }
 
@@ -514,7 +515,7 @@ public class MP3TaggerVC
             if(event.getClickCount() >= 2)
             {
                 vgmdbParserModel.selectAlbum(vgmdbInfoLV.getSelectionModel().getSelectedIndex());
-                System.out.println("Double clicked");
+                debug("Double clicked");
             }
         }
     }
@@ -523,7 +524,7 @@ public class MP3TaggerVC
     @FXML
     private void searchAlbumTFOnEnterPressed(ActionEvent event)
     {
-        System.out.println("Manual Search: " + searchAlbumTF.getText());
+        info("Manual Search: " + searchAlbumTF.getText());
         vgmdbParserModel.searchByAlbum(searchAlbumTF.getText());
     }
 
@@ -531,7 +532,7 @@ public class MP3TaggerVC
     @FXML
     private void clearListOnAction(ActionEvent event)
     {
-        System.out.println("List Cleared");
+        info("List Cleared");
         model.reset();
     }
 }

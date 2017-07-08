@@ -11,10 +11,11 @@ import javafx.scene.control.CheckMenuItem;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import models.Logger;
 import models.Settings;
 import support.Utilities.Tag;
 
-public class RootVC
+public class RootVC implements Logger
 {
     private MP3TaggerVC taggerVC;
     
@@ -42,7 +43,7 @@ public class RootVC
     {
         if(taggerVC != null)
         {
-            System.out.println("SAVING");
+            info("SAVING");
             taggerVC.saveTags();
         }
         
@@ -56,11 +57,11 @@ public class RootVC
             switch(e.getText().toLowerCase())
             {
                 case "s":
-                    System.out.println("Hotkey Save");
+                    info("Hotkey Save");
                     taggerVC.saveTags();
                     break;
                 case "r":
-                    System.out.println("Hotkey AutoFill Toggle");
+                    info("Hotkey AutoFill Toggle");
                     taggerVC.toggleAutoFill();
                     break;
             }

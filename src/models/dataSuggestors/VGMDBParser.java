@@ -47,12 +47,13 @@ import javafx.scene.image.Image;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
+import models.Logger;
 import support.TagBase;
 import support.Utilities;
 import support.Utilities.Tag;
 
 
-public class VGMDBParser implements DataSuggestorBase
+public class VGMDBParser implements DataSuggestorBase, Logger
 {
     public enum AdditionalTag implements TagBase<AdditionalTag> {
         SERIES, IMAGE_URL, THEME,
@@ -201,7 +202,7 @@ public class VGMDBParser implements DataSuggestorBase
     
     private void displaySearchedInfo(JSONObject json)
     {
-        System.out.println(json.toString(4));
+        debug(json.toString(4));
         tagDataLookup.clear();
         displayInfo.clear();
         searchResults.clear();
@@ -231,7 +232,7 @@ public class VGMDBParser implements DataSuggestorBase
 
     private void showAlbumInfo(JSONObject json)
     {
-        System.out.println(json.toString(4));
+        debug(json.toString(4));
         displayInfo.clear();
         albumArtThumb.setValue(null);
         isOnAlbumInfo = true;

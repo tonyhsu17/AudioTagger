@@ -27,6 +27,7 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.util.converter.NumberStringConverter;
+import models.Logger;
 import models.Settings;
 import models.Settings.SettingsKey;
 import models.Settings.SettingsMap;
@@ -38,7 +39,7 @@ import support.Utilities.Tag;
  * 
  * @author Tony Hsu
  */
-public class SettingsVC
+public class SettingsVC implements Logger
 {
     Settings settings;
     @FXML
@@ -74,7 +75,7 @@ public class SettingsVC
     @FXML
     private void initialize()
     {
-        System.out.println("settingsVC");
+        info("settingsVC");
         properties.setCellValueFactory(
             new PropertyValueFactory<Settings.SettingsMap, String>("keyDescription"));
         values.setCellValueFactory(
@@ -98,7 +99,7 @@ public class SettingsVC
     
     @FXML
     private void valueChanged(CellEditEvent<Settings.SettingsMap, String> t) {
-        System.out.println("value changed: " + t.getNewValue());
+        info("value changed: " + t.getNewValue());
         ((SettingsMap)t.getTableView().getItems().get(
                 t.getTablePosition().getRow())
                 ).setDisplayValue(t.getNewValue());

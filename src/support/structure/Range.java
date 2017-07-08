@@ -1,6 +1,8 @@
 package support.structure;
 
-public class Range
+import models.Logger;
+
+public class Range implements Logger
 {
     private int start;
     private int end;
