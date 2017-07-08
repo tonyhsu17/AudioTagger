@@ -22,10 +22,12 @@ import models.dataSuggestors.VGMDBParser;
 import support.EventCenter;
 import support.EventCenter.Events;
 import support.GenreMapping;
+import support.Logger;
 import support.Scheduler;
 import support.TagBase;
-import support.Utilities;
-import support.Utilities.Tag;
+import support.util.ImageUtil;
+import support.util.StringUtil;
+import support.util.Utilities.Tag;
 
 
 public class DataCompilationModel implements Logger
@@ -196,11 +198,11 @@ public class DataCompilationModel implements Logger
         }
         else if(type == Tag.ARTIST)
         {
-            String[] artists = Utilities.splitBySeparators(value);
+            String[] artists = StringUtil.splitBySeparators(value);
             List<String> formattedArtists = new ArrayList<String>();
             
             for(String artist : artists) {
-                String[] byFirstLast = Utilities.splitName(artist);
+                String[] byFirstLast = StringUtil.splitName(artist);
                 String formattedText = dbManagement.getDataForTag(type, byFirstLast[0], byFirstLast[1]);
                 if(!formattedText.isEmpty()) { // if exist in db use that one
                     debug("ARTIST formattedText: " + formattedText);
@@ -210,7 +212,7 @@ public class DataCompilationModel implements Logger
                 }
             }
             
-            String formattedText = Utilities.getCommaSeparatedStringWithAnd(formattedArtists);
+            String formattedText = StringUtil.getCommaSeparatedStringWithAnd(formattedArtists);
             if(!formattedText.isEmpty()) {
                 value = formattedText;
             }  
@@ -519,7 +521,7 @@ public class DataCompilationModel implements Logger
         audioFilesModel.setDataForTag(Tag.GENRE, fieldMap.getMeta(Tag.GENRE).getTextProperty().get());
         audioFilesModel.setDataForTag(Tag.COMMENT, fieldMap.getMeta(Tag.COMMENT).getTextProperty().get());
 
-        File artwork = Utilities.saveImage(albumArt.get());
+        File artwork = ImageUtil.saveImage(albumArt.get());
         audioFilesModel.setAlbumArtFromFile(artwork);
         artwork.delete();
         audioFilesModel.save();
@@ -527,7 +529,7 @@ public class DataCompilationModel implements Logger
         
         dbManagement.setDataForTag(Tag.ALBUM_ARTIST, fieldMap.getMeta(Tag.ALBUM_ARTIST).getTextProperty().get());
 
-        String[] splitArtists = Utilities.splitBySeparators(fieldMap.getMeta(Tag.ARTIST).getTextProperty().get());
+        String[] splitArtists = StringUtil.splitBySeparators(fieldMap.getMeta(Tag.ARTIST).getTextProperty().get());
         dbManagement.setDataForTag(Tag.ARTIST, splitArtists);
         
         setPauseAutoFill(false);

@@ -11,9 +11,7 @@ import javafx.scene.control.CheckMenuItem;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import models.Logger;
-import models.Settings;
-import support.Utilities.Tag;
+import support.Logger;
 
 public class RootVC implements Logger
 {

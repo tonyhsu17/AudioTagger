@@ -11,7 +11,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.scene.image.Image;
 import support.TagBase;
-import support.Utilities.Tag;
+import support.util.Utilities.Tag;
 
 public class AudioTagComboBoxModel implements DataSuggestorBase
 {

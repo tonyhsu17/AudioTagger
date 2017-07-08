@@ -6,24 +6,19 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Scanner;
 
-import org.jaudiotagger.audio.AudioFile;
-
 import javafx.beans.property.SimpleStringProperty;
-import javafx.print.Collation;
 import models.dataSuggestors.DataSuggestorBase;
 import support.EventCenter;
 import support.EventCenter.Events;
+import support.util.Utilities;
+import support.util.Utilities.Tag;
 import support.TagBase;
-import support.Utilities;
-import support.Utilities.Tag;
 
 
 /**

@@ -26,11 +26,11 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.text.Text;
 import models.DataCompilationModel;
 import models.DataCompilationModel.ImageFrom;
-import models.Logger;
 import models.dataSuggestors.VGMDBParser;
-import support.Utilities;
-import support.Utilities.Tag;
+import support.Logger;
 import support.structure.Range;
+import support.util.Utilities;
+import support.util.Utilities.Tag;
 
 
 public class MP3TaggerVC implements Logger

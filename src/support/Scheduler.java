@@ -5,8 +5,6 @@ import java.awt.event.ActionListener;
 
 import javax.swing.Timer;
 
-import models.Logger;
-
 public class Scheduler extends Thread implements Logger
 {
     

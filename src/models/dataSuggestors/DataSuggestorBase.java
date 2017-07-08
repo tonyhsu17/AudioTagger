@@ -5,7 +5,6 @@ import java.util.List;
 
 import javafx.scene.image.Image;
 import support.TagBase;
-import support.Utilities.Tag;
 
 /**
  * Base class for any tag data suggestions. DataCompilation will utilize the common methods to retrieve and pass data back. 
@@ -14,8 +13,6 @@ import support.Utilities.Tag;
  */
 public interface DataSuggestorBase
 {
-    
-    
     public String getDataForTag(TagBase<?> tag, String... extraArgs);
     public Image getAlbumArt();
     

@@ -12,11 +12,10 @@ import java.util.Arrays;
 import java.util.List;
 
 import javafx.scene.image.Image;
-import models.Logger;
-import models.dataSuggestors.VGMDBParser.AdditionalTag;
+import support.Logger;
 import support.TagBase;
-import support.Utilities;
-import support.Utilities.Tag;
+import support.util.StringUtil;
+import support.util.Utilities.Tag;
 
 /**
  * @author Ikersaro
@@ -557,7 +556,7 @@ public class DatabaseController implements DataSuggestorBase, Logger
                 List<Integer> artistIds = new ArrayList<Integer>();
                 for(int i = 0; i < values.length; i++)
                 {
-                    String[] splitName = Utilities.splitName(values[i]);
+                    String[] splitName = StringUtil.splitName(values[i]);
                     int artistId = getId(TableNames.Artist, splitName[0], splitName[1]);
                     if(artistId == -1) // if artist not found
                     {
@@ -568,8 +567,8 @@ public class DatabaseController implements DataSuggestorBase, Logger
                     artistIds.add(artistId);
                 }                
                 fullValues.add(id);
-                debug(Utilities.getCommaSeparatedStringWithAnd(Arrays.asList(values)));
-                fullValues.add(Utilities.getCommaSeparatedStringWithAnd(Arrays.asList(values)));
+                debug(StringUtil.getCommaSeparatedStringWithAnd(Arrays.asList(values)));
+                fullValues.add(StringUtil.getCommaSeparatedStringWithAnd(Arrays.asList(values)));
                 fullValues.add(idHash.toString());
                 fullValues.add("0");
                 insertedId = executeInsert(table, fullValues);
@@ -605,7 +604,7 @@ public class DatabaseController implements DataSuggestorBase, Logger
             int numCols = values.size();
             
             statements = conn.prepareStatement("INSERT INTO " + table + " VALUES (" + 
-                Utilities.createQuestionMarks(numCols) + ")");
+                StringUtil.createQuestionMarks(numCols) + ")");
             switch(table)
             {
                 case AlbumSearchIgnoreList:
@@ -868,7 +867,7 @@ public class DatabaseController implements DataSuggestorBase, Logger
             if(values.length == 1)
             {
                 // param first, last
-                String[] fullName = Utilities.splitName(values[0]);
+                String[] fullName = StringUtil.splitName(values[0]);
                 if(!fullName[0].isEmpty()) 
                 {
                     add(TableNames.Artist, fullName[0], fullName[1]);
@@ -890,7 +889,7 @@ public class DatabaseController implements DataSuggestorBase, Logger
     {
         List<String> returnValue = null;
         if(tag == Tag.ARTIST) {
-            String[] fullName = Utilities.splitName(values);
+            String[] fullName = StringUtil.splitName(values);
             returnValue = getDBResultsForArtist(fullName[0], fullName[1]);
         }
         else if(tag == Tag.ALBUM_ARTIST) {

@@ -1,38 +1,23 @@
 package models.dataSuggestors;
 
-import java.awt.datatransfer.StringSelection;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Formatter;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 
 import javax.imageio.ImageIO;
-import javax.rmi.CORBA.Util;
 
 import org.apache.http.HttpEntity;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import javafx.beans.property.ListProperty;
@@ -46,11 +31,12 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.Dragboard;
-import models.Logger;
+import support.Logger;
 import support.TagBase;
-import support.Utilities;
-import support.Utilities.Tag;
+import support.util.ImageUtil;
+import support.util.StringUtil;
+import support.util.Utilities;
+import support.util.Utilities.Tag;
 
 
 public class VGMDBParser implements DataSuggestorBase, Logger
@@ -279,7 +265,7 @@ public class VGMDBParser implements DataSuggestorBase, Logger
             {
                 BufferedImage buffImage = ImageIO.read(new URL(imageURL));
                 Image image = SwingFXUtils.toFXImage(buffImage, null);
-                albumArt500x500 = Utilities.scaleImage(image, 500, 500, true);
+                albumArt500x500 = ImageUtil.scaleImage(image, 500, 500, true);
                 
                 tagDataLookup.put(AdditionalTag.IMAGE_URL, imageURL);
             }
@@ -318,8 +304,8 @@ public class VGMDBParser implements DataSuggestorBase, Logger
                 }
             }
         }
-        displayInfo.add("Artist(s): " + Utilities.getCommaSeparatedStringWithAnd(performerList));
-        tagDataLookup.put(Tag.ARTIST, Utilities.getCommaSeparatedStringWithAnd(performerList));
+        displayInfo.add("Artist(s): " + StringUtil.getCommaSeparatedStringWithAnd(performerList));
+        tagDataLookup.put(Tag.ARTIST, StringUtil.getCommaSeparatedStringWithAnd(performerList));
 
         // Year
         String year;
@@ -531,7 +517,7 @@ public class VGMDBParser implements DataSuggestorBase, Logger
     }
     
     @Override
-    public TagBase[] getAdditionalTags()
+    public TagBase<?>[] getAdditionalTags()
     {
         return AdditionalTag.values();
     }
@@ -543,7 +529,7 @@ public class VGMDBParser implements DataSuggestorBase, Logger
         keywords.add(Tag.ALBUM);
         keywords.add(Tag.ARTIST);
         keywords.add(Tag.YEAR);
-        for(TagBase t : AdditionalTag.values())
+        for(TagBase<?> t : AdditionalTag.values())
         {
             keywords.add(t);
         }

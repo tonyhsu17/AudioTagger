@@ -1,4 +1,4 @@
-package models;
+package support;
 
 public interface Logger
 {    

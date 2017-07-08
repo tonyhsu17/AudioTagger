@@ -1,18 +1,18 @@
 
 
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 
 import models.dataSuggestors.DatabaseController;
 import models.dataSuggestors.DatabaseController.TableNames;
-import support.Utilities.Tag;
+import support.util.Utilities.Tag;
 
 
 public class DatabaseJUnitTest

@@ -31,12 +31,14 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
-import models.Logger;
 import models.Settings;
 import models.Settings.SettingsKey;
+import support.Constants;
+import support.Logger;
 import support.TagBase;
-import support.Utilities;
-import support.Utilities.Tag;
+import support.util.ImageUtil;
+import support.util.StringUtil;
+import support.util.Utilities.Tag;
 
 
 public class AudioFiles implements DataSuggestorBase, Logger
@@ -121,7 +123,7 @@ public class AudioFiles implements DataSuggestorBase, Logger
         {
             File firstFile = filesInDirQueue.get(0);
             workingDirectories.add(firstFile.getPath());
-            selectedFileNames.add(Utilities.HEADER_ALBUM + FilenameUtils.getName(firstFile.getParent()));
+            selectedFileNames.add(Constants.HEADER_ALBUM + FilenameUtils.getName(firstFile.getParent()));
             workingMP3Files.add(null); // add dummy value
 
             for(File sub : filesInDirQueue)
@@ -158,17 +160,17 @@ public class AudioFiles implements DataSuggestorBase, Logger
         int lower = n - 1;
         int upper = n + 1;
 
-        if(includeSelf && !selectedFileNames.get(n).startsWith(Utilities.HEADER_ALBUM))
+        if(includeSelf && !selectedFileNames.get(n).startsWith(Constants.HEADER_ALBUM))
         {
             indicies.add(n);
         }
 
-        while(lower >= 0 && !selectedFileNames.get(lower).startsWith(Utilities.HEADER_ALBUM))
+        while(lower >= 0 && !selectedFileNames.get(lower).startsWith(Constants.HEADER_ALBUM))
         {
             indicies.add(lower);
             lower--;
         }
-        while(upper < workingMP3Files.size() && !selectedFileNames.get(upper).startsWith(Utilities.HEADER_ALBUM))
+        while(upper < workingMP3Files.size() && !selectedFileNames.get(upper).startsWith(Constants.HEADER_ALBUM))
         {
             indicies.add(upper);
             upper++;
@@ -183,7 +185,7 @@ public class AudioFiles implements DataSuggestorBase, Logger
         debug("SelectFeild: " + index);
         if(index >= 0 && index < workingMP3Files.size())
         {
-            if(selectedFileNames.get(index).startsWith(Utilities.HEADER_ALBUM))
+            if(selectedFileNames.get(index).startsWith(Constants.HEADER_ALBUM))
             {
                 selectTag(index + 1); // initially set a tag,
                 // selectMultipleTags instead
@@ -232,16 +234,16 @@ public class AudioFiles implements DataSuggestorBase, Logger
                 MP3File f = workingMP3Files.get(index);
                 AbstractID3v2Tag tags = f.getID3v2Tag();
 
-                fileName = Utilities.getComparedName(fileName, FilenameUtils.getName(f.getFile().getPath()));
-                title = Utilities.getComparedName(title, tags.getFirst(FieldKey.TITLE));
-                artist = Utilities.getComparedName(artist, tags.getFirst(FieldKey.ARTIST));
-                album = Utilities.getComparedName(album, tags.getFirst(FieldKey.ALBUM));
-                albumArtist = Utilities.getComparedName(albumArtist, tags.getFirst(FieldKey.ALBUM_ARTIST));
-                track = Utilities.getComparedName(track, tags.getFirst(FieldKey.TRACK));
-                year = Utilities.getComparedName(year, tags.getFirst(FieldKey.YEAR));
-                genre = Utilities.getComparedName(genre, tags.getFirst(FieldKey.GENRE));
-                comment = Utilities.getComparedName(comment, tags.getFirst(FieldKey.COMMENT));
-                Image image = Utilities.getComparedImage(albumArt, getAlbumArt(tags));
+                fileName = StringUtil.getComparedName(fileName, FilenameUtils.getName(f.getFile().getPath()));
+                title = StringUtil.getComparedName(title, tags.getFirst(FieldKey.TITLE));
+                artist = StringUtil.getComparedName(artist, tags.getFirst(FieldKey.ARTIST));
+                album = StringUtil.getComparedName(album, tags.getFirst(FieldKey.ALBUM));
+                albumArtist = StringUtil.getComparedName(albumArtist, tags.getFirst(FieldKey.ALBUM_ARTIST));
+                track = StringUtil.getComparedName(track, tags.getFirst(FieldKey.TRACK));
+                year = StringUtil.getComparedName(year, tags.getFirst(FieldKey.YEAR));
+                genre = StringUtil.getComparedName(genre, tags.getFirst(FieldKey.GENRE));
+                comment = StringUtil.getComparedName(comment, tags.getFirst(FieldKey.COMMENT));
+                Image image = ImageUtil.getComparedImage(albumArt, getAlbumArt(tags));
                 albumArt = image;
 
                 // sizeInBytes= http://stackoverflow.com/questions/6250200/how-to-get-the-size-of-an-image-in-java
@@ -336,7 +338,7 @@ public class AudioFiles implements DataSuggestorBase, Logger
         }
         if(Settings.getInstance().isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_ALBUM_ART))
         {
-            File temp = Utilities.saveImage(propAlbumArt);
+            File temp = ImageUtil.saveImage(propAlbumArt);
             setAlbumArtFromFile(temp);
             temp.delete();
         }
@@ -375,7 +377,7 @@ public class AudioFiles implements DataSuggestorBase, Logger
         {
             BufferedImage buffImage = ImageIO.read(file);
             Image image = SwingFXUtils.toFXImage(buffImage, null);
-            albumArt = Utilities.scaleImage(image, 500, 500, true);
+            albumArt = ImageUtil.scaleImage(image, 500, 500, true);
         }
         catch (IOException e)
         {
@@ -391,7 +393,7 @@ public class AudioFiles implements DataSuggestorBase, Logger
         {
             BufferedImage buffImage = ImageIO.read(new URL(url));
             Image image = SwingFXUtils.toFXImage(buffImage, null);
-            albumArt = Utilities.scaleImage(image, 500, 500, true);
+            albumArt = ImageUtil.scaleImage(image, 500, 500, true);
         }
         catch (IOException e)
         {
@@ -419,7 +421,7 @@ public class AudioFiles implements DataSuggestorBase, Logger
             MP3File f = workingMP3Files.get(i);
             AbstractID3v2Tag tags = f.getID3v2Tag(); // could probably do new tag to remove unnecessary tags
             // ID3v23Tag newTags = new ID3v23Tag();
-            if(title != null && !title.isEmpty() && !Utilities.isKeyword(title))
+            if(title != null && !title.isEmpty() && !StringUtil.isKeyword(title))
             {
                 try
                 {
@@ -431,7 +433,7 @@ public class AudioFiles implements DataSuggestorBase, Logger
                     e.printStackTrace();
                 }
             }
-            if(artist != null && !artist.isEmpty() && !Utilities.isKeyword(artist))
+            if(artist != null && !artist.isEmpty() && !StringUtil.isKeyword(artist))
             {
                 try
                 {
@@ -443,7 +445,7 @@ public class AudioFiles implements DataSuggestorBase, Logger
                     e.printStackTrace();
                 }
             }
-            if(album != null && !album.isEmpty() && !Utilities.isKeyword(album))
+            if(album != null && !album.isEmpty() && !StringUtil.isKeyword(album))
             {
                 try
                 {
@@ -455,7 +457,7 @@ public class AudioFiles implements DataSuggestorBase, Logger
                     e.printStackTrace();
                 }
             }
-            if(albumArtist != null && !albumArtist.isEmpty() && !Utilities.isKeyword(albumArtist))
+            if(albumArtist != null && !albumArtist.isEmpty() && !StringUtil.isKeyword(albumArtist))
             {
                 try
                 {
@@ -467,7 +469,7 @@ public class AudioFiles implements DataSuggestorBase, Logger
                     e.printStackTrace();
                 }
             }
-            if(track != null && !track.isEmpty() && !Utilities.isKeyword(track))
+            if(track != null && !track.isEmpty() && !StringUtil.isKeyword(track))
             {
                 try
                 {
@@ -479,7 +481,7 @@ public class AudioFiles implements DataSuggestorBase, Logger
                     e.printStackTrace();
                 }
             }
-            if(year != null && !year.isEmpty() && !Utilities.isKeyword(year))
+            if(year != null && !year.isEmpty() && !StringUtil.isKeyword(year))
             {
                 try
                 {
@@ -491,7 +493,7 @@ public class AudioFiles implements DataSuggestorBase, Logger
                     e.printStackTrace();
                 }
             }
-            if(genre != null && !genre.isEmpty() && !Utilities.isKeyword(genre))
+            if(genre != null && !genre.isEmpty() && !StringUtil.isKeyword(genre))
             {
                 try
                 {
@@ -503,7 +505,7 @@ public class AudioFiles implements DataSuggestorBase, Logger
                     e.printStackTrace();
                 }
             }
-            if(comment != null && !comment.isEmpty() && !Utilities.isKeyword(comment))
+            if(comment != null && !comment.isEmpty() && !StringUtil.isKeyword(comment))
             {
                 try
                 {
@@ -515,11 +517,11 @@ public class AudioFiles implements DataSuggestorBase, Logger
                     e.printStackTrace();
                 }
             }
-            if(albumArt != null && !Utilities.isKeyword(albumArt))
+            if(albumArt != null && !ImageUtil.isKeyword(albumArt))
             {
                 try
                 {
-                    File temp = Utilities.saveImage(albumArt);
+                    File temp = ImageUtil.saveImage(albumArt);
                     tags.deleteArtworkField();
                     tags.setField(ArtworkFactory.createArtworkFromFile(temp));
                     temp.delete();
@@ -538,7 +540,7 @@ public class AudioFiles implements DataSuggestorBase, Logger
                 String originalName = FilenameUtils.getName(f.getFile().getPath());
                 String fileNamePrevious = ""; // used if multiple indicies have been selected
                 String path = f.getFile().getParentFile().getPath();
-                if(Utilities.isKeyword(fileName)) // if keyword
+                if(StringUtil.isKeyword(fileName)) // if keyword
                 {
                     // save current name (keyword)
                     fileNamePrevious = fileName;
@@ -669,7 +671,7 @@ public class AudioFiles implements DataSuggestorBase, Logger
         }
         else if(tag == Tag.TRACK)
         {
-            if(Utilities.isKeyword(track))
+            if(StringUtil.isKeyword(track))
             {
                 returnValue = track;
             }
