@@ -1,4 +1,4 @@
-package models.dataSuggestors;
+package model.information;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -31,15 +31,16 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import model.base.InformationBase;
+import model.base.TagBase;
 import support.Logger;
-import support.TagBase;
 import support.util.ImageUtil;
 import support.util.StringUtil;
 import support.util.Utilities;
 import support.util.Utilities.Tag;
 
 
-public class VGMDBParser implements DataSuggestorBase, Logger
+public class VGMDBParser implements InformationBase, Logger
 {
     public enum AdditionalTag implements TagBase<AdditionalTag> {
         SERIES, IMAGE_URL, THEME,

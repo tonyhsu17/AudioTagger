@@ -11,9 +11,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import models.Settings;
-import models.Settings.SettingsKey;
-import models.dataSuggestors.AudioFiles;
+import model.Settings;
+import model.Settings.SettingsKey;
+import model.information.AudioFiles;
 import support.util.Utilities.Tag;
 
 public class AudioFileJUnitTest

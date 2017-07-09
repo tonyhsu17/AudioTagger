@@ -14,10 +14,10 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Stage;
-import models.Settings;
-import models.Settings.SettingsKey;
-import models.Settings.SettingsMap;
+import model.Settings;
+import model.Settings.SettingsKey;
 import support.Logger;
+import support.structure.SettingsTableViewMeta;
 
 
 /** 
@@ -31,15 +31,15 @@ public class SettingsVC implements Logger
     @FXML
     Stage self;
     
-    ObservableList<Settings.SettingsMap> data;
+    ObservableList<SettingsTableViewMeta> data;
     ListProperty<String> keywordTags;
 
     @FXML
-    TableView<Settings.SettingsMap> table;
+    TableView<SettingsTableViewMeta> table;
     @FXML
-    TableColumn<Settings.SettingsMap, String> properties;
+    TableColumn<SettingsTableViewMeta, String> properties;
     @FXML
-    TableColumn<Settings.SettingsMap, String> values;
+    TableColumn<SettingsTableViewMeta, String> values;
     @FXML
     ListView<String> variables;
     
@@ -63,9 +63,9 @@ public class SettingsVC implements Logger
     {
         info("settingsVC");
         properties.setCellValueFactory(
-            new PropertyValueFactory<Settings.SettingsMap, String>("keyDescription"));
+            new PropertyValueFactory<SettingsTableViewMeta, String>("keyDescription"));
         values.setCellValueFactory(
-            new PropertyValueFactory<Settings.SettingsMap, String>("displayValue"));
+            new PropertyValueFactory<SettingsTableViewMeta, String>("displayValue"));
         values.setEditable(true);
         values.setCellFactory(TextFieldTableCell.forTableColumn());
         table.setItems(data);
@@ -84,9 +84,9 @@ public class SettingsVC implements Logger
     }
     
     @FXML
-    private void valueChanged(CellEditEvent<Settings.SettingsMap, String> t) {
+    private void valueChanged(CellEditEvent<SettingsTableViewMeta, String> t) {
         info("value changed: " + t.getNewValue());
-        ((SettingsMap)t.getTableView().getItems().get(
+        ((SettingsTableViewMeta)t.getTableView().getItems().get(
                 t.getTablePosition().getRow())
                 ).setDisplayValue(t.getNewValue());
     }

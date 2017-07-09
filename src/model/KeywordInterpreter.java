@@ -1,10 +1,10 @@
-package models;
+package model;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import models.dataSuggestors.DataSuggestorBase;
-import support.TagBase;
+import model.base.InformationBase;
+import model.base.TagBase;
 
 /**
  * Interprets preferred formatting using settings.
@@ -39,17 +39,17 @@ public class KeywordInterpreter
         rule.append(str);
     }
     
-    public void appendToRule(String str, DataSuggestorBase objRef, TagBase<?> tag)
+    public void appendToRule(String str, InformationBase objRef, TagBase<?> tag)
     {
         rule.append(str);
         replaceValues.add(new Object[] {objRef, tag});
     }
     
-    public DataSuggestorBase getClass(int i)
+    public InformationBase getClass(int i)
     {
         if(i >= 0 && i < replaceValues.size())
         {
-            return (DataSuggestorBase)replaceValues.get(i)[0];
+            return (InformationBase)replaceValues.get(i)[0];
         }
         return null;
     }

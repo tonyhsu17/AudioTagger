@@ -1,17 +1,16 @@
-package models.dataSuggestors;
+package model.base;
 
 import java.io.File;
 import java.util.List;
 
 import javafx.scene.image.Image;
-import support.TagBase;
 
 /**
  * Base class for any tag data suggestions. DataCompilation will utilize the common methods to retrieve and pass data back. 
  * @author Ikersaro
  *
  */
-public interface DataSuggestorBase
+public interface InformationBase
 {
     public String getDataForTag(TagBase<?> tag, String... extraArgs);
     public Image getAlbumArt();

@@ -1,4 +1,4 @@
-package models;
+package model;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -13,18 +13,18 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.scene.image.Image;
-import models.dataSuggestors.AudioFiles;
-import models.dataSuggestors.AudioTagComboBoxModel;
-import models.dataSuggestors.AudioTagComboBoxModel.ComboBoxMeta;
-import models.dataSuggestors.DataSuggestorBase;
-import models.dataSuggestors.DatabaseController;
-import models.dataSuggestors.VGMDBParser;
+import model.base.InformationBase;
+import model.base.TagBase;
+import model.information.AudioFiles;
+import model.information.DatabaseController;
+import model.information.EditorComboBoxModel;
+import model.information.VGMDBParser;
 import support.EventCenter;
+import support.Genres;
 import support.EventCenter.Events;
-import support.GenreMapping;
 import support.Logger;
 import support.Scheduler;
-import support.TagBase;
+import support.structure.EditorComboBoxMeta;
 import support.util.ImageUtil;
 import support.util.StringUtil;
 import support.util.Utilities.Tag;
@@ -49,9 +49,9 @@ public class DataCompilationModel implements Logger
 
     private ObjectProperty<Image> albumArt; // album art pic
 
-    private AudioTagComboBoxModel fieldMap; // TODO Tag to ComboBox data (editor text and drop down)
+    private EditorComboBoxModel fieldMap; // Tag to ComboBox data (editor text and drop down)
     private AudioFiles audioFilesModel; // audio files meta
-    private DataSuggestorBase dbManagement; // database for prediction of common tag fields
+    private InformationBase dbManagement; // database for prediction of common tag fields
     private VGMDBParser vgmdbModel; // data handler for vgmdb website
 
     private HashMap<Tag, KeywordInterpreter> editorAutoComplete; // store auto complete fields
@@ -59,7 +59,7 @@ public class DataCompilationModel implements Logger
 
     public DataCompilationModel()
     {
-        fieldMap = new AudioTagComboBoxModel();
+        fieldMap = new EditorComboBoxModel();
         audioFilesModel = new AudioFiles();
         dbManagement = new DatabaseController("");
 
@@ -130,12 +130,12 @@ public class DataCompilationModel implements Logger
     {
         for(Entry<Tag, KeywordInterpreter> entry : editorAutoComplete.entrySet())
         {
-            ComboBoxMeta meta = fieldMap.getMeta(entry.getKey()); // get combo box to modify
+            EditorComboBoxMeta meta = fieldMap.getMeta(entry.getKey()); // get combo box to modify
             
             if(!meta.isPaused() && meta.shouldStopAutoFill())
             {
                 KeywordInterpreter builder = entry.getValue();
-                DataSuggestorBase classObj;
+                InformationBase classObj;
                 TagBase<?> tag;
 
                 // pass values into builder to construct the value with given tags and info
@@ -162,7 +162,7 @@ public class DataCompilationModel implements Logger
     {
         for(Entry<Tag, KeywordInterpreter> entry : editorAutoComplete.entrySet())
         {
-            ComboBoxMeta meta = fieldMap.getMeta(entry.getKey()); // get combo box to modify
+            EditorComboBoxMeta meta = fieldMap.getMeta(entry.getKey()); // get combo box to modify
             return !meta.isPaused();
         }
         return false;
@@ -172,7 +172,7 @@ public class DataCompilationModel implements Logger
     {
         for(Entry<Tag, KeywordInterpreter> entry : editorAutoComplete.entrySet())
         {
-            ComboBoxMeta meta = fieldMap.getMeta(entry.getKey()); // get combo box to modify
+            EditorComboBoxMeta meta = fieldMap.getMeta(entry.getKey()); // get combo box to modify
             meta.setPaused(flag);
         }
     }
@@ -181,7 +181,7 @@ public class DataCompilationModel implements Logger
     {
         for(Entry<Tag, KeywordInterpreter> entry : editorAutoComplete.entrySet())
         {
-            ComboBoxMeta meta = fieldMap.getMeta(entry.getKey()); // get combo box to modify
+            EditorComboBoxMeta meta = fieldMap.getMeta(entry.getKey()); // get combo box to modify
             meta.setPaused(!meta.isPaused());
         }
     }
@@ -332,7 +332,7 @@ public class DataCompilationModel implements Logger
 
     private void addAdditionalPossibleFileNames(List<String> dropDownList)
     {
-        ComboBoxMeta field = fieldMap.getMeta(Tag.FILE_NAME);
+        EditorComboBoxMeta field = fieldMap.getMeta(Tag.FILE_NAME);
         String textFieldText = field.getTextProperty().get();
 //        if(!textFieldText.isEmpty() && !Utilities.isKeyword(textFieldText))
 //        {
@@ -367,7 +367,7 @@ public class DataCompilationModel implements Logger
     // adding compilation
     private void addAdditionalPossibleArtists(List<String> dropDownList)
     {
-        ComboBoxMeta field = fieldMap.getMeta(Tag.ARTIST);
+        EditorComboBoxMeta field = fieldMap.getMeta(Tag.ARTIST);
         String textFieldText = field.getTextProperty().get();
         // add from db
         List<String> possibleArtist = dbManagement.getPossibleDataForTag(Tag.ARTIST, textFieldText);
@@ -415,7 +415,7 @@ public class DataCompilationModel implements Logger
     // adding compilation
     private void addAdditionalPossibleAlbumArtists(List<String> dropDownList)
     {
-        ComboBoxMeta field = fieldMap.getMeta(Tag.ALBUM_ARTIST);
+        EditorComboBoxMeta field = fieldMap.getMeta(Tag.ALBUM_ARTIST);
         String textFieldText = field.getTextProperty().get();
         // add from db
         List<String> possibleArtist = dbManagement.getPossibleDataForTag(Tag.ALBUM_ARTIST, textFieldText);
@@ -459,10 +459,10 @@ public class DataCompilationModel implements Logger
 
     private void addAdditionalPossibleGenres(List<String> dropDownList)
     {
-        ComboBoxMeta field = fieldMap.getMeta(Tag.GENRE);
+        EditorComboBoxMeta field = fieldMap.getMeta(Tag.GENRE);
         String textFieldText = field.getTextProperty().get();
 
-        List<String> possibleGenres = GenreMapping.containsIgnoreCase(textFieldText);
+        List<String> possibleGenres = Genres.containsIgnoreCase(textFieldText);
         for(String genre : possibleGenres)
         {
             if(!dropDownList.contains(genre))
@@ -567,7 +567,7 @@ public class DataCompilationModel implements Logger
     {
         // TODO future iteration, abstract VGMDB stuff into its own module (jar file)
         // and load from that, so other sites and also be added in
-        HashMap<DataSuggestorBase, List<TagBase<?>>> mapping = new HashMap<>();
+        HashMap<InformationBase, List<TagBase<?>>> mapping = new HashMap<>();
         mapping.put(audioFilesModel, audioFilesModel.getKeywordTags());
         mapping.put(dbManagement, dbManagement.getKeywordTags());
         mapping.put(vgmdbModel, vgmdbModel.getKeywordTags());
@@ -619,7 +619,7 @@ public class DataCompilationModel implements Logger
         return audioFilesModel.getFileNames();
     }
 
-    public ComboBoxMeta getPropertyForTag(Tag t)
+    public EditorComboBoxMeta getPropertyForTag(Tag t)
     {
         return fieldMap.getMeta(t);
     }

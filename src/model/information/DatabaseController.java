@@ -1,4 +1,4 @@
-package models.dataSuggestors;
+package model.information;
 
 import java.io.File;
 import java.sql.Connection;
@@ -12,8 +12,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import javafx.scene.image.Image;
+import model.base.InformationBase;
+import model.base.TagBase;
 import support.Logger;
-import support.TagBase;
 import support.util.StringUtil;
 import support.util.Utilities.Tag;
 
@@ -22,7 +23,7 @@ import support.util.Utilities.Tag;
  * Group = More than one artist 
  * Artist = Single artist or Group Name
  */
-public class DatabaseController implements DataSuggestorBase, Logger
+public class DatabaseController implements InformationBase, Logger
 {
     private Statement statement;
     Connection conn = null;

@@ -6,8 +6,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import models.dataSuggestors.VGMDBParser;
-import support.TagBase;
+import model.base.TagBase;
+import model.information.VGMDBParser;
 import support.util.Utilities.Tag;
 
 public class VGMDBParserJUnitTest

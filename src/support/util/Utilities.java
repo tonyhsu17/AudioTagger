@@ -1,6 +1,6 @@
 package support.util;
 
-import support.TagBase;
+import model.base.TagBase;
 import support.structure.Range;
 
 

@@ -1,4 +1,4 @@
-package models.dataSuggestors;
+package model.information;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -31,17 +31,18 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
-import models.Settings;
-import models.Settings.SettingsKey;
+import model.Settings;
+import model.Settings.SettingsKey;
+import model.base.InformationBase;
+import model.base.TagBase;
 import support.Constants;
 import support.Logger;
-import support.TagBase;
 import support.util.ImageUtil;
 import support.util.StringUtil;
 import support.util.Utilities.Tag;
 
 
-public class AudioFiles implements DataSuggestorBase, Logger
+public class AudioFiles implements InformationBase, Logger
 {
     ArrayList<MP3File> workingMP3Files;
     ArrayList<String> workingDirectories;

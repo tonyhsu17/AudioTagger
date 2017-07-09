@@ -10,8 +10,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import models.dataSuggestors.DatabaseController;
-import models.dataSuggestors.DatabaseController.TableNames;
+import model.information.DatabaseController;
+import model.information.DatabaseController.TableNames;
 import support.util.Utilities.Tag;
 
 

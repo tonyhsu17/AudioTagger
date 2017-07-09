@@ -1,4 +1,4 @@
-package support;
+package model.base;
 
 public interface TagBase<T extends Enum<T>>
 {

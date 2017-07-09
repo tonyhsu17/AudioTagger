@@ -1,4 +1,4 @@
-package models;
+package model;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -12,13 +12,13 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Scanner;
 
-import javafx.beans.property.SimpleStringProperty;
-import models.dataSuggestors.DataSuggestorBase;
+import model.base.InformationBase;
+import model.base.TagBase;
 import support.EventCenter;
 import support.EventCenter.Events;
+import support.structure.SettingsTableViewMeta;
 import support.util.Utilities;
 import support.util.Utilities.Tag;
-import support.TagBase;
 
 
 /**
@@ -77,20 +77,20 @@ public class Settings
     private File settingsFile;
     private HashMap<String, KeywordTagMetaData> keywordTagsDataMapping;
 
-    private HashMap<SettingsKey, SettingsMap> map;
+    private HashMap<SettingsKey, SettingsTableViewMeta> map;
 
     private class KeywordTagMetaData
     {
-        private DataSuggestorBase dataClass;
+        private InformationBase dataClass;
         private TagBase<?> tag;
 
-        public KeywordTagMetaData(DataSuggestorBase dataClass, TagBase<?> tag)
+        public KeywordTagMetaData(InformationBase dataClass, TagBase<?> tag)
         {
             this.dataClass = dataClass;
             this.tag = tag;
         }
 
-        public DataSuggestorBase getSuggestorClass()
+        public InformationBase getSuggestorClass()
         {
             return dataClass;
         }
@@ -125,22 +125,22 @@ public class Settings
     private void resetToDefaults()
     {
         map.clear();
-        map.put(SettingsKey.PROPAGATE_SAVE_ARTIST, new SettingsMap(SettingsKey.PROPAGATE_SAVE_ARTIST, "true"));
-        map.put(SettingsKey.PROPAGATE_SAVE_ALBUM, new SettingsMap(SettingsKey.PROPAGATE_SAVE_ALBUM, "true"));
-        map.put(SettingsKey.PROPAGATE_SAVE_ALBUM_ARTIST, new SettingsMap(SettingsKey.PROPAGATE_SAVE_ALBUM_ARTIST, "true"));
-        map.put(SettingsKey.PROPAGATE_SAVE_YEAR, new SettingsMap(SettingsKey.PROPAGATE_SAVE_YEAR, "true"));
-        map.put(SettingsKey.PROPAGATE_SAVE_GENRE, new SettingsMap(SettingsKey.PROPAGATE_SAVE_GENRE, "true"));
-        map.put(SettingsKey.PROPAGATE_SAVE_COMMENT, new SettingsMap(SettingsKey.PROPAGATE_SAVE_COMMENT, "true"));
-        map.put(SettingsKey.PROPAGATE_SAVE_ALBUM_ART, new SettingsMap(SettingsKey.PROPAGATE_SAVE_ALBUM_ART, "true"));
-        map.put(SettingsKey.RULE_FILENAME, new SettingsMap(SettingsKey.RULE_FILENAME, ""));
-        // map.add(new SettingsMap(SettingsKey.RULE_TITLE, ""));
-        // map.put(SettingsKey.RULE_ARTIST, new SettingsMap(SettingsKey.RULE_ARTIST, ""));
-        // map.add(new SettingsMap(SettingsKey.RULE_ALBUM, ""));
-        map.put(SettingsKey.RULE_ALBUM_ARTIST, new SettingsMap(SettingsKey.RULE_ALBUM_ARTIST, ""));
-        // map.add(new SettingsMap(SettingsKey.RULE_TRACK, ""));
-        // map.add(new SettingsMap(SettingsKey.RULE_YEAR, ""));
-        // map.add(new SettingsMap(SettingsKey.RULE_GENRE, ""));
-        map.put(SettingsKey.RULE_COMMENT, new SettingsMap(SettingsKey.RULE_COMMENT, ""));
+        map.put(SettingsKey.PROPAGATE_SAVE_ARTIST, new SettingsTableViewMeta(SettingsKey.PROPAGATE_SAVE_ARTIST, "true"));
+        map.put(SettingsKey.PROPAGATE_SAVE_ALBUM, new SettingsTableViewMeta(SettingsKey.PROPAGATE_SAVE_ALBUM, "true"));
+        map.put(SettingsKey.PROPAGATE_SAVE_ALBUM_ARTIST, new SettingsTableViewMeta(SettingsKey.PROPAGATE_SAVE_ALBUM_ARTIST, "true"));
+        map.put(SettingsKey.PROPAGATE_SAVE_YEAR, new SettingsTableViewMeta(SettingsKey.PROPAGATE_SAVE_YEAR, "true"));
+        map.put(SettingsKey.PROPAGATE_SAVE_GENRE, new SettingsTableViewMeta(SettingsKey.PROPAGATE_SAVE_GENRE, "true"));
+        map.put(SettingsKey.PROPAGATE_SAVE_COMMENT, new SettingsTableViewMeta(SettingsKey.PROPAGATE_SAVE_COMMENT, "true"));
+        map.put(SettingsKey.PROPAGATE_SAVE_ALBUM_ART, new SettingsTableViewMeta(SettingsKey.PROPAGATE_SAVE_ALBUM_ART, "true"));
+        map.put(SettingsKey.RULE_FILENAME, new SettingsTableViewMeta(SettingsKey.RULE_FILENAME, ""));
+        // map.add(new SettingsLabelMeta(SettingsKey.RULE_TITLE, ""));
+        // map.put(SettingsKey.RULE_ARTIST, new SettingsLabelMeta(SettingsKey.RULE_ARTIST, ""));
+        // map.add(new SettingsLabelMeta(SettingsKey.RULE_ALBUM, ""));
+        map.put(SettingsKey.RULE_ALBUM_ARTIST, new SettingsTableViewMeta(SettingsKey.RULE_ALBUM_ARTIST, ""));
+        // map.add(new SettingsLabelMeta(SettingsKey.RULE_TRACK, ""));
+        // map.add(new SettingsLabelMeta(SettingsKey.RULE_YEAR, ""));
+        // map.add(new SettingsLabelMeta(SettingsKey.RULE_GENRE, ""));
+        map.put(SettingsKey.RULE_COMMENT, new SettingsTableViewMeta(SettingsKey.RULE_COMMENT, ""));
     }
 
     /**
@@ -162,7 +162,7 @@ public class Settings
 
                 if(key != null)
                 {
-                    map.put(key, new SettingsMap(key, splitLine[1]));
+                    map.put(key, new SettingsTableViewMeta(key, splitLine[1]));
                 }
             }
         }
@@ -180,7 +180,7 @@ public class Settings
         return self;
     }
 
-    public SettingsMap getKeyValuePair(SettingsKey key)
+    public SettingsTableViewMeta getKeyValuePair(SettingsKey key)
     {
         return map.get(key);
     }
@@ -234,9 +234,9 @@ public class Settings
         return flag;
     }
 
-    public void setKeywordTags(HashMap<DataSuggestorBase, List<TagBase<?>>> mapping)
+    public void setKeywordTags(HashMap<InformationBase, List<TagBase<?>>> mapping)
     {
-        for(Entry<DataSuggestorBase, List<TagBase<?>>> entry : mapping.entrySet())
+        for(Entry<InformationBase, List<TagBase<?>>> entry : mapping.entrySet())
         {
             for(TagBase<?> tag : entry.getValue())
             {
@@ -337,7 +337,7 @@ public class Settings
      */
     public void saveSettings()
     {
-        for(SettingsMap sm : map.values())
+        for(SettingsTableViewMeta sm : map.values())
         {
             sm.save();
         }
@@ -348,7 +348,7 @@ public class Settings
 
     public void revertSettings()
     {
-        for(SettingsMap sm : map.values())
+        for(SettingsTableViewMeta sm : map.values())
         {
             sm.revert();
         }
@@ -359,7 +359,7 @@ public class Settings
         try
         {
             BufferedWriter output = new BufferedWriter(new FileWriter(settingsFile));
-            for(SettingsMap sm : map.values())
+            for(SettingsTableViewMeta sm : map.values())
             {
                 System.out.println(sm.getKey() + "=" + sm.getValue());
                 output.write(sm.getKey() + "=" + sm.getValue());
@@ -370,60 +370,6 @@ public class Settings
         catch (IOException e)
         {
 
-        }
-    }
-
-    public class SettingsMap
-    {
-        private SettingsKey key;
-        private String value;
-        private final SimpleStringProperty displayValue;
-
-        public SettingsMap(SettingsKey key, String value)
-        {
-            this.key = key;
-            this.value = value;
-            this.displayValue = new SimpleStringProperty(value);
-        }
-
-        public SettingsKey getKey()
-        {
-            return key;
-        }
-
-        public String getValue()
-        {
-            return value;
-        }
-
-        private void setValue(String value)
-        {
-            this.value = value;
-        }
-
-        public String getKeyDescription()
-        {
-            return key.getDescription();
-        }
-
-        public String getDisplayValue()
-        {
-            return displayValue.get();
-        }
-
-        public void setDisplayValue(String value)
-        {
-            displayValue.set(value);
-        }
-
-        public void save()
-        {
-            value = displayValue.get();
-        }
-
-        public void revert()
-        {
-            displayValue.set(value);
         }
     }
 }

@@ -5,7 +5,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
-public class GenreMapping
+// TODO convert to enum
+public class Genres
 {
     private static HashMap<String, Integer> nameToId;
     
