@@ -10,8 +10,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import model.information.DatabaseController;
-import model.information.DatabaseController.TableNames;
+import model.database.DatabaseController;
+import model.database.DatabaseController.Table;
 import support.util.Utilities.Tag;
 
 
@@ -39,19 +39,19 @@ public class DatabaseJUnitTest
     public void testAddAnime()
     {
         db.setDataForTag(Tag.ALBUM_ARTIST, "Anime1");
-        assertTrue(db.containsCaseSensitive(TableNames.Anime, "Anime1"));
+        assertTrue(db.containsCaseSensitive(Table.ANIME, "Anime1"));
     }
     
     public void testAddArtistFirst()
     {
         db.setDataForTag(Tag.ARTIST, "ArtistFirst");
-        assertTrue(db.containsCaseSensitive(TableNames.Artist, "ArtistFirst", ""));
+        assertTrue(db.containsCaseSensitive(Table.ARTIST, "ArtistFirst", ""));
     }
     
     public void testAddArtistFull()
     {
         db.setDataForTag(Tag.ARTIST, "ArtistFirst Last");
-        assertTrue(db.containsCaseSensitive(TableNames.Artist, "ArtistFirst", "Last"));
+        assertTrue(db.containsCaseSensitive(Table.ARTIST, "ArtistFirst", "Last"));
     }
     
     @Test
@@ -62,24 +62,24 @@ public class DatabaseJUnitTest
         db.setDataForTag(Tag.ARTIST, "GROUPY2");
         
         db.setDataForTag(Tag.ARTIST, "preadded", "next preadded");
-        assertTrue(db.containsCaseSensitive(TableNames.Group, "preadded & next preadded"));
+        assertTrue(db.containsCaseSensitive(Table.GROUP_ARTIST, "preadded & next preadded"));
         
         db.setDataForTag(Tag.ARTIST, "GROUPY2", "preadded", "next preadded");
-        assertTrue(db.containsCaseSensitive(TableNames.Group, "GROUPY2, preadded & next preadded"));
+        assertTrue(db.containsCaseSensitive(Table.GROUP_ARTIST, "GROUPY2, preadded & next preadded"));
         
-        assertTrue(db.containsCaseSensitive(TableNames.Artist, "GROUPY2", ""));
-        assertTrue(db.containsCaseSensitive(TableNames.Artist, "preadded", ""));
-        assertTrue(db.containsCaseSensitive(TableNames.Artist, "next", "preadded"));
+        assertTrue(db.containsCaseSensitive(Table.ARTIST, "GROUPY2", ""));
+        assertTrue(db.containsCaseSensitive(Table.ARTIST, "preadded", ""));
+        assertTrue(db.containsCaseSensitive(Table.ARTIST, "next", "preadded"));
     }
     
    @Test 
     public void testAddGroupNewArtist()
     {
         db.setDataForTag(Tag.ARTIST, "Ace of Tokiwadai", "Misaka", "Mikoto Misaka");
-        assertTrue(db.containsCaseSensitive(TableNames.Group, "Ace of Tokiwadai, Misaka & Mikoto Misaka"));
-        assertTrue(db.containsCaseSensitive(TableNames.Artist, "Misaka", ""));
-        assertTrue(db.containsCaseSensitive(TableNames.Artist, "Mikoto", "Misaka"));
-        assertTrue(db.containsCaseSensitive(TableNames.Artist, "Ace of", "Tokiwadai"));
+        assertTrue(db.containsCaseSensitive(Table.GROUP_ARTIST, "Ace of Tokiwadai, Misaka & Mikoto Misaka"));
+        assertTrue(db.containsCaseSensitive(Table.ARTIST, "Misaka", ""));
+        assertTrue(db.containsCaseSensitive(Table.ARTIST, "Mikoto", "Misaka"));
+        assertTrue(db.containsCaseSensitive(Table.ARTIST, "Ace of", "Tokiwadai"));
     }
     
     @Test
