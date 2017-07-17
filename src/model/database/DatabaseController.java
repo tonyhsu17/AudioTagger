@@ -75,11 +75,6 @@ public class DatabaseController implements InformationBase, Logger {
 
     private void initializeTables() {
         boolean sucess = true;
-        //        sucess &= createTableIfNotExist(TableNames.ParentSeries + "(" +
-        //            "Id INT PRIMARY KEY, " +
-        //            "AnimeSeries VARCHAR(255) UNIQUE," +
-        //            " UseFrequency INT)");
-
         sucess &= createTableIfNotExist(Table.ANIME +
                                         "(" +
                                         AlbumArtist.ID +
@@ -381,7 +376,7 @@ public class DatabaseController implements InformationBase, Logger {
                 statements = conn.prepareStatement(
                     String.format("SELECT %s FROM %s WHERE LOWER(%s) LIKE ? " +
                                   "ORDER BY %s DESC FETCH NEXT 10 ROWS ONLY",
-                        AlbumArtist.ANIME_NAME, Table.ANIME, AlbumArtist.ANIME_NAME));
+                        AlbumArtist.ANIME_NAME, Table.ANIME, AlbumArtist.ANIME_NAME, AlbumArtist.USE_FREQUENCY));
                 statements.setString(1, '%' + compareValue + '%');
                 ResultSet rs = statements.executeQuery();
                 while(rs.next()) {

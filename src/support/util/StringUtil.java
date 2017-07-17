@@ -1,6 +1,9 @@
 package support.util;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import support.Constants;
 
@@ -8,7 +11,7 @@ import support.Constants;
 
 public class StringUtil {
     public static String[] splitName(String fullName) {
-        String[] splitName = { "", "" };
+        String[] splitName = {"", ""};
         if(fullName == null || fullName.isEmpty()) {
             return splitName;
         }
@@ -27,11 +30,11 @@ public class StringUtil {
             firstName = splitName[0];
         }
 
-        return new String[] { firstName, lastName };
+        return new String[] {firstName, lastName};
     }
 
     public static String[] splitBySeparators(String string) {
-        String[] splitArtists = string.split("(, )|( & )");
+        String[] splitArtists = string.split(Constants.REGEX_SEPARATORS);
         // TODO get feat and etc to split by too
         return splitArtists;
     }
@@ -95,5 +98,25 @@ public class StringUtil {
         }
         sb.append(list.get(i) + " & " + list.get(i + 1));
         return sb.toString();
+    }
+
+    public static List<String[]> getDiffInDelim(String before, String after) {
+        List<String[]> results = new ArrayList<String[]>();
+        if(before == null || after == null || before.isEmpty() || after.isEmpty()) {
+            return results;
+        }
+
+        Pattern pattern = Pattern.compile(Constants.REGEX_DELIM);
+        Matcher beforeMatcher = pattern.matcher(before);
+        Matcher afterMatcher = pattern.matcher(after);
+
+        if(beforeMatcher.groupCount() != afterMatcher.groupCount()) {
+            return results;
+        }
+        while(beforeMatcher.find() && afterMatcher.find()) {
+//            System.out.println(beforeMatcher.group() + " " + afterMatcher.group());
+            results.add(new String[] {beforeMatcher.group(), afterMatcher.group()});
+        }
+        return results;
     }
 }

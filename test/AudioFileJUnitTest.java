@@ -102,7 +102,7 @@ public class AudioFileJUnitTest
       assertEquals("TestCollection", audio.getDataForTag(Tag.ALBUM_ARTIST, ""));
       assertEquals("TestB", audio.getDataForTag(Tag.ALBUM, ""));
       assertEquals("2011", audio.getDataForTag(Tag.YEAR));
-      assertEquals("1", audio.getDataForTag(Tag.TRACK, ""));
+      assertEquals("01", audio.getDataForTag(Tag.TRACK, ""));
       assertEquals("Anime", audio.getDataForTag(Tag.GENRE, ""));
       assertEquals("comment goes here", audio.getDataForTag(Tag.COMMENT, ""));
 
@@ -127,7 +127,7 @@ public class AudioFileJUnitTest
       assertEquals("albumArtist", audio.getDataForTag(Tag.ALBUM_ARTIST, ""));
       assertEquals("album", audio.getDataForTag(Tag.ALBUM, ""));
       assertEquals("1999", audio.getDataForTag(Tag.YEAR));
-      assertEquals("2", audio.getDataForTag(Tag.TRACK, ""));
+      assertEquals("02", audio.getDataForTag(Tag.TRACK, ""));
       assertEquals("Pop", audio.getDataForTag(Tag.GENRE, ""));
       assertEquals("comment", audio.getDataForTag(Tag.COMMENT, ""));
       

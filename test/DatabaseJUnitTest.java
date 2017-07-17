@@ -110,12 +110,10 @@ public class DatabaseJUnitTest
     @Test
     public void testGetPossibleArtist()
     {
-        db.setDataForTag(Tag.ARTIST, "Ace of Tokiwadai");
         db.setDataForTag(Tag.ARTIST, "Misaka");
         db.setDataForTag(Tag.ARTIST, "Mikoto Misaka");
         List<String> str = db.getPossibleDataForTag(Tag.ARTIST, "Misaka");
-        assertEquals(3, str.size());
-        assertTrue(str.contains("Ace of Tokiwadai"));
+        assertEquals(2, str.size());
         assertTrue(str.contains("Misaka"));
         assertTrue(str.contains("Mikoto Misaka"));
     }

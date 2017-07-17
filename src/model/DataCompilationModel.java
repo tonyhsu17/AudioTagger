@@ -20,8 +20,8 @@ import model.information.AudioFiles;
 import model.information.EditorComboBoxModel;
 import model.information.VGMDBParser;
 import support.EventCenter;
-import support.Genres;
 import support.EventCenter.Events;
+import support.Genres;
 import support.Logger;
 import support.Scheduler;
 import support.structure.EditorComboBoxMeta;
@@ -258,7 +258,7 @@ public class DataCompilationModel implements Logger
          // stop auto-complete since there is human input
             // unless text is empty then revert back to allow auto-fill
             fieldMap.getMeta(tag).setAllowAutoFill(fieldMap.getMeta(tag).getTextProperty().get().isEmpty() ? true : false);
-            String originalText = (String)audioFilesModel.getDataForTag(tag);
+            String originalText = audioFilesModel.getDataForTag(tag);
 
             int size = addPossibleDataForTag(tag, originalText);
             

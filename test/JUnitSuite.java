@@ -4,6 +4,9 @@
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
+import junit.support.util.StringUtilTest;
+import junit.support.util.UtilitiesTest;
+
 /**
  * JUnit Test Suite
  * 
@@ -14,7 +17,8 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({ 
    DatabaseJUnitTest.class,
    AudioFileJUnitTest.class,
-   UtilitiesJUnitTest.class,
+   UtilitiesTest.class,
+   StringUtilTest.class
 })
 
 public class JUnitSuite {
