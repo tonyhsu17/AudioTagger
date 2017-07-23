@@ -14,7 +14,7 @@ import org.junit.Test;
 import model.Settings;
 import model.Settings.SettingsKey;
 import model.information.AudioFiles;
-import support.util.Utilities.Tag;
+import support.util.Utilities.EditorTag;
 
 public class AudioFileJUnitTest
 {
@@ -65,9 +65,9 @@ public class AudioFileJUnitTest
   public void testSetTagFields()
   {
       List<String> files = audio.getFileNames();
-      assertEquals("", audio.getDataForTag(Tag.FILE_NAME));
+      assertEquals("", audio.getDataForTag(EditorTag.FILE_NAME));
       audio.selectTag(1);
-      assertEquals(files.get(1), audio.getDataForTag(Tag.FILE_NAME));
+      assertEquals(files.get(1), audio.getDataForTag(EditorTag.FILE_NAME));
   }
   
   @Test
@@ -79,15 +79,15 @@ public class AudioFileJUnitTest
       indicies.add(fileNames.indexOf("testFileB.mp3"));
       audio.selectTag(indicies.get(0)); // will always select 1 before multiple
       audio.selectTags(indicies);
-      assertEquals("<Different Values>", audio.getDataForTag(Tag.FILE_NAME));
-      assertEquals("<Different Values>", audio.getDataForTag(Tag.TITLE));
-      assertEquals("<Different Values>", audio.getDataForTag(Tag.ARTIST));
-      assertEquals("TestB", audio.getDataForTag(Tag.ALBUM));
-      assertEquals("TestCollection", audio.getDataForTag(Tag.ALBUM_ARTIST));
-      assertEquals("<Different Values>", audio.getDataForTag(Tag.TRACK));
-      assertEquals("2011", audio.getDataForTag(Tag.YEAR));
-      assertEquals("Anime", audio.getDataForTag(Tag.GENRE));
-      assertEquals("comment goes here", audio.getDataForTag(Tag.COMMENT));
+      assertEquals("<Different Values>", audio.getDataForTag(EditorTag.FILE_NAME));
+      assertEquals("<Different Values>", audio.getDataForTag(EditorTag.TITLE));
+      assertEquals("<Different Values>", audio.getDataForTag(EditorTag.ARTIST));
+      assertEquals("TestB", audio.getDataForTag(EditorTag.ALBUM));
+      assertEquals("TestCollection", audio.getDataForTag(EditorTag.ALBUM_ARTIST));
+      assertEquals("<Different Values>", audio.getDataForTag(EditorTag.TRACK));
+      assertEquals("2011", audio.getDataForTag(EditorTag.YEAR));
+      assertEquals("Anime", audio.getDataForTag(EditorTag.GENRE));
+      assertEquals("comment goes here", audio.getDataForTag(EditorTag.COMMENT));
       assertNull(audio.getAlbumArt());
   }
   
@@ -96,25 +96,25 @@ public class AudioFileJUnitTest
   {
       List<String> fileNames = audio.getFileNames();
       audio.selectTag(fileNames.indexOf("testFileA.mp3"));
-      assertEquals("testFileA.mp3", audio.getDataForTag(Tag.FILE_NAME, ""));
-      assertEquals("TestA", audio.getDataForTag(Tag.TITLE, ""));
-      assertEquals("Various Artists", audio.getDataForTag(Tag.ARTIST, ""));
-      assertEquals("TestCollection", audio.getDataForTag(Tag.ALBUM_ARTIST, ""));
-      assertEquals("TestB", audio.getDataForTag(Tag.ALBUM, ""));
-      assertEquals("2011", audio.getDataForTag(Tag.YEAR));
-      assertEquals("01", audio.getDataForTag(Tag.TRACK, ""));
-      assertEquals("Anime", audio.getDataForTag(Tag.GENRE, ""));
-      assertEquals("comment goes here", audio.getDataForTag(Tag.COMMENT, ""));
+      assertEquals("testFileA.mp3", audio.getDataForTag(EditorTag.FILE_NAME, ""));
+      assertEquals("TestA", audio.getDataForTag(EditorTag.TITLE, ""));
+      assertEquals("Various Artists", audio.getDataForTag(EditorTag.ARTIST, ""));
+      assertEquals("TestCollection", audio.getDataForTag(EditorTag.ALBUM_ARTIST, ""));
+      assertEquals("TestB", audio.getDataForTag(EditorTag.ALBUM, ""));
+      assertEquals("2011", audio.getDataForTag(EditorTag.YEAR));
+      assertEquals("01", audio.getDataForTag(EditorTag.TRACK, ""));
+      assertEquals("Anime", audio.getDataForTag(EditorTag.GENRE, ""));
+      assertEquals("comment goes here", audio.getDataForTag(EditorTag.COMMENT, ""));
 
 //      audio.setDataForTag(Tag.FileName, "2000");
-      audio.setDataForTag(Tag.TITLE, "title");
-      audio.setDataForTag(Tag.ARTIST, "artist");
-      audio.setDataForTag(Tag.ALBUM_ARTIST, "albumArtist");
-      audio.setDataForTag(Tag.ALBUM, "album");
-      audio.setDataForTag(Tag.YEAR, "1999");
-      audio.setDataForTag(Tag.TRACK, "2");
-      audio.setDataForTag(Tag.GENRE, "pop");
-      audio.setDataForTag(Tag.COMMENT, "comment");
+      audio.setDataForTag(EditorTag.TITLE, "title");
+      audio.setDataForTag(EditorTag.ARTIST, "artist");
+      audio.setDataForTag(EditorTag.ALBUM_ARTIST, "albumArtist");
+      audio.setDataForTag(EditorTag.ALBUM, "album");
+      audio.setDataForTag(EditorTag.YEAR, "1999");
+      audio.setDataForTag(EditorTag.TRACK, "2");
+      audio.setDataForTag(EditorTag.GENRE, "pop");
+      audio.setDataForTag(EditorTag.COMMENT, "comment");
             
       audio.save();
       audio.setWorkingDirectory("TestResources"); // refresh the data
@@ -122,26 +122,26 @@ public class AudioFileJUnitTest
       audio.selectTag(fileNames.indexOf("testFileA.mp3"));
       
 //      assertEquals("testFileA.mp3", audio.getDataForTag(Tag.FileName, ""));
-      assertEquals("title", audio.getDataForTag(Tag.TITLE, ""));
-      assertEquals("artist", audio.getDataForTag(Tag.ARTIST, ""));
-      assertEquals("albumArtist", audio.getDataForTag(Tag.ALBUM_ARTIST, ""));
-      assertEquals("album", audio.getDataForTag(Tag.ALBUM, ""));
-      assertEquals("1999", audio.getDataForTag(Tag.YEAR));
-      assertEquals("02", audio.getDataForTag(Tag.TRACK, ""));
-      assertEquals("Pop", audio.getDataForTag(Tag.GENRE, ""));
-      assertEquals("comment", audio.getDataForTag(Tag.COMMENT, ""));
+      assertEquals("title", audio.getDataForTag(EditorTag.TITLE, ""));
+      assertEquals("artist", audio.getDataForTag(EditorTag.ARTIST, ""));
+      assertEquals("albumArtist", audio.getDataForTag(EditorTag.ALBUM_ARTIST, ""));
+      assertEquals("album", audio.getDataForTag(EditorTag.ALBUM, ""));
+      assertEquals("1999", audio.getDataForTag(EditorTag.YEAR));
+      assertEquals("02", audio.getDataForTag(EditorTag.TRACK, ""));
+      assertEquals("Pop", audio.getDataForTag(EditorTag.GENRE, ""));
+      assertEquals("comment", audio.getDataForTag(EditorTag.COMMENT, ""));
       
       // reset data back to original probably 
       // better to make a copy?
-      audio.setDataForTag(Tag.FILE_NAME, "testFileA.mp3");
-      audio.setDataForTag(Tag.TITLE, "TestA");
-      audio.setDataForTag(Tag.ARTIST, "Various Artists");
-      audio.setDataForTag(Tag.ALBUM_ARTIST, "TestCollection");
-      audio.setDataForTag(Tag.ALBUM, "TestB");
-      audio.setDataForTag(Tag.YEAR, "2011");
-      audio.setDataForTag(Tag.TRACK, "1");
-      audio.setDataForTag(Tag.GENRE, "Anime");
-      audio.setDataForTag(Tag.COMMENT, "comment goes here");
+      audio.setDataForTag(EditorTag.FILE_NAME, "testFileA.mp3");
+      audio.setDataForTag(EditorTag.TITLE, "TestA");
+      audio.setDataForTag(EditorTag.ARTIST, "Various Artists");
+      audio.setDataForTag(EditorTag.ALBUM_ARTIST, "TestCollection");
+      audio.setDataForTag(EditorTag.ALBUM, "TestB");
+      audio.setDataForTag(EditorTag.YEAR, "2011");
+      audio.setDataForTag(EditorTag.TRACK, "1");
+      audio.setDataForTag(EditorTag.GENRE, "Anime");
+      audio.setDataForTag(EditorTag.COMMENT, "comment goes here");
             
       audio.save();
   }
@@ -156,8 +156,8 @@ public class AudioFileJUnitTest
       audio.selectTag(indicies.get(0)); // will always select 1 before multiple
       audio.selectTags(indicies);
       
-      audio.setDataForTag(Tag.ARTIST, "NowSame Artist");
-      assertEquals("NowSame Artist", audio.getDataForTag(Tag.ARTIST));
+      audio.setDataForTag(EditorTag.ARTIST, "NowSame Artist");
+      assertEquals("NowSame Artist", audio.getDataForTag(EditorTag.ARTIST));
       audio.save();
      
       audio.setWorkingDirectory("TestResources"); // refresh the data
@@ -167,18 +167,18 @@ public class AudioFileJUnitTest
       indicies.add(fileNames.indexOf("testFileB.mp3"));
       System.out.println("indicies: " + Arrays.toString(indicies.toArray(new Integer[0])));
       audio.selectTag(indicies.get(0)); // will always select 1 before multiple
-      assertEquals("NowSame Artist", audio.getDataForTag(Tag.ARTIST));
+      assertEquals("NowSame Artist", audio.getDataForTag(EditorTag.ARTIST));
       audio.selectTag(indicies.get(1)); // will always select 1 before multiple
-      assertEquals("NowSame Artist", audio.getDataForTag(Tag.ARTIST));
+      assertEquals("NowSame Artist", audio.getDataForTag(EditorTag.ARTIST));
       
       
       // revert data
       audio.selectTag(indicies.get(0));
-      audio.setDataForTag(Tag.ARTIST, "Various Artists");
+      audio.setDataForTag(EditorTag.ARTIST, "Various Artists");
       audio.save();
       
       audio.selectTag(indicies.get(1));
-      audio.setDataForTag(Tag.ARTIST, "Various Artist");
+      audio.setDataForTag(EditorTag.ARTIST, "Various Artist");
       audio.save();
       
   }

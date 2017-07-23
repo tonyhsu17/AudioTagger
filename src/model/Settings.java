@@ -16,9 +16,10 @@ import model.base.InformationBase;
 import model.base.TagBase;
 import support.EventCenter;
 import support.EventCenter.Events;
+import support.Logger;
 import support.structure.SettingsTableViewMeta;
 import support.util.Utilities;
-import support.util.Utilities.Tag;
+import support.util.Utilities.EditorTag;
 
 
 /**
@@ -26,7 +27,7 @@ import support.util.Utilities.Tag;
  * 
  * @author Tony Hsu
  */
-public class Settings
+public class Settings implements Logger
 {
     /**
      * Singleton Initialization
@@ -158,6 +159,7 @@ public class Settings
                 String[] splitLine = line.split("=", 2); // parse setting to [key, value]
 
                 SettingsKey key = SettingsKey.toKey(splitLine[0]);
+                info(key.toString());
                 String value = splitLine[1];
 
                 if(key != null)
@@ -248,7 +250,7 @@ public class Settings
     }
 
     // Akame ga Kill ED Single - Konna Sekai, Shiritaku Nakatta. [Miku Sawai]
-    public KeywordInterpreter getRuleFor(Tag tag)
+    public KeywordInterpreter getRuleFor(EditorTag tag)
     {
         String rule = "";
         // set rule
@@ -287,9 +289,7 @@ public class Settings
         {
             return null; // return early if no rule found
         }
-
-        // $VGMDB.SERIES $VGMDB.THEME Single - $Editor.TITLE [$Editor.ARTIST]
-
+        
         // extrapolate each tag out
         // return string as "%s %s Single - %s [%s]", arr[ of class + tag ]
         // using string formatter to fill in the valus
@@ -299,15 +299,14 @@ public class Settings
 
         int total = 0; // total keywords
         int count = 0; // num of keywords found
-
         // for each split
         for(String parsed : splitRule)
         {
-            // if the split is not empty
+            // if the split word (parsed) is not empty
             if(!parsed.isEmpty())
             {
                 total++;
-                // check each keywordTag to find a match
+                // check each keywordTag in Mapping to find a match
                 for(String s : keywordTagsDataMapping.keySet())
                 {
                     // if keywordTag matched with parsed text
@@ -317,6 +316,7 @@ public class Settings
                         // replace keywordTag with string formatter %s
                         builder.appendToRule("%s" + parsed.substring(s.length() - 1), keywordTagsDataMapping.get(s).getSuggestorClass(),
                             keywordTagsDataMapping.get(s).getTag());
+                        break;
                     }
                 }
             }

@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import model.base.TagBase;
 import model.information.VGMDBParser;
-import support.util.Utilities.Tag;
+import support.util.Utilities.EditorTag;
 
 public class VGMDBParserJUnitTest
 {
@@ -27,7 +27,7 @@ public class VGMDBParserJUnitTest
     public void setUp() throws Exception
     {
         VGMDBParser parser = new VGMDBParser();
-        System.out.println("Tag: " + Tag.ALBUM + " value: " + parser.getDataForTag(Tag.ALBUM, ""));
+        System.out.println("Tag: " + EditorTag.ALBUM + " value: " + parser.getDataForTag(EditorTag.ALBUM, ""));
         TagBase<?>[] addtional = parser.getAdditionalTags();
         for(TagBase<?> t : addtional)
         {

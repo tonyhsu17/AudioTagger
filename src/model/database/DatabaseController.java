@@ -21,7 +21,7 @@ import model.database.tables.GroupArtist;
 import model.database.tables.WordReplacement;
 import support.Logger;
 import support.util.StringUtil;
-import support.util.Utilities.Tag;
+import support.util.Utilities.EditorTag;
 
 
 
@@ -463,14 +463,14 @@ public class DatabaseController implements InformationBase, Logger {
         //        System.out.println("--DB: Update TableNames." + table + " id: " + id);
         PreparedStatement statements;
         try {
-            // get current useFrequency
-            statements = conn.prepareStatement("SELECT UseFrequency, Id FROM " + table + " where Id = ? FETCH FIRST ROWS ONLY");
+            // get current useFrequency TODO find way to abstract it
+            statements = conn.prepareStatement("SELECT USE_FREQUENCY, ID FROM " + table + " where Id = ? FETCH FIRST ROWS ONLY");
             //            String.format("SELECT %s, %s FROM %s WHERE %s = ? FETCH ROWS ONLY", args)
             statements.setInt(1, id);
             ResultSet rs = statements.executeQuery();
             if(rs.next()) {
                 // increase useFrequency count by one
-                statements = conn.prepareStatement("UPDATE " + table + " SET UseFrequency = ?" + " where Id = ?");
+                statements = conn.prepareStatement("UPDATE " + table + " SET USE_FREQUENCY = ?" + " where ID = ?");
                 //                System.out.println("--DB: Got use frequency: " + rs.getInt(1) + " id: " + rs.getInt(2));
                 statements.setInt(1, rs.getInt(1) + 1);
                 statements.setInt(2, id);
@@ -641,8 +641,8 @@ public class DatabaseController implements InformationBase, Logger {
                 default:
                     throw new SQLException("No table found");
             }
-            statements.executeUpdate();
-            return Integer.valueOf(values.get(0));
+            int numInsertted = statements.executeUpdate();
+            return numInsertted;
         }
         catch (SQLException e) {
             // TODO Auto-generated catch block
@@ -764,12 +764,13 @@ public class DatabaseController implements InformationBase, Logger {
             try {
                 statements = conn.prepareStatement(
                     String.format("SELECT %s, %s FROM %s WHERE %s = ?",
-                        AlbumArtist.ANIME_NAME, AlbumArtist.ID, Table.ANIME, AlbumArtist.ANIME_NAME));
+                        WordReplacement.BEFORE, WordReplacement.AFTER, Table.WORD_REPLACEMENT, WordReplacement.BEFORE));
                 statements.setString(1, values[0]);
                 ResultSet rs = statements.executeQuery();
                 if(rs.next()) { // return anything so it shows it already exist
                     id = 1;
                 }
+                debug("Word replacement id: " + id);
                 rs.close();
             }
             catch (SQLException e) {
@@ -822,18 +823,18 @@ public class DatabaseController implements InformationBase, Logger {
     @Override
     public List<TagBase<?>> getKeywordTags() {
         List<TagBase<?>> keywords = new ArrayList<>();
-        keywords.add(Tag.ARTIST);
-        keywords.add(Tag.ALBUM_ARTIST);
+        keywords.add(EditorTag.ARTIST);
+        keywords.add(EditorTag.ALBUM_ARTIST);
         return keywords;
     }
 
     @Override
     public String getDataForTag(TagBase<?> tag, String... extraArgs) {
         String results = "";
-        if(tag == Tag.ALBUM_ARTIST && extraArgs.length == 1) {
+        if(tag == EditorTag.ALBUM_ARTIST && extraArgs.length == 1) {
             results = getAnimeInDB(extraArgs[0]);
         }
-        else if(tag == Tag.ARTIST && extraArgs.length == 2) {
+        else if(tag == EditorTag.ARTIST && extraArgs.length == 2) {
             results = getArtist(extraArgs[0], extraArgs[1]);
         }
         else if(tag == AdditionalTag.REPLACE_WORD && extraArgs.length == 1) {
@@ -844,10 +845,10 @@ public class DatabaseController implements InformationBase, Logger {
 
     @Override
     public void setDataForTag(TagBase<?> tag, String... values) {
-        if(tag == Tag.ALBUM_ARTIST) {
+        if(tag == EditorTag.ALBUM_ARTIST) {
             add(Table.ANIME, values[0]);
         }
-        else if(tag == Tag.ARTIST) {
+        else if(tag == EditorTag.ARTIST) {
             if(values.length == 1) {
                 // param first, last
                 String[] fullName = StringUtil.splitName(values[0]);
@@ -871,11 +872,11 @@ public class DatabaseController implements InformationBase, Logger {
     @Override
     public List<String> getPossibleDataForTag(TagBase<?> tag, String values) {
         List<String> returnValue = null;
-        if(tag == Tag.ARTIST) {
+        if(tag == EditorTag.ARTIST) {
             String[] fullName = StringUtil.splitName(values);
             returnValue = getResultsForArtist(fullName[0], fullName[1]);
         }
-        else if(tag == Tag.ALBUM_ARTIST) {
+        else if(tag == EditorTag.ALBUM_ARTIST) {
             returnValue = getResultsForAnime(values);
         }
         else if(tag == AdditionalTag.REPLACE_WORD) {

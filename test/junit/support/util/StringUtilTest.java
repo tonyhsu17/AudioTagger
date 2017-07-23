@@ -68,6 +68,7 @@ public class StringUtilTest {
     
     @Test
     public void testGetDiffInDelim() {
+        // also tests getStrInDelim()
         String[] posTest1 = {"High Free Spirits [TV.ver]", "High Free Spirits (TV Size)"};
         String[] posResult1 = {"[TV.ver]", "(TV Size)"};
         String[] posTest2 = {"level 5 ~judgelight~ [TVver]", "Level 5 -Judgelight- (TV Size)"};

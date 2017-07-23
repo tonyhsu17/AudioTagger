@@ -37,7 +37,7 @@ import support.Logger;
 import support.util.ImageUtil;
 import support.util.StringUtil;
 import support.util.Utilities;
-import support.util.Utilities.Tag;
+import support.util.Utilities.EditorTag;
 
 
 public class VGMDBParser implements InformationBase, Logger
@@ -283,7 +283,7 @@ public class VGMDBParser implements InformationBase, Logger
         {
             // "only my railgun / fripSide [Limited Edition]"
             displayInfo.add("Album: " + albumName.split(" / ", 2)[0]);
-            tagDataLookup.put(Tag.ALBUM, albumName.split(" / ", 2)[0]);
+            tagDataLookup.put(EditorTag.ALBUM, albumName.split(" / ", 2)[0]);
         }
 
         // Get artist
@@ -306,14 +306,14 @@ public class VGMDBParser implements InformationBase, Logger
             }
         }
         displayInfo.add("Artist(s): " + StringUtil.getCommaSeparatedStringWithAnd(performerList));
-        tagDataLookup.put(Tag.ARTIST, StringUtil.getCommaSeparatedStringWithAnd(performerList));
+        tagDataLookup.put(EditorTag.ARTIST, StringUtil.getCommaSeparatedStringWithAnd(performerList));
 
         // Year
         String year;
         if(!(year = json.getString("release_date")).isEmpty())
         {
             displayInfo.add("Year: " + year.substring(0, 4)); // yyyy-mm-dd
-            tagDataLookup.put(Tag.YEAR, year.substring(0, 4));
+            tagDataLookup.put(EditorTag.YEAR, year.substring(0, 4));
         }
 
         // Track Info (TODO handle multiple disc in future
@@ -440,6 +440,7 @@ public class VGMDBParser implements InformationBase, Logger
         return albumArtThumb;
     }
 
+    @Override
     public final Image getAlbumArt()
     {
         return albumArt500x500;
@@ -461,23 +462,27 @@ public class VGMDBParser implements InformationBase, Logger
     {
         String returnValue = "";
 //        TagBase<?> newTag = Utilities.getEnum(tag, AdditionalTag.class, Tag.class);
-        if(tag == Tag.ALBUM) {
-            returnValue = tagDataLookup.get(Tag.ALBUM);
+        if(tag == EditorTag.ALBUM) {
+            returnValue = tagDataLookup.get(EditorTag.ALBUM);
         }
-        else if(tag == Tag.ALBUM_ARTIST) {
+        else if(tag == EditorTag.ALBUM_ARTIST) {
 //            returnValue = tagDataLookup.get(VGMDBTag.SERIES);
         }
-        else if(tag == Tag.ARTIST) {
-            returnValue = tagDataLookup.get(Tag.ARTIST);
+        else if(tag == EditorTag.ARTIST) {
+            returnValue = tagDataLookup.get(EditorTag.ARTIST);
         }
-        else if(tag == Tag.COMMENT) {
+        else if(tag == EditorTag.COMMENT) {
 //            returnValue = tagDataLookup.get(AdditionalTag.THEME);
         }
-        else if(tag == Tag.TRACK) {
+        else if(tag == EditorTag.TRACK || tag == EditorTag.TITLE) {
+            if(values.length == 0) {
+                error("Please pass in int for which track title");
+                return returnValue;
+            }
             returnValue = tagDataLookup.get(AdditionalTag.getTrackTag(Integer.valueOf(values[0])));
         }
-        else if(tag == Tag.YEAR) {
-            returnValue = tagDataLookup.get(Tag.YEAR);
+        else if(tag == EditorTag.YEAR) {
+            returnValue = tagDataLookup.get(EditorTag.YEAR);
         }
         else if(tag == AdditionalTag.SERIES) {
             returnValue = tagDataLookup.get(AdditionalTag.SERIES);
@@ -527,9 +532,9 @@ public class VGMDBParser implements InformationBase, Logger
     public List<TagBase<?>> getKeywordTags()
     {
         List<TagBase<?>> keywords = new ArrayList<>();
-        keywords.add(Tag.ALBUM);
-        keywords.add(Tag.ARTIST);
-        keywords.add(Tag.YEAR);
+        keywords.add(EditorTag.ALBUM);
+        keywords.add(EditorTag.ARTIST);
+        keywords.add(EditorTag.YEAR);
         for(TagBase<?> t : AdditionalTag.values())
         {
             keywords.add(t);

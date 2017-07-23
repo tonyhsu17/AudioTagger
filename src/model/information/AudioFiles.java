@@ -39,7 +39,7 @@ import support.Constants;
 import support.Logger;
 import support.util.ImageUtil;
 import support.util.StringUtil;
-import support.util.Utilities.Tag;
+import support.util.Utilities.EditorTag;
 
 
 public class AudioFiles implements InformationBase, Logger
@@ -315,27 +315,27 @@ public class AudioFiles implements InformationBase, Logger
         // set selected values back
         if(Settings.getInstance().isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_ARTIST))
         {
-            setDataForTag(Tag.ARTIST, propArtist);
+            setDataForTag(EditorTag.ARTIST, propArtist);
         }
         if(Settings.getInstance().isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_ALBUM))
         {
-            setDataForTag(Tag.ALBUM, propAlbum);
+            setDataForTag(EditorTag.ALBUM, propAlbum);
         }
         if(Settings.getInstance().isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_ALBUM_ARTIST))
         {
-            setDataForTag(Tag.ALBUM_ARTIST, propAlbumArtist);
+            setDataForTag(EditorTag.ALBUM_ARTIST, propAlbumArtist);
         }
         if(Settings.getInstance().isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_YEAR))
         {
-            setDataForTag(Tag.YEAR, propYear);
+            setDataForTag(EditorTag.YEAR, propYear);
         }
         if(Settings.getInstance().isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_GENRE))
         {
-            setDataForTag(Tag.GENRE, propGenre);
+            setDataForTag(EditorTag.GENRE, propGenre);
         }
         if(Settings.getInstance().isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_COMMENT))
         {
-            setDataForTag(Tag.COMMENT, propComment);
+            setDataForTag(EditorTag.COMMENT, propComment);
         }
         if(Settings.getInstance().isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_ALBUM_ART))
         {
@@ -611,7 +611,7 @@ public class AudioFiles implements InformationBase, Logger
     }
 
     @Override
-    public Tag[] getAdditionalTags()
+    public EditorTag[] getAdditionalTags()
     {
         // TODO Auto-generated method stub
         return null;
@@ -621,15 +621,15 @@ public class AudioFiles implements InformationBase, Logger
     public List<TagBase<?>> getKeywordTags()
     {
         List<TagBase<?>> keywords = new ArrayList<>();
-        keywords.add(Tag.ALBUM);
-        keywords.add(Tag.ALBUM_ARTIST);
-        keywords.add(Tag.ARTIST);
-        keywords.add(Tag.COMMENT);
-        keywords.add(Tag.FILE_NAME);
-        keywords.add(Tag.GENRE);
-        keywords.add(Tag.TITLE);
-        keywords.add(Tag.TRACK);
-        keywords.add(Tag.YEAR);
+        keywords.add(EditorTag.ALBUM);
+        keywords.add(EditorTag.ALBUM_ARTIST);
+        keywords.add(EditorTag.ARTIST);
+        keywords.add(EditorTag.COMMENT);
+        keywords.add(EditorTag.FILE_NAME);
+        keywords.add(EditorTag.GENRE);
+        keywords.add(EditorTag.TITLE);
+        keywords.add(EditorTag.TRACK);
+        keywords.add(EditorTag.YEAR);
         return keywords;
     }
 
@@ -638,39 +638,39 @@ public class AudioFiles implements InformationBase, Logger
     public String getDataForTag(TagBase<?> tag, String... extraArgs)
     {
         String returnValue = "";
-        if(tag == Tag.ALBUM)
+        if(tag == EditorTag.ALBUM)
         {
             returnValue = album;
         }
-        else if(tag == Tag.ALBUM_ART_META)
+        else if(tag == EditorTag.ALBUM_ART_META)
         {
             returnValue = albumArtMeta;
         }
-        else if(tag == Tag.ALBUM_ARTIST)
+        else if(tag == EditorTag.ALBUM_ARTIST)
         {
             returnValue = albumArtist;
         }
-        else if(tag == Tag.ARTIST)
+        else if(tag == EditorTag.ARTIST)
         {
             returnValue = artist;
         }
-        else if(tag == Tag.COMMENT)
+        else if(tag == EditorTag.COMMENT)
         {
             returnValue = comment;
         }
-        else if(tag == Tag.FILE_NAME)
+        else if(tag == EditorTag.FILE_NAME)
         {
             returnValue = fileName;
         }
-        else if(tag == Tag.GENRE)
+        else if(tag == EditorTag.GENRE)
         {
             returnValue = genre;
         }
-        else if(tag == Tag.TITLE)
+        else if(tag == EditorTag.TITLE)
         {
             returnValue = title;
         }
-        else if(tag == Tag.TRACK)
+        else if(tag == EditorTag.TRACK)
         {
             if(StringUtil.isKeyword(track))
             {
@@ -682,7 +682,7 @@ public class AudioFiles implements InformationBase, Logger
             }
             
         }
-        else if(tag == Tag.YEAR)
+        else if(tag == EditorTag.YEAR)
         {
             returnValue = year;
         }
@@ -697,43 +697,43 @@ public class AudioFiles implements InformationBase, Logger
     @Override
     public void setDataForTag(TagBase<?> tag, String... values)
     {
-        if(tag == Tag.ALBUM)
+        if(tag == EditorTag.ALBUM)
         {
             album = values[0];
         }
-        else if(tag == Tag.ALBUM_ART_META)
+        else if(tag == EditorTag.ALBUM_ART_META)
         {
             albumArtMeta = values[0];
         }
-        else if(tag == Tag.ALBUM_ARTIST)
+        else if(tag == EditorTag.ALBUM_ARTIST)
         {
             albumArtist = values[0];
         }
-        else if(tag == Tag.ARTIST)
+        else if(tag == EditorTag.ARTIST)
         {
             artist = values[0];
         }
-        else if(tag == Tag.COMMENT)
+        else if(tag == EditorTag.COMMENT)
         {
             comment = values[0];
         }
-        else if(tag == Tag.FILE_NAME)
+        else if(tag == EditorTag.FILE_NAME)
         {
             fileName = values[0];
         }
-        else if(tag == Tag.GENRE)
+        else if(tag == EditorTag.GENRE)
         {
             genre = values[0];
         }
-        else if(tag == Tag.TITLE)
+        else if(tag == EditorTag.TITLE)
         {
             title = values[0];
         }
-        else if(tag == Tag.TRACK)
+        else if(tag == EditorTag.TRACK)
         {
             track = values[0];
         }
-        else if(tag == Tag.YEAR)
+        else if(tag == EditorTag.YEAR)
         {
             year = values[0];
         }
