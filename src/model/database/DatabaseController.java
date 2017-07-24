@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -83,6 +84,7 @@ public class DatabaseController implements InformationBase, Logger {
                                         " VARCHAR(255) UNIQUE," +
                                         AlbumArtist.USE_FREQUENCY +
                                         " INT)");
+        //        dumpTable(Table.ANIME);
         sucess &= createTableIfNotExist(Table.ARTIST +
                                         "(" +
                                         Artist.ID +
@@ -93,7 +95,12 @@ public class DatabaseController implements InformationBase, Logger {
                                         " VARCHAR(255)," +
                                         Artist.USE_FREQUENCY +
                                         " INT," +
-                                        " UNIQUE (" + Artist.ARTIST_FIRST + ", " + Artist.ARTIST_LAST + "))");
+                                        " UNIQUE (" +
+                                        Artist.ARTIST_FIRST +
+                                        ", " +
+                                        Artist.ARTIST_LAST +
+                                        "))");
+        //        dumpTable(Table.ARTIST);
         sucess &= createTableIfNotExist(Table.GROUP_ARTIST +
                                         "(" +
                                         GroupArtist.ID +
@@ -104,21 +111,40 @@ public class DatabaseController implements InformationBase, Logger {
                                         " VARCHAR(255)," +
                                         GroupArtist.USE_FREQUENCY +
                                         " INT)");
+        //        dumpTable(Table.GROUP_ARTIST);
         sucess &= createTableIfNotExist(Table.ARTIST_TO_GROUP +
                                         "(" +
                                         ArtistToGroup.ARTIST_ID +
                                         " INT," +
                                         ArtistToGroup.GROUP_ID +
                                         " INT," +
-                                        " PRIMARY KEY (" + ArtistToGroup.ARTIST_ID + ", " + ArtistToGroup.GROUP_ID + ")," +
-                                        " FOREIGN KEY (" + ArtistToGroup.ARTIST_ID + ") REFERENCES " + Table.ARTIST + "(" + Artist.ID + ")," +
-                                        " FOREIGN KEY (" + ArtistToGroup.GROUP_ID + ") REFERENCES " + Table.GROUP_ARTIST + "(" + GroupArtist.ID + "))");
+                                        " PRIMARY KEY (" +
+                                        ArtistToGroup.ARTIST_ID +
+                                        ", " +
+                                        ArtistToGroup.GROUP_ID +
+                                        ")," +
+                                        " FOREIGN KEY (" +
+                                        ArtistToGroup.ARTIST_ID +
+                                        ") REFERENCES " +
+                                        Table.ARTIST +
+                                        "(" +
+                                        Artist.ID +
+                                        ")," +
+                                        " FOREIGN KEY (" +
+                                        ArtistToGroup.GROUP_ID +
+                                        ") REFERENCES " +
+                                        Table.GROUP_ARTIST +
+                                        "(" +
+                                        GroupArtist.ID +
+                                        "))");
+        //        dumpTable(Table.ARTIST_TO_GROUP);
         sucess &= createTableIfNotExist(Table.WORD_REPLACEMENT +
                                         "(" +
                                         WordReplacement.BEFORE +
                                         " VARCHAR(255) PRIMARY KEY," +
                                         WordReplacement.AFTER +
                                         " VARCHAR(255))");
+        //        dumpTable(Table.WORD_REPLACEMENT);
         if(sucess) {
             info("Connected to db");
         }
@@ -311,16 +337,17 @@ public class DatabaseController implements InformationBase, Logger {
                                 String.format("SELECT %s, %s FROM %s WHERE %s = ?",
                                     GroupArtist.GROUP_NAME, GroupArtist.ID, Table.GROUP_ARTIST, GroupArtist.ID));
                             statements.setInt(1, tempGroupId);
-                            rs = statements.executeQuery();
-                            if(rs.next()) {
-                                String name = (rs.getString(1)).trim();
+                            ResultSet innerRS = statements.executeQuery();
+                            if(innerRS.next()) {
+                                String name = (innerRS.getString(1)).trim();
                                 possibleArtists.add(name);
                                 groupId.add(tempGroupId);
                             }
+                            innerRS.close();
                         }
                     }
+                    rs.close();
                 }
-                debug("DB Artist Search Results:\n" + Arrays.toString(possibleArtists.toArray(new String[0])));
                 rs.close();
             }
             catch (SQLException e) {
@@ -394,7 +421,7 @@ public class DatabaseController implements InformationBase, Logger {
         }
         return possibleAnimes;
     }
-    
+
     private String getReplacementWord(String before) {
         String result = "";
         if(before == null || before.isEmpty()) {
@@ -408,7 +435,8 @@ public class DatabaseController implements InformationBase, Logger {
             try {
                 // Individuals: first - dbFirst, last - dbLast
                 statements = conn.prepareStatement(
-                    String.format("SELECT %s FROM %s WHERE LOWER(%s) = ?", WordReplacement.AFTER, Table.WORD_REPLACEMENT, WordReplacement.BEFORE));
+                    String.format("SELECT %s FROM %s WHERE LOWER(%s) = ?", WordReplacement.AFTER, Table.WORD_REPLACEMENT,
+                        WordReplacement.BEFORE));
                 statements.setString(1, before);
                 rs = statements.executeQuery();
                 if(rs.next()) {
@@ -471,11 +499,8 @@ public class DatabaseController implements InformationBase, Logger {
             if(rs.next()) {
                 // increase useFrequency count by one
                 statements = conn.prepareStatement("UPDATE " + table + " SET USE_FREQUENCY = ?" + " where ID = ?");
-                //                System.out.println("--DB: Got use frequency: " + rs.getInt(1) + " id: " + rs.getInt(2));
                 statements.setInt(1, rs.getInt(1) + 1);
                 statements.setInt(2, id);
-                int status = statements.executeUpdate();
-                //                System.out.println("--DB: update status: " + status);
             }
             rs.close();
         }
@@ -507,7 +532,7 @@ public class DatabaseController implements InformationBase, Logger {
         switch (table) {
             case ANIME: // AnimeName
                 if(values.length != 1) {
-                    debug("Invalid num of args for: " + table + " w/ length: " + values.length);
+                    error("Invalid num of args for: " + table + " w/ length: " + values.length);
                 }
                 fullValues.add(id);
                 fullValues.add(values[0]);
@@ -516,7 +541,7 @@ public class DatabaseController implements InformationBase, Logger {
                 break;
             case ARTIST: // ArtistFirst, ArtistLast
                 if(values.length != 2) {
-                    debug("Invalid num of args for: " + table + " w/ length: " + values.length);
+                    error("Invalid num of args for: " + table + " w/ length: " + values.length);
                 }
                 fullValues.add(id);
                 fullValues.add(values[0]);
@@ -527,7 +552,7 @@ public class DatabaseController implements InformationBase, Logger {
             case ARTIST_TO_GROUP:
                 //self called to add this one from group insert
                 if(values.length != 2) {
-                    debug("Invalid num of args for: " + table + " w/ length: " + values.length);
+                    error("Invalid num of args for: " + table + " w/ length: " + values.length);
                 }
 
                 fullValues.add(values[0]);
@@ -536,7 +561,7 @@ public class DatabaseController implements InformationBase, Logger {
                 break;
             case GROUP_ARTIST:
                 if(values.length < 2) {
-                    debug("Invalid num of args for: " + table + " w/ length: " + values.length);
+                    error("Invalid num of args for: " + table + " w/ length: " + values.length);
                 }
 
                 // create idHash
@@ -554,7 +579,6 @@ public class DatabaseController implements InformationBase, Logger {
                     artistIds.add(artistId);
                 }
                 fullValues.add(id);
-                debug(StringUtil.getCommaSeparatedStringWithAnd(Arrays.asList(values)));
                 fullValues.add(StringUtil.getCommaSeparatedStringWithAnd(Arrays.asList(values)));
                 fullValues.add(idHash.toString());
                 fullValues.add("0");
@@ -567,7 +591,7 @@ public class DatabaseController implements InformationBase, Logger {
                 break;
             case WORD_REPLACEMENT:
                 if(values.length != 2) {
-                    debug("Invlid num of args for: " + table + " w/ length: " + values.length);
+                    error("Invlid num of args for: " + table + " w/ length: " + values.length);
                 }
                 fullValues.add(values[0]);
                 fullValues.add(values[1]);
@@ -597,6 +621,7 @@ public class DatabaseController implements InformationBase, Logger {
      * @return Id of row
      */
     private int executeInsert(Table table, List<String> values) {
+        info("inserting in: " + table + " values: " + Arrays.toString(values.toArray(new String[0])));
         try {
             PreparedStatement statements;
             int numCols = values.size();
@@ -641,12 +666,20 @@ public class DatabaseController implements InformationBase, Logger {
                 default:
                     throw new SQLException("No table found");
             }
-            int numInsertted = statements.executeUpdate();
+            statements.executeUpdate();
+            int numInsertted = 1;
+            try {
+                numInsertted = Integer.valueOf(values.get(0));
+            }
+            catch (NumberFormatException e) {
+                // WORD_REPLACEMENT has no id and will exception will be thrown
+            }
             return numInsertted;
         }
         catch (SQLException e) {
             // TODO Auto-generated catch block
-            error("termination");
+            error("termination inserting in table: " + table);
+            dumpTable(table);
             e.printStackTrace();
             System.exit(1);
         }
@@ -770,7 +803,6 @@ public class DatabaseController implements InformationBase, Logger {
                 if(rs.next()) { // return anything so it shows it already exist
                     id = 1;
                 }
-                debug("Word replacement id: " + id);
                 rs.close();
             }
             catch (SQLException e) {
@@ -778,6 +810,43 @@ public class DatabaseController implements InformationBase, Logger {
             }
         }
         return id;
+    }
+
+    public void dumpTable(Table t) {
+        PreparedStatement statements;
+        try {
+            StringBuffer temp = new StringBuffer("");
+            statements = conn.prepareStatement("SELECT * FROM " + t);
+            ResultSet rs = statements.executeQuery();
+            ResultSetMetaData data = rs.getMetaData();
+
+
+            info("Table Name: " + t + " contents...");
+
+            // header
+            temp.append("| ");
+            for(int i = 1; i <= data.getColumnCount(); i++) {
+                temp.append(data.getColumnLabel(i) + "\t| ");
+            }
+            info(temp.toString());
+
+            while(rs.next()) {
+                temp = new StringBuffer("| ");
+                for(int i = 1; i <= data.getColumnCount(); i++) {
+                    temp.append(rs.getString(i) + "\t| ");
+                }
+                info(temp.toString());
+            }
+
+            info("| ------------ Table End ------------- |");
+
+            rs.close();
+        }
+        catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
     }
 
 
@@ -789,6 +858,8 @@ public class DatabaseController implements InformationBase, Logger {
             statement.execute("DROP TABLE " + Table.GROUP_ARTIST);
             statement.execute("DROP TABLE " + Table.ARTIST);
             statement.execute("DROP TABLE " + Table.ANIME);
+            statement.execute("DROP TABLE " + Table.WORD_REPLACEMENT);
+            conn.commit();
         }
         catch (SQLException e) {
             // TODO Auto-generated catch block

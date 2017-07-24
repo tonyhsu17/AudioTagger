@@ -65,7 +65,7 @@ public class StringUtilTest {
         assertEquals("Arisa Meigeo", result[2]);
         assertEquals("illy von esienberg", result[3]);
     }
-    
+
     @Test
     public void testGetDiffInDelim() {
         // also tests getStrInDelim()
@@ -73,7 +73,7 @@ public class StringUtilTest {
         String[] posResult1 = {"[TV.ver]", "(TV Size)"};
         String[] posTest2 = {"level 5 ~judgelight~ [TVver]", "Level 5 -Judgelight- (TV Size)"};
         String[] posResult2 = {"~judgelight~", "-Judgelight-", "[TVver]", "(TV Size)"};
-        
+
         List<String[]> list = StringUtil.getDiffInDelim(posTest1[0], posTest1[1]);
         assertEquals(list.size(), 1);
         assertEquals(list.get(0)[0], posResult1[0]);

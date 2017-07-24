@@ -1,11 +1,12 @@
 
 
-
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 import junit.support.util.StringUtilTest;
 import junit.support.util.UtilitiesTest;
+
+
 
 /**
  * JUnit Test Suite
@@ -14,12 +15,11 @@ import junit.support.util.UtilitiesTest;
  */
 @RunWith(Suite.class)
 
-@Suite.SuiteClasses({ 
-   DatabaseJUnitTest.class,
-   AudioFileJUnitTest.class,
-   UtilitiesTest.class,
-   StringUtilTest.class
+@Suite.SuiteClasses({
+    DatabaseJUnitTest.class,
+    AudioFileJUnitTest.class,
+    UtilitiesTest.class,
+    StringUtilTest.class
 })
 
-public class JUnitSuite {
-}
+public class JUnitSuite {}

@@ -183,7 +183,6 @@ public class DataCompilationModel implements Logger {
                 String[] byFirstLast = StringUtil.splitName(artist);
                 String formattedText = dbManagement.getDataForTag(type, byFirstLast[0], byFirstLast[1]);
                 if(!formattedText.isEmpty()) { // if exist in db use that one
-                    debug("ARTIST formattedText: " + formattedText);
                     formattedArtists.add(formattedText);
                 }
                 else { // else use original one
@@ -215,7 +214,7 @@ public class DataCompilationModel implements Logger {
         for(int i = 0; i < tags.size(); i++) { // tags.size() == dbTags.size()
             // db returns empty string for non replaced tags
             if(!dbTags.get(i).isEmpty()) {
-                debug("replacing: " + tags.get(i) + " with: " + dbTags.get(i));
+                info("replacing: " + tags.get(i) + " with: " + dbTags.get(i));
                 //text.re
                 text = text.replaceFirst(Pattern.quote(tags.get(i)), dbTags.get(i));
             }
@@ -272,7 +271,6 @@ public class DataCompilationModel implements Logger {
      */
     private int addPossibleDataForTag(EditorTag tag, String... additional) {
         String editorText = getDelimTagReplacement(editorMap.getMeta(tag).getTextProperty().get());
-        debug(editorText);
         List<String> dropDownList = editorMap.getMeta(tag).getDropDownListProperty().get();
         dropDownList.clear();
 
@@ -330,8 +328,8 @@ public class DataCompilationModel implements Logger {
     }
 
     private void addAdditionalPossibleFileNames(List<String> dropDownList) {
-        EditorComboBoxMeta field = editorMap.getMeta(EditorTag.FILE_NAME);
-        String textFieldText = field.getTextProperty().get();
+        //        EditorComboBoxMeta field = editorMap.getMeta(EditorTag.FILE_NAME);
+        //        String textFieldText = field.getTextProperty().get();
         //        if(!textFieldText.isEmpty() && !Utilities.isKeyword(textFieldText))
         //        {
         //            String formatted = String.format("%02d", Integer.valueOf(textFieldText)) + " " +
@@ -514,7 +512,7 @@ public class DataCompilationModel implements Logger {
         for(String[] delimDiff : delimDiffs) {
             dbManagement.setDataForTag(DatabaseController.AdditionalTag.REPLACE_WORD, delimDiff[0], delimDiff[1]);
         }
-        
+
         int trackNum = 1;
         try {
             trackNum = Integer.valueOf(editorMap.getDataForTag(EditorTag.TRACK));
@@ -522,7 +520,6 @@ public class DataCompilationModel implements Logger {
         catch (NumberFormatException e) {
             info("track number: " + trackNum + " isn't an int, default to 1");
         }
-        debug("Title: " + vgmdbModel.getDataForTag(EditorTag.TRACK, trackNum + ""));
         delimDiffs = StringUtil.getDiffInDelim(vgmdbModel.getDataForTag(EditorTag.TRACK, trackNum + ""),
             editorMap.getMeta(EditorTag.TITLE).getTextProperty().get());
         for(String[] delimDiff : delimDiffs) {

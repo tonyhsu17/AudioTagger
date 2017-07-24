@@ -1,7 +1,6 @@
 package support.util;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -100,40 +99,38 @@ public class StringUtil {
         sb.append(list.get(i) + " & " + list.get(i + 1));
         return sb.toString();
     }
-    
+
     public static List<String> getStrInDelim(String search) {
         List<String> results = new ArrayList<String>();
         if(search == null || search.isEmpty()) {
             return results;
         }
-        
+
         Pattern pattern = Pattern.compile(Constants.REGEX_DELIM);
         Matcher match = pattern.matcher(search);
-        
+
         while(match.find()) {
             results.add(match.group());
         }
-        
+
         return results;
     }
 
     public static List<String[]> getDiffInDelim(String before, String after) {
         List<String[]> results = new ArrayList<String[]>();
-        
+
         List<String> beforeResults = StringUtil.getStrInDelim(before);
         List<String> afterResults = StringUtil.getStrInDelim(after);
-        System.out.println("getDiffInDelimBefore: " + Arrays.toString(beforeResults.toArray(new String[0])));
-        System.out.println("getDiffInDelimAfter: " + Arrays.toString(afterResults.toArray(new String[0])));
         if(beforeResults.isEmpty() || afterResults.isEmpty() || beforeResults.size() != afterResults.size()) {
             return results;
         }
-        
+
         for(int i = 0; i < beforeResults.size(); i++) {
             if(!beforeResults.equals(afterResults)) {
                 results.add(new String[] {beforeResults.get(i), afterResults.get(i)});
             }
         }
-        
+
         return results;
     }
 }
