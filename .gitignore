@@ -55,3 +55,4 @@ bin/
 
 derby.log
 audioTagger.cfg
+/target/
