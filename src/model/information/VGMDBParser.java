@@ -37,59 +37,57 @@ import support.Logger;
 import support.util.ImageUtil;
 import support.util.StringUtil;
 import support.util.Utilities;
-import support.util.Utilities.Tag;
+import support.util.Utilities.EditorTag;
 
 
-public class VGMDBParser implements InformationBase, Logger
-{
+
+public class VGMDBParser implements InformationBase, Logger {
     public enum AdditionalTag implements TagBase<AdditionalTag> {
         SERIES, IMAGE_URL, THEME,
         TRACK01, TRACK02, TRACK03, TRACK04, TRACK05,
         TRACK06, TRACK07, TRACK08, TRACK09, TRACK10,
         TRACK11, TRACK12, TRACK13, TRACK14, TRACK15,
         TRACK16, TRACK17, TRACK18, TRACK19, TRACK20;
-        
-        public static AdditionalTag getTrackTag(int i)
-        {
+
+        public static AdditionalTag getTrackTag(int i) {
             String str = "TRACK" + String.format("%02d", i);
-            for(AdditionalTag t : AdditionalTag.values())
-            {
-                if(str.equals(t.name()))
-                {
+            for(AdditionalTag t : AdditionalTag.values()) {
+                if(str.equals(t.name())) {
                     return t;
                 }
             }
-          return null;
+            return null;
         }
     }
-    
-    
-//    public static enum VGMDBTag {
-//      ARTIST, ALBUM, TRACK_NUM, YEAR, SERIES, 
-//      IMAGE_URL, THEME,
-//      TRACK01, TRACK02, TRACK03, TRACK04, TRACK05,
-//      TRACK06, TRACK07, TRACK08, TRACK09, TRACK10,
-//      TRACK11, TRACK12, TRACK13, TRACK14, TRACK15,
-//      TRACK16, TRACK17, TRACK18, TRACK19, TRACK20;
-//      
-//      public static VGMDBTag getTrackTag(int i)
-//      {
-//          String str = "TRACK" + String.format("%02d", i);
-//          for(VGMDBTag t : VGMDBTag.values())
-//          {
-//              if(str.equals(t.name()))
-//              {
-//                  return t;
-//              }
-//          }
-//        return null;
-//      }
-//    };
+
+
+    // public static enum VGMDBTag {
+    // ARTIST, ALBUM, TRACK_NUM, YEAR, SERIES,
+    // IMAGE_URL, THEME,
+    // TRACK01, TRACK02, TRACK03, TRACK04, TRACK05,
+    // TRACK06, TRACK07, TRACK08, TRACK09, TRACK10,
+    // TRACK11, TRACK12, TRACK13, TRACK14, TRACK15,
+    // TRACK16, TRACK17, TRACK18, TRACK19, TRACK20;
+    //
+    // public static VGMDBTag getTrackTag(int i)
+    // {
+    // String str = "TRACK" + String.format("%02d", i);
+    // for(VGMDBTag t : VGMDBTag.values())
+    // {
+    // if(str.equals(t.name()))
+    // {
+    // return t;
+    // }
+    // }
+    // return null;
+    // }
+    // };
     public static final String vgmdbParserURL = "http://vgmdb.info/";
     private HashMap<TagBase<?>, String> tagDataLookup; // mapping of retrieved info
     private CloseableHttpClient httpClient;
 
-    private List<String[]> searchResults; // albumID from search results to be used to display album info
+    private List<String[]> searchResults; // albumID from search results to be used to display album
+                                          // info
 
     private boolean isOnAlbumInfo;
 
@@ -97,9 +95,8 @@ public class VGMDBParser implements InformationBase, Logger
     private ObjectProperty<Image> albumArtThumb;
     private Image albumArt500x500;
     private String query;
-    
-    public VGMDBParser()
-    {
+
+    public VGMDBParser() {
         httpClient = HttpClients.createDefault();
         tagDataLookup = new HashMap<TagBase<?>, String>();
         displayInfo = new SimpleListProperty<String>();
@@ -110,21 +107,18 @@ public class VGMDBParser implements InformationBase, Logger
         query = "";
     }
 
-    public JSONObject handleHttpGet(String url, boolean isSearch) throws IOException
-    {
+    public JSONObject handleHttpGet(String url, boolean isSearch) throws IOException {
         JSONObject json;
         HttpGet httpGet = new HttpGet(url);
         httpGet.addHeader("Accept", "application/json");
 
         CloseableHttpResponse response = httpClient.execute(httpGet);
-        try
-        {
+        try {
             HttpEntity entity = response.getEntity();
             // convert response into json
             Scanner sc = new Scanner(entity.getContent());
             StringBuffer buffer = new StringBuffer();
-            while(sc.hasNextLine())
-            {
+            while(sc.hasNextLine()) {
                 buffer.append(sc.nextLine());
             }
             sc.close();
@@ -132,23 +126,18 @@ public class VGMDBParser implements InformationBase, Logger
 
             EntityUtils.consume(entity);
         }
-        finally
-        {
+        finally {
             response.close();
         }
         return json;
     }
 
-    public void searchByAlbum(String album)
-    {
-        if(album.toLowerCase().equals(query.toLowerCase()))
-        {
+    public void searchByAlbum(String album) {
+        if(album.toLowerCase().equals(query.toLowerCase())) {
             return;
         }
-        else
-        {
-            Service<JSONObject> serv = new Service<JSONObject>()
-            {
+        else {
+            Service<JSONObject> serv = new Service<JSONObject>() {
                 @Override
                 protected Task<JSONObject> createTask() {
                     return new Task<JSONObject>() {
@@ -167,10 +156,8 @@ public class VGMDBParser implements InformationBase, Logger
         }
     }
 
-    private void retrieveAlbumByID(String id)
-    {
-        Service<JSONObject> serv = new Service<JSONObject>()
-        {
+    private void retrieveAlbumByID(String id) {
+        Service<JSONObject> serv = new Service<JSONObject>() {
             @Override
             protected Task<JSONObject> createTask() {
                 return new Task<JSONObject>() {
@@ -186,9 +173,8 @@ public class VGMDBParser implements InformationBase, Logger
         });
         serv.start();
     }
-    
-    private void displaySearchedInfo(JSONObject json)
-    {
+
+    private void displaySearchedInfo(JSONObject json) {
         debug(json.toString(4));
         tagDataLookup.clear();
         displayInfo.clear();
@@ -202,10 +188,10 @@ public class VGMDBParser implements InformationBase, Logger
         query = json.getString("query");
         String queryText = "Query: " + query;
         displayInfo.add(queryText);
-        searchResults.add(new String[] {queryText, ""}); // dummy used as placeholder (no -1 for indexing)
+        searchResults.add(new String[] {queryText, ""}); // dummy used as placeholder (no -1 for
+                                                         // indexing)
 
-        for(int i = 0; i < albums.length(); i++)
-        {
+        for(int i = 0; i < albums.length(); i++) {
             JSONObject album = albums.getJSONObject(i);
 
             JSONObject titles = album.getJSONObject("titles");
@@ -213,17 +199,16 @@ public class VGMDBParser implements InformationBase, Logger
             displayInfo.add(engAlbumAndArtist);
 
             String link = album.getString("link");
-            searchResults.add(new String[] { engAlbumAndArtist, link });
+            searchResults.add(new String[] {engAlbumAndArtist, link});
         }
     }
 
-    private void showAlbumInfo(JSONObject json)
-    {
+    private void showAlbumInfo(JSONObject json) {
         debug(json.toString(4));
         displayInfo.clear();
         albumArtThumb.setValue(null);
         isOnAlbumInfo = true;
-        
+
         displayInfo.add("Go Back");
 
         // Get Anime Series
@@ -232,12 +217,10 @@ public class VGMDBParser implements InformationBase, Logger
         JSONObject nameVariences;
         String name;
         if(((products = json.optJSONArray("products")) != null) &&
-            ((productInfo = products.optJSONObject(0)) != null) &&
-            ((nameVariences = productInfo.optJSONObject("names")) != null))
-        {
+           ((productInfo = products.optJSONObject(0)) != null) &&
+           ((nameVariences = productInfo.optJSONObject("names")) != null)) {
             if(!(name = nameVariences.optString("ja-latn")).isEmpty() ||
-                !(name = nameVariences.optString("en")).isEmpty())
-            {
+               !(name = nameVariences.optString("en")).isEmpty()) {
                 displayInfo.add("Series: " + name);
                 tagDataLookup.put(AdditionalTag.SERIES, name);
             }
@@ -245,33 +228,27 @@ public class VGMDBParser implements InformationBase, Logger
 
         // Get Image
         String imageURL;
-        if((imageURL = json.optString("picture_small")) != null)
-        {
+        if((imageURL = json.optString("picture_small")) != null) {
             // String imageURL = Utilities.getString(json, "picture_full"));
-            try
-            {
+            try {
                 URL url = new URL(imageURL);
                 BufferedImage image = ImageIO.read(url);
                 albumArtThumb.set(SwingFXUtils.toFXImage(image, null));
             }
-            catch (IOException e)
-            {
+            catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
-        if((imageURL = json.optString("picture_full")) != null)
-        {
-            try
-            {
+        if((imageURL = json.optString("picture_full")) != null) {
+            try {
                 BufferedImage buffImage = ImageIO.read(new URL(imageURL));
                 Image image = SwingFXUtils.toFXImage(buffImage, null);
                 albumArt500x500 = ImageUtil.scaleImage(image, 500, 500, true);
-                
+
                 tagDataLookup.put(AdditionalTag.IMAGE_URL, imageURL);
             }
-            catch (IOException e)
-            {
+            catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
@@ -279,63 +256,54 @@ public class VGMDBParser implements InformationBase, Logger
 
         // Get album name
         String albumName;
-        if((albumName = json.optString("name")) != null)
-        {
+        if((albumName = json.optString("name")) != null) {
             // "only my railgun / fripSide [Limited Edition]"
             displayInfo.add("Album: " + albumName.split(" / ", 2)[0]);
-            tagDataLookup.put(Tag.ALBUM, albumName.split(" / ", 2)[0]);
+            tagDataLookup.put(EditorTag.ALBUM, albumName.split(" / ", 2)[0]);
         }
 
         // Get artist
         JSONArray performers;
         List<String> performerList = new ArrayList<String>();
-        if((performers = json.getJSONArray("performers")) != null)
-        {
-            for(int i = 0; i < performers.length(); i++)
-            {
+        if((performers = json.getJSONArray("performers")) != null) {
+            for(int i = 0; i < performers.length(); i++) {
                 JSONObject artistInfo;
                 JSONObject artistVariences;
                 String artistName;
                 if(((artistInfo = performers.optJSONObject(i)) != null) &&
-                    ((artistVariences = artistInfo.optJSONObject("names")) != null) &&
-                    (!(artistName = artistVariences.optString("en")).isEmpty() ||
-                    !(artistName = artistVariences.optString("ja")).isEmpty()) )
-                {
+                   ((artistVariences = artistInfo.optJSONObject("names")) != null) &&
+                   (!(artistName = artistVariences.optString("en")).isEmpty() ||
+                    !(artistName = artistVariences.optString("ja")).isEmpty())) {
                     performerList.add(artistName);
                 }
             }
         }
         displayInfo.add("Artist(s): " + StringUtil.getCommaSeparatedStringWithAnd(performerList));
-        tagDataLookup.put(Tag.ARTIST, StringUtil.getCommaSeparatedStringWithAnd(performerList));
+        tagDataLookup.put(EditorTag.ARTIST, StringUtil.getCommaSeparatedStringWithAnd(performerList));
 
         // Year
         String year;
-        if(!(year = json.getString("release_date")).isEmpty())
-        {
+        if(!(year = json.getString("release_date")).isEmpty()) {
             displayInfo.add("Year: " + year.substring(0, 4)); // yyyy-mm-dd
-            tagDataLookup.put(Tag.YEAR, year.substring(0, 4));
+            tagDataLookup.put(EditorTag.YEAR, year.substring(0, 4));
         }
 
         // Track Info (TODO handle multiple disc in future
         JSONArray discs;
         JSONObject firstDisc;
         JSONArray tracks;
-        if(((discs = json.optJSONArray("discs")) != null) && 
-            ((firstDisc = discs.optJSONObject(0)) != null) &&
-            ((tracks = firstDisc.optJSONArray("tracks")) != null))
-        {
-            for(int i = 0; i < tracks.length(); i++)
-            {
+        if(((discs = json.optJSONArray("discs")) != null) &&
+           ((firstDisc = discs.optJSONObject(0)) != null) &&
+           ((tracks = firstDisc.optJSONArray("tracks")) != null)) {
+            for(int i = 0; i < tracks.length(); i++) {
                 JSONObject trackInfo;
                 JSONObject titleVariences;
                 if(((trackInfo = tracks.optJSONObject(i)) != null) &&
-                    ((titleVariences = trackInfo.optJSONObject("names")) != null))
-                {
+                   ((titleVariences = trackInfo.optJSONObject("names")) != null)) {
                     String title;
                     if(!(title = titleVariences.optString("English")).isEmpty() ||
-                        !(title = titleVariences.optString("Romaji")).isEmpty() ||
-                        !(title = titleVariences.optString("Japanese")).isEmpty())
-                    {
+                       !(title = titleVariences.optString("Romaji")).isEmpty() ||
+                       !(title = titleVariences.optString("Japanese")).isEmpty()) {
                         displayInfo.add((i + 1) + " " + title);
                         tagDataLookup.put(AdditionalTag.getTrackTag(i + 1), title);
                     }
@@ -344,66 +312,54 @@ public class VGMDBParser implements InformationBase, Logger
         }
         // Store Info for additional resources
         JSONArray stores;
-        if(((stores = json.optJSONArray("stores")) != null))
-        {
-            for(int i = 0; i < stores.length(); i++)
-            {
+        if(((stores = json.optJSONArray("stores")) != null)) {
+            for(int i = 0; i < stores.length(); i++) {
                 JSONObject store;
                 String link;
                 if(((store = stores.getJSONObject(i)) != null) &&
                    (store.optString("name").equals("CD Japan") || store.optString("name").equals("Play-Asia")) &&
-                    !(link = store.optString("link")).isEmpty())
-                {
+                   !(link = store.optString("link")).isEmpty()) {
                     displayInfo.add(link);
                 }
             }
         }
-        
+
         // Get theme
         String notes = json.optString("notes");
-        if(notes.toLowerCase().contains("opening"))
-        {
+        if(notes.toLowerCase().contains("opening")) {
             int end = notes.toLowerCase().indexOf("opening");
             int value = Utilities.findIntValue(notes.substring(end - 6, end));
             tagDataLookup.put(AdditionalTag.THEME, "OP" + (value != -1 ? value : ""));
         }
-        if(notes.toLowerCase().contains("ending"))
-        {
+        if(notes.toLowerCase().contains("ending")) {
             int end = notes.toLowerCase().indexOf("ending");
             int value = Utilities.findIntValue(notes.substring(end - 6, end));
             String theme;
             String foundTheme = "ED" + (value != -1 ? value : "");
-            if((theme = tagDataLookup.get(AdditionalTag.THEME)) != null)
-            {
-                tagDataLookup.put(AdditionalTag.THEME, theme + " + " + foundTheme); 
+            if((theme = tagDataLookup.get(AdditionalTag.THEME)) != null) {
+                tagDataLookup.put(AdditionalTag.THEME, theme + " + " + foundTheme);
             }
-            else
-            {
+            else {
                 tagDataLookup.put(AdditionalTag.THEME, foundTheme);
             }
         }
-        if(notes.toLowerCase().contains("insert"))
-        {
+        if(notes.toLowerCase().contains("insert")) {
             int end = notes.toLowerCase().indexOf("insert");
             int value = Utilities.findIntValue(notes.substring(end - 6, end));
             String theme;
             String foundTheme = "IN" + (value != -1 ? value : "");
-            if((theme = tagDataLookup.get(AdditionalTag.THEME)) != null)
-            {
-                tagDataLookup.put(AdditionalTag.THEME, theme + " + " + foundTheme); 
+            if((theme = tagDataLookup.get(AdditionalTag.THEME)) != null) {
+                tagDataLookup.put(AdditionalTag.THEME, theme + " + " + foundTheme);
             }
-            else
-            {
+            else {
                 tagDataLookup.put(AdditionalTag.THEME, foundTheme);
             }
         }
     }
 
-    public void selectAlbum(int index)
-    {
+    public void selectAlbum(int index) {
         // first index is showing query info not actually a result
-        if(!isOnAlbumInfo && index > 0 && index < searchResults.size())
-        {
+        if(!isOnAlbumInfo && index > 0 && index < searchResults.size()) {
             retrieveAlbumByID(searchResults.get(index)[1]);
             isOnAlbumInfo = true; // reset value so clicking on index does nothing
         }
@@ -411,14 +367,12 @@ public class VGMDBParser implements InformationBase, Logger
         {
             displayInfo.clear();
             albumArtThumb.set(null);
-            for(String[] str : searchResults)
-            {
+            for(String[] str : searchResults) {
                 displayInfo.add(str[0]);
             }
             isOnAlbumInfo = false; // reset value so clicking on index does nothing
         }
-        else
-        {
+        else {
             Clipboard clpbrd = Clipboard.getSystemClipboard();
             ClipboardContent content = new ClipboardContent();
             content.putString(displayInfo.get(index));
@@ -430,54 +384,53 @@ public class VGMDBParser implements InformationBase, Logger
     // Getters & Setters //
     // ~~~~~~~~~~~~~~~~~ //
 
-    public ListProperty<String> vgmdbInfoProperty()
-    {
+    public ListProperty<String> vgmdbInfoProperty() {
         return displayInfo;
     }
 
-    public ObjectProperty<Image> albumArtProperty()
-    {
+    public ObjectProperty<Image> albumArtProperty() {
         return albumArtThumb;
     }
 
-    public final Image getAlbumArt()
-    {
+    @Override
+    public final Image getAlbumArt() {
         return albumArt500x500;
     }
-    
-    public List<String> getArtistsInGroup()
-    {
+
+    public List<String> getArtistsInGroup() {
         return null;
     }
 
     @Override
-    public String getDisplayKeywordTagClassName()
-    {
+    public String getDisplayKeywordTagClassName() {
         return "VGMDB";
     }
-    
+
     @Override
-    public String getDataForTag(TagBase<?> tag, String... values)
-    {
+    public String getDataForTag(TagBase<?> tag, String... values) {
         String returnValue = "";
-//        TagBase<?> newTag = Utilities.getEnum(tag, AdditionalTag.class, Tag.class);
-        if(tag == Tag.ALBUM) {
-            returnValue = tagDataLookup.get(Tag.ALBUM);
+        // TagBase<?> newTag = Utilities.getEnum(tag, AdditionalTag.class, Tag.class);
+        if(tag == EditorTag.ALBUM) {
+            returnValue = tagDataLookup.get(EditorTag.ALBUM);
         }
-        else if(tag == Tag.ALBUM_ARTIST) {
-//            returnValue = tagDataLookup.get(VGMDBTag.SERIES);
+        else if(tag == EditorTag.ALBUM_ARTIST) {
+            // returnValue = tagDataLookup.get(VGMDBTag.SERIES);
         }
-        else if(tag == Tag.ARTIST) {
-            returnValue = tagDataLookup.get(Tag.ARTIST);
+        else if(tag == EditorTag.ARTIST) {
+            returnValue = tagDataLookup.get(EditorTag.ARTIST);
         }
-        else if(tag == Tag.COMMENT) {
-//            returnValue = tagDataLookup.get(AdditionalTag.THEME);
+        else if(tag == EditorTag.COMMENT) {
+            // returnValue = tagDataLookup.get(AdditionalTag.THEME);
         }
-        else if(tag == Tag.TRACK) {
+        else if(tag == EditorTag.TRACK || tag == EditorTag.TITLE) {
+            if(values.length == 0) {
+                error("Please pass in int for which track title");
+                return returnValue;
+            }
             returnValue = tagDataLookup.get(AdditionalTag.getTrackTag(Integer.valueOf(values[0])));
         }
-        else if(tag == Tag.YEAR) {
-            returnValue = tagDataLookup.get(Tag.YEAR);
+        else if(tag == EditorTag.YEAR) {
+            returnValue = tagDataLookup.get(EditorTag.YEAR);
         }
         else if(tag == AdditionalTag.SERIES) {
             returnValue = tagDataLookup.get(AdditionalTag.SERIES);
@@ -492,46 +445,34 @@ public class VGMDBParser implements InformationBase, Logger
     }
 
     @Override
-    public void setDataForTag(TagBase<?> tag, String... values)
-    {
-    }
+    public void setDataForTag(TagBase<?> tag, String... values) {}
 
     @Override
-    public void setAlbumArtFromFile(File file)
-    {
-    }
-    
-    @Override
-    public void setAlbumArtFromURL(String url)
-    {  
-    }
+    public void setAlbumArtFromFile(File file) {}
 
     @Override
-    public void save()
-    {
-    }
+    public void setAlbumArtFromURL(String url) {}
 
     @Override
-    public List<String> getPossibleDataForTag(TagBase<?> tag, String values)
-    {
+    public void save() {}
+
+    @Override
+    public List<String> getPossibleDataForTag(TagBase<?> tag, String values) {
         return null;
     }
-    
+
     @Override
-    public TagBase<?>[] getAdditionalTags()
-    {
+    public TagBase<?>[] getAdditionalTags() {
         return AdditionalTag.values();
     }
 
     @Override
-    public List<TagBase<?>> getKeywordTags()
-    {
+    public List<TagBase<?>> getKeywordTags() {
         List<TagBase<?>> keywords = new ArrayList<>();
-        keywords.add(Tag.ALBUM);
-        keywords.add(Tag.ARTIST);
-        keywords.add(Tag.YEAR);
-        for(TagBase<?> t : AdditionalTag.values())
-        {
+        keywords.add(EditorTag.ALBUM);
+        keywords.add(EditorTag.ARTIST);
+        keywords.add(EditorTag.YEAR);
+        for(TagBase<?> t : AdditionalTag.values()) {
             keywords.add(t);
         }
         return keywords;

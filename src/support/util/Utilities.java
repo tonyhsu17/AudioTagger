@@ -6,7 +6,7 @@ import support.structure.Range;
 
 public class Utilities
 {
-    public enum Tag implements TagBase<Tag> {
+    public enum EditorTag implements TagBase<EditorTag> {
         FILE_NAME, TITLE, ARTIST, ALBUM, ALBUM_ARTIST, TRACK, YEAR, GENRE, COMMENT, ALBUM_ART, ALBUM_ART_META,;
     }
     

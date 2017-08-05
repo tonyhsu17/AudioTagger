@@ -30,7 +30,7 @@ import model.information.VGMDBParser;
 import support.Logger;
 import support.structure.Range;
 import support.util.Utilities;
-import support.util.Utilities.Tag;
+import support.util.Utilities.EditorTag;
 
 
 public class MP3TaggerVC implements Logger
@@ -111,27 +111,27 @@ public class MP3TaggerVC implements Logger
         // binds
         songListLV.itemsProperty().bindBidirectional(model.processingFilesProperty());
 
-        fileNameCB.itemsProperty().bindBidirectional(model.getPropertyForTag(Tag.FILE_NAME).getDropDownListProperty());
-        fileNameCB.editorProperty().getValue().textProperty().bindBidirectional(model.getPropertyForTag(Tag.FILE_NAME).getTextProperty());
-        titleCB.itemsProperty().bindBidirectional(model.getPropertyForTag(Tag.TITLE).getDropDownListProperty());
-        titleCB.editorProperty().getValue().textProperty().bindBidirectional(model.getPropertyForTag(Tag.TITLE).getTextProperty());
-        artistCB.itemsProperty().bindBidirectional(model.getPropertyForTag(Tag.ARTIST).getDropDownListProperty());
-        artistCB.editorProperty().getValue().textProperty().bindBidirectional(model.getPropertyForTag(Tag.ARTIST).getTextProperty());
-        albumCB.itemsProperty().bindBidirectional(model.getPropertyForTag(Tag.ALBUM).getDropDownListProperty());
-        albumCB.editorProperty().getValue().textProperty().bindBidirectional(model.getPropertyForTag(Tag.ALBUM).getTextProperty());
-        albumArtistCB.itemsProperty().bindBidirectional(model.getPropertyForTag(Tag.ALBUM_ARTIST).getDropDownListProperty());
+        fileNameCB.itemsProperty().bindBidirectional(model.getPropertyForTag(EditorTag.FILE_NAME).getDropDownListProperty());
+        fileNameCB.editorProperty().getValue().textProperty().bindBidirectional(model.getPropertyForTag(EditorTag.FILE_NAME).getTextProperty());
+        titleCB.itemsProperty().bindBidirectional(model.getPropertyForTag(EditorTag.TITLE).getDropDownListProperty());
+        titleCB.editorProperty().getValue().textProperty().bindBidirectional(model.getPropertyForTag(EditorTag.TITLE).getTextProperty());
+        artistCB.itemsProperty().bindBidirectional(model.getPropertyForTag(EditorTag.ARTIST).getDropDownListProperty());
+        artistCB.editorProperty().getValue().textProperty().bindBidirectional(model.getPropertyForTag(EditorTag.ARTIST).getTextProperty());
+        albumCB.itemsProperty().bindBidirectional(model.getPropertyForTag(EditorTag.ALBUM).getDropDownListProperty());
+        albumCB.editorProperty().getValue().textProperty().bindBidirectional(model.getPropertyForTag(EditorTag.ALBUM).getTextProperty());
+        albumArtistCB.itemsProperty().bindBidirectional(model.getPropertyForTag(EditorTag.ALBUM_ARTIST).getDropDownListProperty());
         albumArtistCB.editorProperty().getValue().textProperty()
-            .bindBidirectional(model.getPropertyForTag(Tag.ALBUM_ARTIST).getTextProperty());
-        trackCB.itemsProperty().bindBidirectional(model.getPropertyForTag(Tag.TRACK).getDropDownListProperty());
-        trackCB.editorProperty().getValue().textProperty().bindBidirectional(model.getPropertyForTag(Tag.TRACK).getTextProperty());
-        yearCB.itemsProperty().bindBidirectional(model.getPropertyForTag(Tag.YEAR).getDropDownListProperty());
-        yearCB.editorProperty().getValue().textProperty().bindBidirectional(model.getPropertyForTag(Tag.YEAR).getTextProperty());
-        genreCB.itemsProperty().bindBidirectional(model.getPropertyForTag(Tag.GENRE).getDropDownListProperty());
-        genreCB.editorProperty().getValue().textProperty().bindBidirectional(model.getPropertyForTag(Tag.GENRE).getTextProperty());
-        commentCB.itemsProperty().bindBidirectional(model.getPropertyForTag(Tag.COMMENT).getDropDownListProperty());
-        commentCB.editorProperty().getValue().textProperty().bindBidirectional(model.getPropertyForTag(Tag.COMMENT).getTextProperty());
+            .bindBidirectional(model.getPropertyForTag(EditorTag.ALBUM_ARTIST).getTextProperty());
+        trackCB.itemsProperty().bindBidirectional(model.getPropertyForTag(EditorTag.TRACK).getDropDownListProperty());
+        trackCB.editorProperty().getValue().textProperty().bindBidirectional(model.getPropertyForTag(EditorTag.TRACK).getTextProperty());
+        yearCB.itemsProperty().bindBidirectional(model.getPropertyForTag(EditorTag.YEAR).getDropDownListProperty());
+        yearCB.editorProperty().getValue().textProperty().bindBidirectional(model.getPropertyForTag(EditorTag.YEAR).getTextProperty());
+        genreCB.itemsProperty().bindBidirectional(model.getPropertyForTag(EditorTag.GENRE).getDropDownListProperty());
+        genreCB.editorProperty().getValue().textProperty().bindBidirectional(model.getPropertyForTag(EditorTag.GENRE).getTextProperty());
+        commentCB.itemsProperty().bindBidirectional(model.getPropertyForTag(EditorTag.COMMENT).getDropDownListProperty());
+        commentCB.editorProperty().getValue().textProperty().bindBidirectional(model.getPropertyForTag(EditorTag.COMMENT).getTextProperty());
         albumArtIV.imageProperty().bindBidirectional(model.albumArtProperty());
-        albumArtMetaLabel.textProperty().bind(model.getPropertyForTag(Tag.ALBUM_ART_META).getTextProperty());
+        albumArtMetaLabel.textProperty().bind(model.getPropertyForTag(EditorTag.ALBUM_ART_META).getTextProperty());
 
         vgmdbInfoLV.itemsProperty().bind(vgmdbParserModel.vgmdbInfoProperty());
         vgmdbAlbumArtIV.imageProperty().bind(vgmdbParserModel.albumArtProperty());
@@ -150,7 +150,7 @@ public class MP3TaggerVC implements Logger
             @Override
             public void handle(MouseEvent event)
             {
-                onMouseClickedEventHandler(event, Tag.FILE_NAME);
+                onMouseClickedEventHandler(event, EditorTag.FILE_NAME);
             }
         });
         titleCB.getEditor().setOnMouseClicked(new EventHandler<MouseEvent>()
@@ -158,7 +158,7 @@ public class MP3TaggerVC implements Logger
             @Override
             public void handle(MouseEvent event)
             {
-                onMouseClickedEventHandler(event, Tag.TITLE);
+                onMouseClickedEventHandler(event, EditorTag.TITLE);
             }
         });
         artistCB.getEditor().setOnMouseClicked(new EventHandler<MouseEvent>()
@@ -166,7 +166,7 @@ public class MP3TaggerVC implements Logger
             @Override
             public void handle(MouseEvent event)
             {
-                onMouseClickedEventHandler(event, Tag.ARTIST);
+                onMouseClickedEventHandler(event, EditorTag.ARTIST);
             }
         });
         albumCB.getEditor().setOnMouseClicked(new EventHandler<MouseEvent>()
@@ -174,7 +174,7 @@ public class MP3TaggerVC implements Logger
             @Override
             public void handle(MouseEvent event)
             {
-                onMouseClickedEventHandler(event, Tag.ALBUM);
+                onMouseClickedEventHandler(event, EditorTag.ALBUM);
             }
         });
         albumArtistCB.getEditor().setOnMouseClicked(new EventHandler<MouseEvent>()
@@ -182,7 +182,7 @@ public class MP3TaggerVC implements Logger
             @Override
             public void handle(MouseEvent event)
             {
-                onMouseClickedEventHandler(event, Tag.ALBUM_ARTIST);
+                onMouseClickedEventHandler(event, EditorTag.ALBUM_ARTIST);
             }
         });
         trackCB.getEditor().setOnMouseClicked(new EventHandler<MouseEvent>()
@@ -190,7 +190,7 @@ public class MP3TaggerVC implements Logger
             @Override
             public void handle(MouseEvent event)
             {
-                onMouseClickedEventHandler(event, Tag.TRACK);
+                onMouseClickedEventHandler(event, EditorTag.TRACK);
             }
         });
         yearCB.getEditor().setOnMouseClicked(new EventHandler<MouseEvent>()
@@ -198,7 +198,7 @@ public class MP3TaggerVC implements Logger
             @Override
             public void handle(MouseEvent event)
             {
-                onMouseClickedEventHandler(event, Tag.YEAR);
+                onMouseClickedEventHandler(event, EditorTag.YEAR);
             }
         });
         genreCB.getEditor().setOnMouseClicked(new EventHandler<MouseEvent>()
@@ -206,7 +206,7 @@ public class MP3TaggerVC implements Logger
             @Override
             public void handle(MouseEvent event)
             {
-                onMouseClickedEventHandler(event, Tag.GENRE);
+                onMouseClickedEventHandler(event, EditorTag.GENRE);
             }
         });
         commentCB.getEditor().setOnMouseClicked(new EventHandler<MouseEvent>()
@@ -214,13 +214,13 @@ public class MP3TaggerVC implements Logger
             @Override
             public void handle(MouseEvent event)
             {
-                onMouseClickedEventHandler(event, Tag.COMMENT);
+                onMouseClickedEventHandler(event, EditorTag.COMMENT);
             }
         });
     }
 
     @SuppressWarnings("unchecked")
-    private void onMouseClickedEventHandler(MouseEvent e, Tag tag)
+    private void onMouseClickedEventHandler(MouseEvent e, EditorTag tag)
     {
         TextField cb = (TextField)e.getSource();
         Range range = Utilities.getRange(cb.getText(), cb.getCaretPosition(), cb.getSelectedText());
@@ -239,7 +239,7 @@ public class MP3TaggerVC implements Logger
             @Override
             public void handle(KeyEvent event)
             {
-                onKeyReleasedEventHandler(event, Tag.ARTIST);
+                onKeyReleasedEventHandler(event, EditorTag.ARTIST);
             }
         });
         albumArtistCB.getEditor().setOnKeyReleased(new EventHandler<KeyEvent>()
@@ -247,7 +247,7 @@ public class MP3TaggerVC implements Logger
             @Override
             public void handle(KeyEvent event)
             {
-                onKeyReleasedEventHandler(event, Tag.ALBUM_ARTIST);
+                onKeyReleasedEventHandler(event, EditorTag.ALBUM_ARTIST);
             }
         });
         genreCB.getEditor().setOnKeyReleased(new EventHandler<KeyEvent>()
@@ -255,16 +255,16 @@ public class MP3TaggerVC implements Logger
             @Override
             public void handle(KeyEvent event)
             {
-                onKeyReleasedEventHandler(event, Tag.GENRE);
+                onKeyReleasedEventHandler(event, EditorTag.GENRE);
             }
         });
     }
     
     @SuppressWarnings("unchecked")
-    private void onKeyReleasedEventHandler(KeyEvent e, Tag tag) {
+    private void onKeyReleasedEventHandler(KeyEvent e, EditorTag tag) {
         TextField tf = (TextField)e.getSource();
         ComboBox<String> cb = ((ComboBox<String>)tf.getParent());
-        model.updateChoicesForTag(Tag.GENRE, (size) ->
+        model.updateChoicesForTag(EditorTag.GENRE, (size) ->
         {
             cb.hide();
             cb.show();
@@ -369,7 +369,7 @@ public class MP3TaggerVC implements Logger
             });
         }
 
-        vgmdbParserModel.searchByAlbum(model.getPropertyForTag(Tag.ALBUM).getTextProperty().get());
+        vgmdbParserModel.searchByAlbum(model.getPropertyForTag(EditorTag.ALBUM).getTextProperty().get());
     }
 
     private void selectFirstIndex()

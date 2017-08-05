@@ -9,22 +9,22 @@ import javafx.scene.image.Image;
 import model.base.InformationBase;
 import model.base.TagBase;
 import support.structure.EditorComboBoxMeta;
-import support.util.Utilities.Tag;
+import support.util.Utilities.EditorTag;
 
 public class EditorComboBoxModel implements InformationBase
 {
-    private HashMap<Tag, EditorComboBoxMeta> tagToData;
+    private HashMap<EditorTag, EditorComboBoxMeta> tagToData;
     
     public EditorComboBoxModel()
     {
-        tagToData = new HashMap<Tag, EditorComboBoxMeta>();
+        tagToData = new HashMap<EditorTag, EditorComboBoxMeta>();
         
-        for(Tag t : Tag.values())
+        for(EditorTag t : EditorTag.values())
         {
             tagToData.put(t, new EditorComboBoxMeta());
         }
     }
-    public EditorComboBoxMeta getMeta(Tag t)
+    public EditorComboBoxMeta getMeta(EditorTag t)
     {
         return tagToData.get(t);
     }
@@ -77,15 +77,15 @@ public class EditorComboBoxModel implements InformationBase
     public List<TagBase<?>> getKeywordTags()
     {
         List<TagBase<?>> keywords = new ArrayList<>();
-        keywords.add(Tag.ALBUM);
-        keywords.add(Tag.ALBUM_ARTIST);
-        keywords.add(Tag.ARTIST);
-        keywords.add(Tag.COMMENT);
-        keywords.add(Tag.FILE_NAME);
-        keywords.add(Tag.GENRE);
-        keywords.add(Tag.TITLE);
-        keywords.add(Tag.TRACK);
-        keywords.add(Tag.YEAR);
+        keywords.add(EditorTag.ALBUM);
+        keywords.add(EditorTag.ALBUM_ARTIST);
+        keywords.add(EditorTag.ARTIST);
+        keywords.add(EditorTag.COMMENT);
+        keywords.add(EditorTag.FILE_NAME);
+        keywords.add(EditorTag.GENRE);
+        keywords.add(EditorTag.TITLE);
+        keywords.add(EditorTag.TRACK);
+        keywords.add(EditorTag.YEAR);
         return keywords;
     }
 

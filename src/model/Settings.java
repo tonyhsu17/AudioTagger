@@ -16,9 +16,11 @@ import model.base.InformationBase;
 import model.base.TagBase;
 import support.EventCenter;
 import support.EventCenter.Events;
+import support.Logger;
 import support.structure.SettingsTableViewMeta;
 import support.util.Utilities;
-import support.util.Utilities.Tag;
+import support.util.Utilities.EditorTag;
+
 
 
 /**
@@ -26,15 +28,13 @@ import support.util.Utilities.Tag;
  * 
  * @author Tony Hsu
  */
-public class Settings
-{
+public class Settings implements Logger {
     /**
      * Singleton Initialization
      */
     private static Settings self = new Settings();
 
-    public static enum SettingsKey
-    {
+    public static enum SettingsKey {
         PROPAGATE_SAVE_ARTIST("Propagate Save for Artist"), PROPAGATE_SAVE_ALBUM("Propagate Save for Artist"),
         PROPAGATE_SAVE_ALBUM_ARTIST("Propagate Save for Artist"), PROPAGATE_SAVE_YEAR("Propagate Save for Artist"),
         PROPAGATE_SAVE_GENRE("Propagate Save for Artist"), PROPAGATE_SAVE_COMMENT("Propagate Save for Artist"),
@@ -50,22 +50,17 @@ public class Settings
 
         String description;
 
-        private SettingsKey(String description)
-        {
+        private SettingsKey(String description) {
             this.description = description;
         }
 
-        public String getDescription()
-        {
+        public String getDescription() {
             return description;
         }
 
-        public static SettingsKey toKey(String str)
-        {
-            for(SettingsKey key : SettingsKey.values())
-            {
-                if(key.toString().equals(str))
-                {
+        public static SettingsKey toKey(String str) {
+            for(SettingsKey key : SettingsKey.values()) {
+                if(key.toString().equals(str)) {
                     return key;
                 }
             }
@@ -79,24 +74,20 @@ public class Settings
 
     private HashMap<SettingsKey, SettingsTableViewMeta> map;
 
-    private class KeywordTagMetaData
-    {
+    private class KeywordTagMetaData {
         private InformationBase dataClass;
         private TagBase<?> tag;
 
-        public KeywordTagMetaData(InformationBase dataClass, TagBase<?> tag)
-        {
+        public KeywordTagMetaData(InformationBase dataClass, TagBase<?> tag) {
             this.dataClass = dataClass;
             this.tag = tag;
         }
 
-        public InformationBase getSuggestorClass()
-        {
+        public InformationBase getSuggestorClass() {
             return dataClass;
         }
 
-        public TagBase<?> getTag()
-        {
+        public TagBase<?> getTag() {
             return tag;
         }
     }
@@ -105,25 +96,21 @@ public class Settings
      * Private constructor to prevent instantiating multiple instances.
      * Use getInstance() to get singleton.
      */
-    private Settings()
-    {
+    private Settings() {
         map = new HashMap<>();
 
         settingsFile = new File(fileName);
-        if(settingsFile.exists())
-        {
+        if(settingsFile.exists()) {
             // resetToDefaults();
             loadSettings();
         }
-        else
-        {
+        else {
             resetToDefaults();
         }
         keywordTagsDataMapping = new HashMap<>();
     }
 
-    private void resetToDefaults()
-    {
+    private void resetToDefaults() {
         map.clear();
         map.put(SettingsKey.PROPAGATE_SAVE_ARTIST, new SettingsTableViewMeta(SettingsKey.PROPAGATE_SAVE_ARTIST, "true"));
         map.put(SettingsKey.PROPAGATE_SAVE_ALBUM, new SettingsTableViewMeta(SettingsKey.PROPAGATE_SAVE_ALBUM, "true"));
@@ -146,28 +133,23 @@ public class Settings
     /**
      * Load settings
      */
-    private void loadSettings()
-    {
+    private void loadSettings() {
         Scanner sc;
-        try
-        {
+        try {
             sc = new Scanner(settingsFile);
-            while(sc.hasNextLine())
-            {
+            while(sc.hasNextLine()) {
                 String line = sc.nextLine(); // Grab each setting line
                 String[] splitLine = line.split("=", 2); // parse setting to [key, value]
 
                 SettingsKey key = SettingsKey.toKey(splitLine[0]);
-                String value = splitLine[1];
+                info(key.toString());
 
-                if(key != null)
-                {
+                if(key != null) {
                     map.put(key, new SettingsTableViewMeta(key, splitLine[1]));
                 }
             }
         }
-        catch (FileNotFoundException e)
-        {
+        catch (FileNotFoundException e) {
             // Should not come here since file is confirmed first
         }
     }
@@ -175,20 +157,16 @@ public class Settings
     /**
      * @return Singleton of Configuration
      */
-    public static Settings getInstance()
-    {
+    public static Settings getInstance() {
         return self;
     }
 
-    public SettingsTableViewMeta getKeyValuePair(SettingsKey key)
-    {
+    public SettingsTableViewMeta getKeyValuePair(SettingsKey key) {
         return map.get(key);
     }
 
-    public void setSetting(SettingsKey key, String value)
-    {
-        switch (key)
-        {
+    public void setSetting(SettingsKey key, String value) {
+        switch (key) {
             case PROPAGATE_SAVE_ALBUM:
             case PROPAGATE_SAVE_ALBUM_ART:
             case PROPAGATE_SAVE_ALBUM_ARTIST:
@@ -206,19 +184,19 @@ public class Settings
         }
     }
 
-    public boolean isAnyPropagateSaveOn()
-    {
-        return isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_ALBUM) || isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_ALBUM_ART) ||
-            isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_ALBUM_ARTIST) || isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_ARTIST) ||
-            isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_COMMENT) || isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_GENRE) ||
-            isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_YEAR);
+    public boolean isAnyPropagateSaveOn() {
+        return isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_ALBUM) ||
+               isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_ALBUM_ART) ||
+               isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_ALBUM_ARTIST) ||
+               isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_ARTIST) ||
+               isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_COMMENT) ||
+               isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_GENRE) ||
+               isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_YEAR);
     }
 
-    public boolean isPropagateSaveOn(SettingsKey key)
-    {
+    public boolean isPropagateSaveOn(SettingsKey key) {
         boolean flag = false;
-        switch (key)
-        {
+        switch (key) {
             case PROPAGATE_SAVE_ALBUM:
             case PROPAGATE_SAVE_ALBUM_ART:
             case PROPAGATE_SAVE_ALBUM_ARTIST:
@@ -234,12 +212,9 @@ public class Settings
         return flag;
     }
 
-    public void setKeywordTags(HashMap<InformationBase, List<TagBase<?>>> mapping)
-    {
-        for(Entry<InformationBase, List<TagBase<?>>> entry : mapping.entrySet())
-        {
-            for(TagBase<?> tag : entry.getValue())
-            {
+    public void setKeywordTags(HashMap<InformationBase, List<TagBase<?>>> mapping) {
+        for(Entry<InformationBase, List<TagBase<?>>> entry : mapping.entrySet()) {
+            for(TagBase<?> tag : entry.getValue()) {
                 // System.out.println("$" + entry.getKey().getDisplayKeywordTagClassName() + "." + tag.name());
                 keywordTagsDataMapping.put("$" + entry.getKey().getDisplayKeywordTagClassName() + "." + tag.name(),
                     new KeywordTagMetaData(entry.getKey(), tag));
@@ -248,12 +223,10 @@ public class Settings
     }
 
     // Akame ga Kill ED Single - Konna Sekai, Shiritaku Nakatta. [Miku Sawai]
-    public KeywordInterpreter getRuleFor(Tag tag)
-    {
+    public KeywordInterpreter getRuleFor(EditorTag tag) {
         String rule = "";
         // set rule
-        switch (tag)
-        {
+        switch (tag) {
             case ALBUM:
                 break;
             case ALBUM_ART:
@@ -283,12 +256,9 @@ public class Settings
                 break;
         }
 
-        if(rule.isEmpty() || keywordTagsDataMapping.keySet().isEmpty())
-        {
+        if(rule.isEmpty() || keywordTagsDataMapping.keySet().isEmpty()) {
             return null; // return early if no rule found
         }
-
-        // $VGMDB.SERIES $VGMDB.THEME Single - $Editor.TITLE [$Editor.ARTIST]
 
         // extrapolate each tag out
         // return string as "%s %s Single - %s [%s]", arr[ of class + tag ]
@@ -299,24 +269,20 @@ public class Settings
 
         int total = 0; // total keywords
         int count = 0; // num of keywords found
-
         // for each split
-        for(String parsed : splitRule)
-        {
-            // if the split is not empty
-            if(!parsed.isEmpty())
-            {
+        for(String parsed : splitRule) {
+            // if the split word (parsed) is not empty
+            if(!parsed.isEmpty()) {
                 total++;
-                // check each keywordTag to find a match
-                for(String s : keywordTagsDataMapping.keySet())
-                {
+                // check each keywordTag in Mapping to find a match
+                for(String s : keywordTagsDataMapping.keySet()) {
                     // if keywordTag matched with parsed text
-                    if(parsed.startsWith(s.substring(1), 0))
-                    {
+                    if(parsed.startsWith(s.substring(1), 0)) {
                         count++;
                         // replace keywordTag with string formatter %s
                         builder.appendToRule("%s" + parsed.substring(s.length() - 1), keywordTagsDataMapping.get(s).getSuggestorClass(),
                             keywordTagsDataMapping.get(s).getTag());
+                        break;
                     }
                 }
             }
@@ -325,8 +291,7 @@ public class Settings
         return total == count ? builder : null;
     }
 
-    public List<String> getKeywordTags()
-    {
+    public List<String> getKeywordTags() {
         ArrayList<String> keys = new ArrayList<String>(keywordTagsDataMapping.keySet());
         Collections.sort(keys);
         return keys;
@@ -335,10 +300,8 @@ public class Settings
     /**
      * Save Settings
      */
-    public void saveSettings()
-    {
-        for(SettingsTableViewMeta sm : map.values())
-        {
+    public void saveSettings() {
+        for(SettingsTableViewMeta sm : map.values()) {
             sm.save();
         }
         writeSettings();
@@ -346,29 +309,23 @@ public class Settings
         EventCenter.getInstance().postEvent(Events.SettingChanged, null);
     }
 
-    public void revertSettings()
-    {
-        for(SettingsTableViewMeta sm : map.values())
-        {
+    public void revertSettings() {
+        for(SettingsTableViewMeta sm : map.values()) {
             sm.revert();
         }
     }
 
-    public void writeSettings()
-    {
-        try
-        {
+    public void writeSettings() {
+        try {
             BufferedWriter output = new BufferedWriter(new FileWriter(settingsFile));
-            for(SettingsTableViewMeta sm : map.values())
-            {
+            for(SettingsTableViewMeta sm : map.values()) {
                 System.out.println(sm.getKey() + "=" + sm.getValue());
                 output.write(sm.getKey() + "=" + sm.getValue());
                 output.newLine();
             }
             output.close();
         }
-        catch (IOException e)
-        {
+        catch (IOException e) {
 
         }
     }
