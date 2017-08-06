@@ -1,17 +1,32 @@
-package junit.support.util;
+package support.util.test;
 
-import static org.junit.Assert.assertEquals;
+import static org.testng.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
 import support.util.StringUtil;
 
 
 
 public class StringUtilTest {
+    @DataProvider(name = "SplitNameValues")
+    public static Object[][] rangeValues() {
+        return new Object[][] {{"first middle last", "first middle", "last"},
+            {"aSingleName", "aSingleName", ""}};
+    }
+
+    @Test(dataProvider = "SplitNameValues")
+    public void testSplitName(String fullName, String first, String last) {
+        String[] result = StringUtil.splitName(fullName);
+        assertEquals(first, result[0], "first name");
+        assertEquals(last, result[1], "last name");
+
+    }
+
     @Test
     public void testCommaSeparatedStringAnd() {
         List<String> list = new ArrayList<String>();
@@ -38,17 +53,6 @@ public class StringUtilTest {
         assertEquals("<Different Values>", StringUtil.getComparedName("miku", "hatsune miku"));
     }
 
-    @Test
-    public void testSplitName() {
-        String[] result = StringUtil.splitName("first middle last");
-        assertEquals("first middle", result[0]);
-        assertEquals("last", result[1]);
-
-        result = StringUtil.splitName("aSingleName");
-        assertEquals("aSingleName", result[0]);
-        assertEquals("", result[1]);
-
-    }
 
     @Test
     public void testCreateQuestionMarks() {

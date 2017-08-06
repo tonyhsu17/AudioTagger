@@ -328,12 +328,12 @@ public class VGMDBParser implements InformationBase, Logger {
         String notes = json.optString("notes");
         if(notes.toLowerCase().contains("opening")) {
             int end = notes.toLowerCase().indexOf("opening");
-            int value = Utilities.findIntValue(notes.substring(end - 6, end));
+            int value = Utilities.findIntValueWithSuffix(notes.substring(end - 6, end));
             tagDataLookup.put(AdditionalTag.THEME, "OP" + (value != -1 ? value : ""));
         }
         if(notes.toLowerCase().contains("ending")) {
             int end = notes.toLowerCase().indexOf("ending");
-            int value = Utilities.findIntValue(notes.substring(end - 6, end));
+            int value = Utilities.findIntValueWithSuffix(notes.substring(end - 6, end));
             String theme;
             String foundTheme = "ED" + (value != -1 ? value : "");
             if((theme = tagDataLookup.get(AdditionalTag.THEME)) != null) {
@@ -345,7 +345,7 @@ public class VGMDBParser implements InformationBase, Logger {
         }
         if(notes.toLowerCase().contains("insert")) {
             int end = notes.toLowerCase().indexOf("insert");
-            int value = Utilities.findIntValue(notes.substring(end - 6, end));
+            int value = Utilities.findIntValueWithSuffix(notes.substring(end - 6, end));
             String theme;
             String foundTheme = "IN" + (value != -1 ? value : "");
             if((theme = tagDataLookup.get(AdditionalTag.THEME)) != null) {
