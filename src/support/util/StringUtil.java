@@ -63,7 +63,10 @@ public class StringUtil {
      * @return Same given value or "Different"
      */
     public static String getComparedName(String s1, String s2) {
-        if(s1 == null || s2 == null || !s1.equals(s2)) {
+        if(s1 == s2) {
+            return s1;
+        }
+        else if(s1 == null || s2 == null || !s1.equals(s2)) {
             return Constants.KEYWORD_DIFF_VALUE;
         }
         else {
@@ -100,6 +103,12 @@ public class StringUtil {
         return sb.toString();
     }
 
+    /**
+     * Retrieves text within delimiters
+     * 
+     * @param search String to search
+     * @return List of text including delimiters matched
+     */
     public static List<String> getStrInDelim(String search) {
         List<String> results = new ArrayList<String>();
         if(search == null || search.isEmpty()) {
@@ -116,6 +125,14 @@ public class StringUtil {
         return results;
     }
 
+    /**
+     * Retrieves a list of different values within the delimiters
+     * 
+     * @param before Original string
+     * @param after Modified string
+     * @return List of arrays containing original and modified string. array[0] = original, array[1]
+     *         = modified
+     */
     public static List<String[]> getDiffInDelim(String before, String after) {
         List<String[]> results = new ArrayList<String[]>();
 
@@ -126,7 +143,7 @@ public class StringUtil {
         }
 
         for(int i = 0; i < beforeResults.size(); i++) {
-            if(!beforeResults.equals(afterResults)) {
+            if(!beforeResults.get(i).equals(afterResults.get(i))) {
                 results.add(new String[] {beforeResults.get(i), afterResults.get(i)});
             }
         }

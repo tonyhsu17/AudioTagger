@@ -8,27 +8,81 @@ import java.util.List;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import support.Constants;
 import support.util.StringUtil;
 
 
 
 public class StringUtilTest {
-    @DataProvider(name = "SplitNameValues")
-    public static Object[][] rangeValues() {
+    @DataProvider(name = "dataSplitName")
+    public static Object[][] dataSplitName() {
         return new Object[][] {{"first middle last", "first middle", "last"},
-            {"aSingleName", "aSingleName", ""}};
+            {"aSingleName", "aSingleName", ""},
+            {"a b c d", "a b c", "d"}};
     }
 
-    @Test(dataProvider = "SplitNameValues")
+    @Test(dataProvider = "dataSplitName")
     public void testSplitName(String fullName, String first, String last) {
         String[] result = StringUtil.splitName(fullName);
         assertEquals(first, result[0], "first name");
         assertEquals(last, result[1], "last name");
+    }
 
+    @DataProvider(name = "dataSplitBySeparators")
+    public static Object[][] dataSplitBySeparators() {
+        return new Object[][] {
+            {"fripSide, claris, Arisa Meigeo & illya von esienberg", "fripSide", "claris", "Arisa Meigeo", "illya von esienberg"},
+            {"fripSide & claris", "fripSide", "claris"},
+            {"", ""},
+            {"illya", "illya"}};
+    }
+
+    @Test(dataProvider = "dataSplitBySeparators")
+    public void testSplitBySeparators(String fullString, String... individuals) {
+        String[] strings = StringUtil.splitBySeparators(fullString);
+        assertEquals(strings.length, individuals.length);
+        for(int i = 0; i < strings.length; i++) {
+            assertEquals(strings[i], individuals[i]);
+        }
+    }
+
+    @DataProvider(name = "dataCreateQuestionMarks")
+    public static Object[][] questionMarksValues() {
+        return new Object[][] {
+            {1, "?"},
+            {2, "?, ?"},
+            {5, "?, ?, ?, ?, ?"}};
+    }
+
+    @Test(dataProvider = "dataCreateQuestionMarks")
+    public void testCreateQuestionMarks(int count, String expected) {
+        assertEquals(StringUtil.createQuestionMarks(count), expected);
+    }
+
+    @DataProvider(name = "dataCompareName")
+    public static Object[][] dataCompareName() {
+        return new Object[][] {{"miku", "miku", "miku"},
+            {"hatsune miku", "miku", Constants.KEYWORD_DIFF_VALUE},
+            {"miku", "hatsune miku", Constants.KEYWORD_DIFF_VALUE},
+            {"", "miku", Constants.KEYWORD_DIFF_VALUE},
+            {null, "miku", Constants.KEYWORD_DIFF_VALUE},
+            {"aasd", null, Constants.KEYWORD_DIFF_VALUE},
+            {null, null, null}};
+    }
+
+    @Test(dataProvider = "dataCompareName")
+    public void testCompareName(String s1, String s2, String compareVal) {
+        assertEquals(StringUtil.getComparedName(s1, s2), compareVal);
     }
 
     @Test
-    public void testCommaSeparatedStringAnd() {
+    public void testIsKeyword() {
+        assertEquals(StringUtil.isKeyword(Constants.KEYWORD_DIFF_VALUE), true);
+        assertEquals(StringUtil.isKeyword("not keyword"), false);
+    }
+
+    @Test
+    public void testGetCommaSeparatedStringWithAnd() {
         List<String> list = new ArrayList<String>();
 
         list.add("one");
@@ -47,46 +101,37 @@ public class StringUtilTest {
         assertEquals("one, two, three, four & five", StringUtil.getCommaSeparatedStringWithAnd(list));
     }
 
-    @Test
-    public void testCompareName() {
-        assertEquals("miku", StringUtil.getComparedName("miku", "miku"));
-        assertEquals("<Different Values>", StringUtil.getComparedName("miku", "hatsune miku"));
+    @DataProvider(name = "dataGetStrInDelim")
+    public static Object[][] dataGetStrInDelim() {
+        return new Object[][] {{"asd [instru]", "[instru]"},
+            {"asd -tv size- asddsa", "-tv size-"},
+            {"asd (tv ver)-instrumental- asd ~remix~;", "(tv ver)", "-instrumental-", "~remix~"}};
     }
 
-
-    @Test
-    public void testCreateQuestionMarks() {
-        assertEquals("?, ?, ?, ?, ?", StringUtil.createQuestionMarks(5));
+    @Test(dataProvider = "dataGetStrInDelim")
+    public void testGetStrInDelim(String search, String... expectedList) {
+        List<String> list = StringUtil.getStrInDelim(search);
+        assertEquals(expectedList.length, list.size());
+        for(int i = 0; i < list.size(); i++) {
+            assertEquals(list.get(i), expectedList[i]);
+        }
     }
 
-    @Test
-    public void testSplitBySeparators() {
-        String names = "fripSide, claris, Arisa Meigeo & illy von esienberg";
-        String[] result = StringUtil.splitBySeparators(names);
-        assertEquals(4, result.length);
-        assertEquals("fripSide", result[0]);
-        assertEquals("claris", result[1]);
-        assertEquals("Arisa Meigeo", result[2]);
-        assertEquals("illy von esienberg", result[3]);
+    @DataProvider(name = "dataGetDiffInDelim")
+    public static Object[][] dataGetDiffInDelim() {
+        return new Object[][] {
+            {"High Free Spirits (TV Size)", "High Free Spirits (TV Size)", ""},
+            {"High Free Spirits [TV.ver]", "High Free Spirits (TV Size)", "[TV.ver]", "(TV Size)"},
+            {"level 5 ~judgelight~ [TVver](remix)", "Level 5 -Judgelight- (TV Size) (remix)", "~judgelight~", "-Judgelight-", "[TVver]", "(TV Size)"}};
     }
 
-    @Test
-    public void testGetDiffInDelim() {
-        // also tests getStrInDelim()
-        String[] posTest1 = {"High Free Spirits [TV.ver]", "High Free Spirits (TV Size)"};
-        String[] posResult1 = {"[TV.ver]", "(TV Size)"};
-        String[] posTest2 = {"level 5 ~judgelight~ [TVver]", "Level 5 -Judgelight- (TV Size)"};
-        String[] posResult2 = {"~judgelight~", "-Judgelight-", "[TVver]", "(TV Size)"};
-
-        List<String[]> list = StringUtil.getDiffInDelim(posTest1[0], posTest1[1]);
-        assertEquals(list.size(), 1);
-        assertEquals(list.get(0)[0], posResult1[0]);
-        assertEquals(list.get(0)[1], posResult1[1]);
-        list = StringUtil.getDiffInDelim(posTest2[0], posTest2[1]);
-        assertEquals(list.size(), 2);
-        assertEquals(list.get(0)[0], posResult2[0]);
-        assertEquals(list.get(0)[1], posResult2[1]);
-        assertEquals(list.get(1)[0], posResult2[2]);
-        assertEquals(list.get(1)[1], posResult2[3]);
+    @Test(dataProvider = "dataGetDiffInDelim")
+    public void testGetDiffInDelim(String s1, String s2, String... expected) {
+        List<String[]> list = StringUtil.getDiffInDelim(s1, s2);
+        assertEquals(list.size(), expected.length / 2);
+        for(int i = 0; i < list.size(); i++) {
+            assertEquals(list.get(i)[0], expected[i * 2]);
+            assertEquals(list.get(i)[1], expected[i * 2 + 1]);
+        }
     }
 }
