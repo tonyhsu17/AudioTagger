@@ -33,10 +33,10 @@ public class AudioFileJUnitTest {
     private static final String FILE_B = "testFileB.mp3";
     private static final String FILE_C = "testFileC.mp3";
     private static final String FILE_D = "testFileD.mp3";
-    private static final String TEMP_DIR = "TestResources/Temp";
+    private static final String TEMP_DIR = "TestResources/Temp/";
+    
     private File tempDir;
-
-    public AudioFiles audioList;
+    private AudioFiles audioList;
 
     @BeforeClass
     public void setUp() {
@@ -47,8 +47,6 @@ public class AudioFileJUnitTest {
         catch (IOException e) {
             fail("Unable to copy test resources");
         }
-//        audioList = new AudioFiles();
-//        audioList.setWorkingDirectory(WORKING_DIR);
         Settings.getInstance().setSetting(SettingsKey.PROPAGATE_SAVE_ALBUM, "false");
         Settings.getInstance().setSetting(SettingsKey.PROPAGATE_SAVE_ALBUM_ART, "false");
         Settings.getInstance().setSetting(SettingsKey.PROPAGATE_SAVE_ALBUM_ARTIST, "false");
@@ -219,7 +217,7 @@ public class AudioFileJUnitTest {
                 Constants.KEYWORD_DIFF_VALUE,
                 Constants.KEYWORD_DIFF_VALUE,
                 Constants.KEYWORD_DIFF_VALUE,
-                Constants.KEYWORD_DIFF_VALUE,
+                "TestCollectionB",
                 Constants.KEYWORD_DIFF_VALUE,
                 "2011",
                 "Anime",
@@ -267,7 +265,7 @@ public class AudioFileJUnitTest {
         assertEquals(audioList.getDataForTag(EditorTag.COMMENT), comment, "Comment " + testDesc);
 
 //      assertEquals(audioList.getDataForTag(EditorTag.ALBUM_ART), Constants.KEYWORD_DIFF_VALUE);
-//        assertEquals(audioList.getDataForTag(EditorTag.ALBUM_ART_META), Constants.KEYWORD_DIFF_VALUE);
+//      assertEquals(audioList.getDataForTag(EditorTag.ALBUM_ART_META), Constants.KEYWORD_DIFF_VALUE);
     }
 
     @DataProvider(name = "audioSaveMeta")

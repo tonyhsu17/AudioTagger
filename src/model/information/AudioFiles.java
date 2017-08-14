@@ -211,7 +211,23 @@ public class AudioFiles implements InformationBase, Logger {
     // set fields to the currently opened file
     public void selectTags(List<Integer> indicies) {
         selectedIndicies.clear();
+
+        List<Integer> temp = new ArrayList<Integer>();
+        // santizie the indicies to contain only valid audio indicies (ie convert folder index to
+        // file indicies)
         for(int index : indicies) {
+            if(index >= 0 &&
+               index < workingMP3Files.size() &&
+               selectedFileNames.get(index).startsWith(Constants.HEADER_ALBUM)) {
+                List<Integer> albumSelectedIndicies = getAllIndexFromAlbum(index + 1, true);
+                temp.addAll(albumSelectedIndicies);
+            }
+            else {
+                temp.add(index);
+            }
+        }
+
+        for(int index : temp) {
             if(index >= 0 && index < workingMP3Files.size()) {
                 selectedIndicies.add(index);
                 MP3File f = workingMP3Files.get(index);
@@ -324,6 +340,7 @@ public class AudioFiles implements InformationBase, Logger {
 
     /**
      * Returns the display list of folders with audio files within them
+     * 
      * @return n Folders + n Audio Files
      */
     public final List<String> getFileNames() {
