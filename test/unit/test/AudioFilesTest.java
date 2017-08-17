@@ -24,7 +24,7 @@ import support.util.Utilities.EditorTag;
 
 
 
-public class AudioFileJUnitTest {
+public class AudioFilesTest {
     private static final String WORKING_DIR = "TestResources/Audios/";
     private static final String FOLDER_A = "FolderA";
     private static final String FOLDER_B = "FolderB";

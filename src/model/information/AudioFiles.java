@@ -44,10 +44,12 @@ import support.util.Utilities.EditorTag;
 
 
 public class AudioFiles implements InformationBase, Logger {
-    ArrayList<MP3File> workingMP3Files;
-    ArrayList<String> workingDirectories;
+    private ArrayList<String> workingDirectories;
 
+    // list view display, includes album headers
     private ListProperty<String> selectedFileNames;
+    // audio files, null placeholders for album headers
+    private ArrayList<MP3File> workingMP3Files;
 
     // currently selected information
     private String fileName;
@@ -62,9 +64,8 @@ public class AudioFiles implements InformationBase, Logger {
     private Image albumArt;
     private String albumArtMeta;
 
-    private List<Integer> selectedIndicies; // index of selected file
-    private List<Integer> selectedIndiciesCopy; // copy of index of selected file, to revert back
-                                                // after saving
+    private List<Integer> selectedindices; // index of selected file
+    private List<Integer> selectedindicesCopy; // copy of index of selected file, to revert back after saving
 
     public AudioFiles() {
         selectedFileNames = new SimpleListProperty<String>();
@@ -74,7 +75,7 @@ public class AudioFiles implements InformationBase, Logger {
     }
 
     private void reset() {
-        selectedIndicies = new ArrayList<Integer>();
+        selectedindices = new ArrayList<Integer>();
         workingMP3Files = new ArrayList<>();
         workingDirectories = new ArrayList<String>();
 
@@ -92,29 +93,32 @@ public class AudioFiles implements InformationBase, Logger {
         albumArtMeta = "";
     }
 
+    /**
+     * Set the working directory and load in all audio files within
+     * 
+     * @param folder Directory Path
+     */
     public void setWorkingDirectory(String folder) {
         reset();
         appendWorkingDirectory(new File[] {new File(folder)});
     }
 
+    /**
+     * Append more directories to the list
+     * 
+     * @param files Directories or files
+     */
     public void appendWorkingDirectory(File[] files) {
         List<File> directoriesQueue = new ArrayList<File>();
         List<File> filesInDirQueue = new ArrayList<File>();
         Arrays.sort(files);
-        for(File f : files) // for each file
-        {
+        for(File f : files) {// for each file
             String fullPath = f.getPath();
-            if(f.isDirectory()) // if folder
-            {
+            if(f.isDirectory()) {// if folder
                 directoriesQueue.add(f);
             }
             // else if correct file
-            else if(FilenameUtils.getExtension(fullPath).equals("mp3") || FilenameUtils.getExtension(fullPath).equals("m4a")) // TODO
-                                                                                                                              // the
-                                                                                                                              // other
-                                                                                                                              // formats
-                                                                                                                              // too
-            {
+            else if(FilenameUtils.getExtension(fullPath).equals("mp3") || FilenameUtils.getExtension(fullPath).equals("m4a")) {// TODO the other formats too
                 filesInDirQueue.add(f);
             }
         }
@@ -133,7 +137,6 @@ public class AudioFiles implements InformationBase, Logger {
                 }
                 catch (IOException | TagException | ReadOnlyFileException | CannotReadException | InvalidAudioFrameException e) {
                     error("failed on: " + sub.getPath());
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
             }
@@ -147,41 +150,53 @@ public class AudioFiles implements InformationBase, Logger {
         }
     }
 
+    /**
+     * Returns a list of indices that are part of the selected album
+     * 
+     * @param n Selected index
+     * @param includeSelf Include selected index in list
+     * @return list of indices in the same album
+     */
     private List<Integer> getAllIndexFromAlbum(int n, boolean includeSelf) {
-        List<Integer> indicies = new ArrayList<Integer>();
+        List<Integer> indices = new ArrayList<Integer>();
 
         int lower = n - 1;
         int upper = n + 1;
 
-        if(includeSelf && !selectedFileNames.get(n).startsWith(Constants.HEADER_ALBUM)) {
-            indicies.add(n);
+        if(includeSelf && workingMP3Files.get(n) != null) {
+            indices.add(n);
         }
 
-        while(lower >= 0 && !selectedFileNames.get(lower).startsWith(Constants.HEADER_ALBUM)) {
-            indicies.add(lower);
+        while(lower >= 0 && workingMP3Files.get(lower) != null) {
+            indices.add(lower);
             lower--;
         }
-        while(upper < workingMP3Files.size() && !selectedFileNames.get(upper).startsWith(Constants.HEADER_ALBUM)) {
-            indicies.add(upper);
+        while(upper < workingMP3Files.size() && workingMP3Files.get(upper) != null) {
+            indices.add(upper);
             upper++;
         }
-        debug("Indicies Selected: " + Arrays.toString(indicies.toArray(new Integer[0])));
-        return indicies;
+        debug("indices Selected: " + Arrays.toString(indices.toArray(new Integer[0])));
+        return indices;
     }
 
-    // set fields to the currently opened file
+    /**
+     * Set fields to the currently selected index
+     * 
+     * @param index Audio file to open up and modify
+     */
     public void selectTag(int index) {
+        // should probably condense this with selectTag(int indices)
         debug("SelectFeild: " + index);
         if(index >= 0 && index < workingMP3Files.size()) {
             if(selectedFileNames.get(index).startsWith(Constants.HEADER_ALBUM)) {
                 selectTag(index + 1); // initially set a tag,
                 // selectMultipleTags instead
-                List<Integer> indicies = getAllIndexFromAlbum(index + 1, true);
-                selectTags(indicies);
+                List<Integer> indices = getAllIndexFromAlbum(index + 1, true);
+                selectTags(indices);
             }
             else {
-                selectedIndicies.clear();
-                selectedIndicies.add(index);
+                selectedindices.clear();
+                selectedindices.add(index);
                 MP3File f = workingMP3Files.get(index);
                 AbstractID3v2Tag tags = f.getID3v2Tag();
 
@@ -198,8 +213,7 @@ public class AudioFiles implements InformationBase, Logger {
                 Image image = getAlbumArt(tags);
                 albumArt = image;
 
-                // sizeInBytes=
-                // http://stackoverflow.com/questions/6250200/how-to-get-the-size-of-an-image-in-java
+                // sizeInBytes=http://stackoverflow.com/questions/6250200/how-to-get-the-size-of-an-image-in-java
                 String mimeType = getAlbumImageMimeType(tags);
                 if(image != null) {
                     albumArtMeta = mimeType + " : " + (int)image.getWidth() + "x" + (int)image.getHeight();
@@ -208,19 +222,23 @@ public class AudioFiles implements InformationBase, Logger {
         }
     }
 
-    // set fields to the currently opened file
-    public void selectTags(List<Integer> indicies) {
-        selectedIndicies.clear();
+    /**
+     * Set fields to the currently selected indices
+     * 
+     * @param indices Audio file to open up and modify
+     */
+    public void selectTags(List<Integer> indices) {
+        selectedindices.clear();
 
         List<Integer> temp = new ArrayList<Integer>();
-        // santizie the indicies to contain only valid audio indicies (ie convert folder index to
-        // file indicies)
-        for(int index : indicies) {
+        // sanitize the indices to contain only valid audio indices (ie convert folder index to
+        // file indices)
+        for(int index : indices) {
             if(index >= 0 &&
                index < workingMP3Files.size() &&
                selectedFileNames.get(index).startsWith(Constants.HEADER_ALBUM)) {
-                List<Integer> albumSelectedIndicies = getAllIndexFromAlbum(index + 1, true);
-                temp.addAll(albumSelectedIndicies);
+                List<Integer> albumSelectedindices = getAllIndexFromAlbum(index + 1, true);
+                temp.addAll(albumSelectedindices);
             }
             else {
                 temp.add(index);
@@ -229,7 +247,7 @@ public class AudioFiles implements InformationBase, Logger {
 
         for(int index : temp) {
             if(index >= 0 && index < workingMP3Files.size()) {
-                selectedIndicies.add(index);
+                selectedindices.add(index);
                 MP3File f = workingMP3Files.get(index);
                 AbstractID3v2Tag tags = f.getID3v2Tag();
 
@@ -245,8 +263,7 @@ public class AudioFiles implements InformationBase, Logger {
                 Image image = ImageUtil.getComparedImage(albumArt, getAlbumArt(tags));
                 albumArt = image;
 
-                // sizeInBytes=
-                // http://stackoverflow.com/questions/6250200/how-to-get-the-size-of-an-image-in-java
+                // sizeInBytes=http://stackoverflow.com/questions/6250200/how-to-get-the-size-of-an-image-in-java
                 String mimeType = getAlbumImageMimeType(tags); // could be incorrect if image
                                                                // different
                 if(image != null) {
@@ -256,16 +273,12 @@ public class AudioFiles implements InformationBase, Logger {
         }
     }
 
-    private String getAlbumImageMimeType(AbstractID3v2Tag tag) {
-        List<Artwork> artworkList = tag.getArtworkList();
-        if(!artworkList.isEmpty()) {
-            Artwork first = artworkList.get(0);
-            // System.out.println("mime: " + first.getMimeType());
-            return first.getMimeType();
-        }
-        return "";
-    }
-
+    /**
+     * Extract the album art image
+     * 
+     * @param tag Audio Tag to extract from
+     * @return Image
+     */
     private Image getAlbumArt(AbstractID3v2Tag tag) {
         List<Artwork> artworkList = tag.getArtworkList();
 
@@ -281,11 +294,23 @@ public class AudioFiles implements InformationBase, Logger {
     }
 
     /**
-     * used for propagating save data to multiple tags
-     * very manual intensive...
-     * make copy of checked tag
-     * select all files from album
-     * set back checked tags
+     * Extract the album art mime type
+     * 
+     * @param tag Audio Tag to extract from
+     * @return mime type
+     */
+    private String getAlbumImageMimeType(AbstractID3v2Tag tag) {
+        List<Artwork> artworkList = tag.getArtworkList();
+        if(!artworkList.isEmpty()) {
+            Artwork first = artworkList.get(0);
+            return first.getMimeType();
+        }
+        return "";
+    }
+
+    /**
+     * Used for propagating save data to multiple tags, very manual intensive...
+     * make copy of checked tag, select all files from album, set back checked tags
      * saveTags()
      */
     private void mockMultisave() {
@@ -300,7 +325,7 @@ public class AudioFiles implements InformationBase, Logger {
 
         // select all tags from album
         if(Settings.getInstance().isAnyPropagateSaveOn()) {
-            selectTags(getAllIndexFromAlbum(selectedIndicies.get(0), false));
+            selectTags(getAllIndexFromAlbum(selectedindices.get(0), false));
         }
 
         // set selected values back
@@ -364,7 +389,6 @@ public class AudioFiles implements InformationBase, Logger {
             albumArt = ImageUtil.scaleImage(image, 500, 500, true);
         }
         catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
@@ -377,7 +401,6 @@ public class AudioFiles implements InformationBase, Logger {
             albumArt = ImageUtil.scaleImage(image, 500, 500, true);
         }
         catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
@@ -386,24 +409,23 @@ public class AudioFiles implements InformationBase, Logger {
     // save new tags
     @Override
     public void save() {
-        info("Starting Save: " + Arrays.toString(selectedIndicies.toArray(new Integer[0])));
-        // if save triggered, copy selected indicies for later reverting back incase multisave is on
-        if(selectedIndiciesCopy == null) {
-            selectedIndiciesCopy = new ArrayList<Integer>();
-            selectedIndiciesCopy.addAll(selectedIndicies);
+        info("Starting Save: " + Arrays.toString(selectedindices.toArray(new Integer[0])));
+        // if save triggered, copy selected indices for later reverting back incase multisave is on
+        if(selectedindicesCopy == null) {
+            selectedindicesCopy = new ArrayList<Integer>();
+            selectedindicesCopy.addAll(selectedindices);
         }
 
-        for(int i : selectedIndicies) {
+        for(int i : selectedindices) {
             MP3File f = workingMP3Files.get(i);
             AbstractID3v2Tag tags = f.getID3v2Tag(); // could probably do new tag to remove
                                                      // unnecessary tags
-            // ID3v23Tag newTags = new ID3v23Tag();
+                                                     // ID3v23Tag newTags = new ID3v23Tag();
             if(title != null && !title.isEmpty() && !StringUtil.isKeyword(title)) {
                 try {
                     tags.setField(FieldKey.TITLE, title);
                 }
                 catch (KeyNotFoundException | FieldDataInvalidException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
             }
@@ -412,7 +434,6 @@ public class AudioFiles implements InformationBase, Logger {
                     tags.setField(FieldKey.ARTIST, artist);
                 }
                 catch (KeyNotFoundException | FieldDataInvalidException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
             }
@@ -421,7 +442,6 @@ public class AudioFiles implements InformationBase, Logger {
                     tags.setField(FieldKey.ALBUM, album);
                 }
                 catch (KeyNotFoundException | FieldDataInvalidException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
             }
@@ -430,7 +450,6 @@ public class AudioFiles implements InformationBase, Logger {
                     tags.setField(FieldKey.ALBUM_ARTIST, albumArtist);
                 }
                 catch (KeyNotFoundException | FieldDataInvalidException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
             }
@@ -439,7 +458,6 @@ public class AudioFiles implements InformationBase, Logger {
                     tags.setField(FieldKey.TRACK, track);
                 }
                 catch (KeyNotFoundException | FieldDataInvalidException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
             }
@@ -448,7 +466,6 @@ public class AudioFiles implements InformationBase, Logger {
                     tags.setField(FieldKey.YEAR, year);
                 }
                 catch (KeyNotFoundException | FieldDataInvalidException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
             }
@@ -457,7 +474,6 @@ public class AudioFiles implements InformationBase, Logger {
                     tags.setField(FieldKey.GENRE, genre);
                 }
                 catch (KeyNotFoundException | FieldDataInvalidException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
             }
@@ -466,7 +482,6 @@ public class AudioFiles implements InformationBase, Logger {
                     tags.setField(FieldKey.COMMENT, comment);
                 }
                 catch (KeyNotFoundException | FieldDataInvalidException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
             }
@@ -478,7 +493,6 @@ public class AudioFiles implements InformationBase, Logger {
                     temp.delete();
                 }
                 catch (FieldDataInvalidException | IOException e1) {
-                    // TODO Auto-generated catch block
                     e1.printStackTrace();
                 }
             }
@@ -487,9 +501,9 @@ public class AudioFiles implements InformationBase, Logger {
 
             try {
                 String originalName = FilenameUtils.getName(f.getFile().getPath());
-                String fileNamePrevious = ""; // used if multiple indicies have been selected
+                String fileNamePrevious = ""; // used if multiple indices have been selected
                 String path = f.getFile().getParentFile().getPath();
-                if(StringUtil.isKeyword(fileName) || selectedIndicies.size() != 1) // if keyword
+                if(StringUtil.isKeyword(fileName) || selectedindices.size() != 1) // if keyword
                 {
                     // save current name (keyword)
                     fileNamePrevious = fileName;
@@ -517,13 +531,11 @@ public class AudioFiles implements InformationBase, Logger {
 
                     // update ui list view
                     workingMP3Files.remove(i); // remove original file
-                    workingMP3Files.add(i, new MP3File(new File(newNamePath))); // update to new
-                                                                                // file
+                    workingMP3Files.add(i, new MP3File(new File(newNamePath))); // update to new file
 
                     selectedFileNames.add(i, fileName); // add new filename into list
                     selectedFileNames.remove(i + 1); // remove original filename,
-                    // (order matters, causes an ui update and triggering a selectIndex which
-                    // changes selected Index)
+                    // (order matters, causes an ui update and triggering a selectIndex which changes selected Index)
                 }
 
                 if(!fileNamePrevious.isEmpty()) {
@@ -536,15 +548,15 @@ public class AudioFiles implements InformationBase, Logger {
                 e.printStackTrace();
             }
         }
-        if(selectedIndicies.size() == 1 && Settings.getInstance().isAnyPropagateSaveOn()) {
+        if(selectedindices.size() == 1 && Settings.getInstance().isAnyPropagateSaveOn()) {
             mockMultisave();
         }
-        // now revert indicies to original
+        // now revert indices to original
         // need to check for null as original call + mockMultiSave will trigger it twice
-        if(selectedIndiciesCopy != null) {
-            selectedIndicies.clear();
-            selectedIndicies.addAll(selectedIndiciesCopy);
-            selectedIndiciesCopy = null;
+        if(selectedindicesCopy != null) {
+            selectedindices.clear();
+            selectedindices.addAll(selectedindicesCopy);
+            selectedindicesCopy = null;
         }
 
     }
@@ -556,7 +568,6 @@ public class AudioFiles implements InformationBase, Logger {
 
     @Override
     public EditorTag[] getAdditionalTags() {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -610,7 +621,6 @@ public class AudioFiles implements InformationBase, Logger {
             else {
                 returnValue = String.format("%02d", Integer.valueOf(track));
             }
-
         }
         else if(tag == EditorTag.YEAR) {
             returnValue = year;
