@@ -37,7 +37,7 @@ public class DatabaseController implements InformationBase, Logger {
 
     //    
     public enum Table {
-        ANIME,
+        ALBUM_ARTIST,
         ARTIST,
         GROUP_ARTIST,
         ARTIST_TO_GROUP,
@@ -76,7 +76,7 @@ public class DatabaseController implements InformationBase, Logger {
 
     private void initializeTables() {
         boolean sucess = true;
-        sucess &= createTableIfNotExist(Table.ANIME +
+        sucess &= createTableIfNotExist(Table.ALBUM_ARTIST +
                                         "(" +
                                         AlbumArtist.ID +
                                         " INT PRIMARY KEY," +
@@ -372,7 +372,7 @@ public class DatabaseController implements InformationBase, Logger {
             try {
                 // Individuals: first - dbFirst, last - dbLast
                 statements = conn.prepareStatement(
-                    String.format("SELECT %s FROM %s WHERE LOWER(%s) = ?", AlbumArtist.ANIME_NAME, Table.ANIME, AlbumArtist.ANIME_NAME));
+                    String.format("SELECT %s FROM %s WHERE LOWER(%s) = ?", AlbumArtist.ANIME_NAME, Table.ALBUM_ARTIST, AlbumArtist.ANIME_NAME));
                 statements.setString(1, anime);
                 rs = statements.executeQuery();
                 if(rs.next()) {
@@ -403,7 +403,7 @@ public class DatabaseController implements InformationBase, Logger {
                 statements = conn.prepareStatement(
                     String.format("SELECT %s FROM %s WHERE LOWER(%s) LIKE ? " +
                                   "ORDER BY %s DESC FETCH NEXT 10 ROWS ONLY",
-                        AlbumArtist.ANIME_NAME, Table.ANIME, AlbumArtist.ANIME_NAME, AlbumArtist.USE_FREQUENCY));
+                        AlbumArtist.ANIME_NAME, Table.ALBUM_ARTIST, AlbumArtist.ANIME_NAME, AlbumArtist.USE_FREQUENCY));
                 statements.setString(1, '%' + compareValue + '%');
                 ResultSet rs = statements.executeQuery();
                 while(rs.next()) {
@@ -530,7 +530,7 @@ public class DatabaseController implements InformationBase, Logger {
         List<String> fullValues = new ArrayList<String>();
         int insertedId = -1;
         switch (table) {
-            case ANIME: // AnimeName
+            case ALBUM_ARTIST: // AnimeName
                 if(values.length != 1) {
                     error("Invalid num of args for: " + table + " w/ length: " + values.length);
                 }
@@ -628,7 +628,7 @@ public class DatabaseController implements InformationBase, Logger {
 
             statements = conn.prepareStatement("INSERT INTO " + table + " VALUES (" + StringUtil.createQuestionMarks(numCols) + ")");
             switch (table) {
-                case ANIME:
+                case ALBUM_ARTIST:
                     if(numCols == 3) {
                         statements.setInt(1, Integer.valueOf(values.get(0)));
                         statements.setString(2, values.get(1));
@@ -695,7 +695,7 @@ public class DatabaseController implements InformationBase, Logger {
         ResultSet rs;
         int usableId = -1;
         try {
-            if(table.equals(Table.ANIME) || table.equals(Table.ARTIST) || table.equals(Table.GROUP_ARTIST)) {
+            if(table.equals(Table.ALBUM_ARTIST) || table.equals(Table.ARTIST) || table.equals(Table.GROUP_ARTIST)) {
                 rs = statement.executeQuery("SELECT Id FROM " + table + " ORDER BY Id DESC FETCH FIRST ROW ONLY");
                 if(rs.next()) {
                     usableId = rs.getInt(1) + 1;
@@ -761,12 +761,14 @@ public class DatabaseController implements InformationBase, Logger {
                 e.printStackTrace();
             }
         }
+        // handle "artist feat x" case
         else if(table == Table.GROUP_ARTIST && values.length == 1) {
+            String singleString = StringUtil.getCommaSeparatedStringWithAnd(Arrays.asList(values));
             try {
                 statements = conn.prepareStatement(
                     String.format("SELECT %s, %s FROM %s WHERE %s = ? FETCH FIRST ROW ONLY",
                         GroupArtist.GROUP_NAME, GroupArtist.ID, Table.GROUP_ARTIST, GroupArtist.GROUP_NAME));
-                statements.setString(1, values[0]);
+                statements.setString(1, singleString);
                 ResultSet rs = statements.executeQuery();
                 if(rs.next()) {
                     id = rs.getInt(2);
@@ -777,11 +779,29 @@ public class DatabaseController implements InformationBase, Logger {
                 e.printStackTrace();
             }
         }
-        else if(table == Table.ANIME && values.length == 1) {
+        // handle regular case of "artistA", "artistB", ...
+        else if(table == Table.GROUP_ARTIST) {
+            String singleString = StringUtil.getCommaSeparatedStringWithAnd(Arrays.asList(values));
+            try {
+                statements = conn.prepareStatement(
+                    String.format("SELECT %s, %s FROM %s WHERE %s = ? FETCH FIRST ROW ONLY",
+                        GroupArtist.GROUP_NAME, GroupArtist.ID, Table.GROUP_ARTIST, GroupArtist.GROUP_NAME));
+                statements.setString(1, singleString);
+                ResultSet rs = statements.executeQuery();
+                if(rs.next()) {
+                    id = rs.getInt(2);
+                }
+                rs.close();
+            }
+            catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        else if(table == Table.ALBUM_ARTIST && values.length == 1) {
             try {
                 statements = conn.prepareStatement(
                     String.format("SELECT %s, %s FROM %s WHERE %s = ?",
-                        AlbumArtist.ANIME_NAME, AlbumArtist.ID, Table.ANIME, AlbumArtist.ANIME_NAME));
+                        AlbumArtist.ANIME_NAME, AlbumArtist.ID, Table.ALBUM_ARTIST, AlbumArtist.ANIME_NAME));
                 statements.setString(1, values[0]);
                 ResultSet rs = statements.executeQuery();
                 if(rs.next()) {
@@ -857,7 +877,7 @@ public class DatabaseController implements InformationBase, Logger {
             statement.execute("DROP TABLE " + Table.ARTIST_TO_GROUP);
             statement.execute("DROP TABLE " + Table.GROUP_ARTIST);
             statement.execute("DROP TABLE " + Table.ARTIST);
-            statement.execute("DROP TABLE " + Table.ANIME);
+            statement.execute("DROP TABLE " + Table.ALBUM_ARTIST);
             statement.execute("DROP TABLE " + Table.WORD_REPLACEMENT);
             conn.commit();
         }
@@ -916,8 +936,8 @@ public class DatabaseController implements InformationBase, Logger {
 
     @Override
     public void setDataForTag(TagBase<?> tag, String... values) {
-        if(tag == EditorTag.ALBUM_ARTIST) {
-            add(Table.ANIME, values[0]);
+        if(tag == EditorTag.ALBUM_ARTIST && values.length > 0 && !values[0].isEmpty()) {
+            add(Table.ALBUM_ARTIST, values[0]);
         }
         else if(tag == EditorTag.ARTIST) {
             if(values.length == 1) {
