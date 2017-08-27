@@ -372,7 +372,8 @@ public class DatabaseController implements InformationBase, Logger {
             try {
                 // Individuals: first - dbFirst, last - dbLast
                 statements = conn.prepareStatement(
-                    String.format("SELECT %s FROM %s WHERE LOWER(%s) = ?", AlbumArtist.ANIME_NAME, Table.ALBUM_ARTIST, AlbumArtist.ANIME_NAME));
+                    String.format("SELECT %s FROM %s WHERE LOWER(%s) = ?", AlbumArtist.ANIME_NAME, Table.ALBUM_ARTIST,
+                        AlbumArtist.ANIME_NAME));
                 statements.setString(1, anime);
                 rs = statements.executeQuery();
                 if(rs.next()) {
@@ -563,29 +564,15 @@ public class DatabaseController implements InformationBase, Logger {
                 if(values.length < 2) {
                     error("Invalid num of args for: " + table + " w/ length: " + values.length);
                 }
-
-                // create idHash
-                StringBuffer idHash = new StringBuffer("");
-                List<Integer> artistIds = new ArrayList<Integer>();
-                for(int i = 0; i < values.length; i++) {
-                    String[] splitName = StringUtil.splitName(values[i]);
-                    int artistId = getId(Table.ARTIST, splitName[0], splitName[1]);
-                    if(artistId == -1) // if artist not found
-                    {
-                        // add new entry for artist
-                        artistId = prepareInsertThenExecute(Table.ARTIST, splitName[0], splitName[1]);
-                    }
-                    idHash.append(artistId + "-");
-                    artistIds.add(artistId);
-                }
+                String idHash = getGroupHash(values);
                 fullValues.add(id);
                 fullValues.add(StringUtil.getCommaSeparatedStringWithAnd(Arrays.asList(values)));
-                fullValues.add(idHash.toString());
+                fullValues.add(idHash);
                 fullValues.add("0");
                 insertedId = executeInsert(table, fullValues);
 
                 // populate lookup table
-                for(int i : artistIds) {
+                for(int i : decodeGroupHash(idHash)) {
                     prepareInsertThenExecute(Table.ARTIST_TO_GROUP, i + "", id + "");
                 }
                 break;
@@ -761,32 +748,18 @@ public class DatabaseController implements InformationBase, Logger {
                 e.printStackTrace();
             }
         }
-        // handle "artist feat x" case
-        else if(table == Table.GROUP_ARTIST && values.length == 1) {
-            String singleString = StringUtil.getCommaSeparatedStringWithAnd(Arrays.asList(values));
-            try {
-                statements = conn.prepareStatement(
-                    String.format("SELECT %s, %s FROM %s WHERE %s = ? FETCH FIRST ROW ONLY",
-                        GroupArtist.GROUP_NAME, GroupArtist.ID, Table.GROUP_ARTIST, GroupArtist.GROUP_NAME));
-                statements.setString(1, singleString);
-                ResultSet rs = statements.executeQuery();
-                if(rs.next()) {
-                    id = rs.getInt(2);
-                }
-                rs.close();
-            }
-            catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-        // handle regular case of "artistA", "artistB", ...
         else if(table == Table.GROUP_ARTIST) {
-            String singleString = StringUtil.getCommaSeparatedStringWithAnd(Arrays.asList(values));
+            String hash = "";
+            if(values.length == 1) {
+                hash = getGroupHash(values[0]);
+            } else {
+                hash = getGroupHash(values);
+            }
             try {
                 statements = conn.prepareStatement(
                     String.format("SELECT %s, %s FROM %s WHERE %s = ? FETCH FIRST ROW ONLY",
-                        GroupArtist.GROUP_NAME, GroupArtist.ID, Table.GROUP_ARTIST, GroupArtist.GROUP_NAME));
-                statements.setString(1, singleString);
+                        GroupArtist.GROUP_NAME, GroupArtist.ID, Table.GROUP_ARTIST, GroupArtist.ARTIST_ID_HASH));
+                statements.setString(1, hash); //
                 ResultSet rs = statements.executeQuery();
                 if(rs.next()) {
                     id = rs.getInt(2);
@@ -830,6 +803,78 @@ public class DatabaseController implements InformationBase, Logger {
             }
         }
         return id;
+    }
+
+    /**
+     * Generates the hash value for the artists.
+     * Will add in new artist entry in db if artist does not exist
+     * 
+     * @param str Format Artist1, Artist2 & Artist3
+     * @return Hash of artists
+     */
+    private String getGroupHash(String values) {
+        // create idHash
+        StringBuffer idHash = new StringBuffer("");
+        String[] names = StringUtil.splitBySeparators(values);
+        for(int i = 0; i < names.length; i++) {
+            String[] splitName = StringUtil.splitName(names[i]);
+            int artistId = getId(Table.ARTIST, splitName[0], splitName[1]);
+            if(artistId == -1) { // if artist not found
+                // add new entry for artist
+                artistId = prepareInsertThenExecute(Table.ARTIST, splitName[0], splitName[1]);
+            }
+            else {
+                idHash.append(artistId + "-");
+            }
+
+        }
+        return idHash.toString();
+    }
+
+    /**
+     * Generates the hash value for the artists.
+     * Will add in new artist entry in db if artist does not exist
+     * 
+     * @param str Format: [Artist1, Artist2, Artist3]
+     * @return Hash of artists
+     */
+    private String getGroupHash(String[] values) {
+        // create idHash
+        StringBuffer idHash = new StringBuffer("");
+        List<Integer> artistIds = new ArrayList<Integer>();
+        for(int i = 0; i < values.length; i++) {
+            String[] splitName = StringUtil.splitName(values[i]);
+            int artistId = getId(Table.ARTIST, splitName[0], splitName[1]);
+            if(artistId == -1) {// if artist not found
+                // add new entry for artist
+                artistId = prepareInsertThenExecute(Table.ARTIST, splitName[0], splitName[1]);
+            }
+            else {
+                idHash.append(artistId + "-");
+            }
+
+            artistIds.add(artistId);
+        }
+        return idHash.toString();
+    }
+
+    /**
+     * Decode group id hash into artist ids
+     * @param hash GroupHash format is #-#-...-
+     * @return List of artist ids
+     */
+    private List<Integer> decodeGroupHash(String hash) {
+        List<Integer> ids = new ArrayList<Integer>();
+        String[] splitId = hash.split("-");
+        for(String id : splitId) {
+            try {
+                ids.add(Integer.parseInt(id));
+            }
+            catch(NumberFormatException e){
+               // dont do anything with bad numbers
+            }
+        }
+        return ids;
     }
 
     public void dumpTable(Table t) {

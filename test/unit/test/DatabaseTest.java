@@ -1,9 +1,8 @@
 package unit.test;
 
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import java.util.List;
 
@@ -71,11 +70,13 @@ public class DatabaseTest {
 
         db.setDataForTag(EditorTag.ARTIST, "GROUPY2", "preadded", "next preadded");
         assertTrue(db.containsCaseSensitive(Table.GROUP_ARTIST, "GROUPY2, preadded & next preadded"));
+        assertTrue(db.containsCaseSensitive(Table.GROUP_ARTIST, "GROUPY2", "preadded","next preadded"));
     }
 
     @Test
     public void testAddGroupNewArtist() {
         db.setDataForTag(EditorTag.ARTIST, "Ace of Tokiwadai", "Misaka", "Mikoto Misaka");
+        assertTrue(db.containsCaseSensitive(Table.GROUP_ARTIST, "Ace of Tokiwadai", "Misaka", "Mikoto Misaka"));
         assertTrue(db.containsCaseSensitive(Table.GROUP_ARTIST, "Ace of Tokiwadai, Misaka & Mikoto Misaka"));
         assertTrue(db.containsCaseSensitive(Table.ARTIST, "Misaka", ""));
         assertTrue(db.containsCaseSensitive(Table.ARTIST, "Mikoto", "Misaka"));
@@ -158,10 +159,10 @@ public class DatabaseTest {
         db.setDataForTag(EditorTag.ARTIST, "Mikoto Misaka");
         
         List<String> str = db.getPossibleDataForTag(EditorTag.ARTIST, "m");
-        assertEquals(4, str.size());
-        // Mikoto Misaka
-        // Misaka
-        // Misaka & Mikoto Misaka
-        // Ace of Tokiwadai, Misaka & Mikoto Misaka
+        assertEquals(str.size(), 4);
+        assertEquals(str.get(0), "Mikoto Misaka");
+        assertEquals(str.get(1), "Misaka");
+        assertEquals(str.get(2), "Misaka & Mikoto Misaka");
+        assertEquals(str.get(3), "Ace of Tokiwadai, Misaka & Mikoto Misaka");
     }
 }

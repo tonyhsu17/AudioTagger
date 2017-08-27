@@ -10,6 +10,11 @@ import support.Constants;
 
 
 public class StringUtil {
+    /**
+     * Split name into first and last name. Firstname is everything except last word.
+     * @param fullName Fullname to split
+     * @return Array with [0]=first, [1]=last
+     */
     public static String[] splitName(String fullName) {
         String[] splitName = {"", ""};
         if(fullName == null || fullName.isEmpty()) {
@@ -33,6 +38,11 @@ public class StringUtil {
         return new String[] {firstName, lastName};
     }
 
+    /**
+     * Parses comma + & dividers into an array.
+     * @param string String to parse
+     * @return List of values that was separated
+     */
     public static String[] splitBySeparators(String string) {
         String[] splitArtists = string.split(Constants.REGEX_SEPARATORS);
         // TODO get feat and etc to split by too
