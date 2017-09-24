@@ -42,6 +42,14 @@ import support.util.Utilities.EditorTag;
 
 
 public class VGMDBParser implements InformationBase, Logger {
+    
+    /**
+     * Callback to indicate results have been posted
+     */
+    public interface VGMDBParserCB {
+        public void dataRetrievedForVGMDB();
+    }
+    
     public enum AdditionalTag implements TagBase<AdditionalTag> {
         SERIES, IMAGE_URL, THEME,
         TRACK01, TRACK02, TRACK03, TRACK04, TRACK05,
@@ -59,29 +67,7 @@ public class VGMDBParser implements InformationBase, Logger {
             return null;
         }
     }
-
-
-    // public static enum VGMDBTag {
-    // ARTIST, ALBUM, TRACK_NUM, YEAR, SERIES,
-    // IMAGE_URL, THEME,
-    // TRACK01, TRACK02, TRACK03, TRACK04, TRACK05,
-    // TRACK06, TRACK07, TRACK08, TRACK09, TRACK10,
-    // TRACK11, TRACK12, TRACK13, TRACK14, TRACK15,
-    // TRACK16, TRACK17, TRACK18, TRACK19, TRACK20;
-    //
-    // public static VGMDBTag getTrackTag(int i)
-    // {
-    // String str = "TRACK" + String.format("%02d", i);
-    // for(VGMDBTag t : VGMDBTag.values())
-    // {
-    // if(str.equals(t.name()))
-    // {
-    // return t;
-    // }
-    // }
-    // return null;
-    // }
-    // };
+    
     public static final String vgmdbParserURL = "http://vgmdb.info/";
     private HashMap<TagBase<?>, String> tagDataLookup; // mapping of retrieved info
     private CloseableHttpClient httpClient;
@@ -95,7 +81,9 @@ public class VGMDBParser implements InformationBase, Logger {
     private ObjectProperty<Image> albumArtThumb;
     private Image albumArt500x500;
     private String query;
-
+    
+    private VGMDBParserCB callback;
+    
     public VGMDBParser() {
         httpClient = HttpClients.createDefault();
         tagDataLookup = new HashMap<TagBase<?>, String>();
@@ -105,6 +93,10 @@ public class VGMDBParser implements InformationBase, Logger {
         albumArtThumb = new SimpleObjectProperty<Image>();
         albumArt500x500 = null;
         query = "";
+    }
+    
+    public void setCallback(VGMDBParserCB cb) {
+        callback = cb;
     }
 
     public JSONObject handleHttpGet(String url, boolean isSearch) throws IOException {
@@ -151,6 +143,9 @@ public class VGMDBParser implements InformationBase, Logger {
             };
             serv.setOnSucceeded((status) -> {
                 displaySearchedInfo(serv.getValue());
+                if(callback != null) {
+                    callback.dataRetrievedForVGMDB();
+                }
             });
             serv.start();
         }
@@ -170,6 +165,9 @@ public class VGMDBParser implements InformationBase, Logger {
         };
         serv.setOnSucceeded((status) -> {
             showAlbumInfo(serv.getValue());
+            if(callback != null) {
+                callback.dataRetrievedForVGMDB();
+            }
         });
         serv.start();
     }
@@ -357,7 +355,12 @@ public class VGMDBParser implements InformationBase, Logger {
         }
     }
 
-    public void selectAlbum(int index) {
+    /**
+     * Interact with vgmdb parser state
+     * @param index Case 01: If on search results, select an album (0 is noop) </br>
+     *          Case 02: If on album info, selecting index copies content to clipboard (0 to return to search results)
+     */
+    public void selectOption(int index) {
         // first index is showing query info not actually a result
         if(!isOnAlbumInfo && index > 0 && index < searchResults.size()) {
             retrieveAlbumByID(searchResults.get(index)[1]);
