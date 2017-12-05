@@ -1,9 +1,15 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
- 
-<suite name="Support Tests" verbose="1" >
-  <test name="All Tests"   >
-    <packages>
-      <package name="support.util.test" />
-   </packages>
+
+<suite name="Tests" verbose="1">
+ <test name="Util Tests">
+  <packages>
+   <package name="support.util.test" />
+  </packages>
+ </test>
+  <test name="Unit Tests">
+  <packages>
+   <package name="unit.test" />
+  </packages>
  </test>
 </suite>
+
