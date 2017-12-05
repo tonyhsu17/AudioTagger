@@ -2,6 +2,7 @@ package unit.test;
 
 import static org.testng.Assert.assertEquals;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.testng.annotations.AfterClass;
@@ -11,6 +12,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import javafx.application.Application;
+import model.base.TagBase;
 import model.information.VGMDBParser;
 import model.information.VGMDBParser.VGMDBParserCB;
 import support.util.Utilities.EditorTag;
@@ -21,7 +23,7 @@ import support.util.Utilities.EditorTag;
  * @author Ikersaro
  *
  */
-public class VGMDBParserTest implements VGMDBParserCB {
+public class VGMDBParserTest extends ModelInformationTestBase implements VGMDBParserCB {
     VGMDBParser parser;
     boolean isDataRetrieved;
 
@@ -104,6 +106,21 @@ public class VGMDBParserTest implements VGMDBParserCB {
         assertEquals(parser.getDataForTag(EditorTag.YEAR), "2009");
         assertEquals(parser.getDataForTag(VGMDBParser.AdditionalTag.THEME), "OP1");
         assertEquals(parser.getDataForTag(VGMDBParser.AdditionalTag.SERIES), "Toaru Kagaku no Railgun");
+    }
+    
+    @Test
+    public void testKeywords() {
+        TagBase<?>[] tags = {
+            VGMDBParser.AdditionalTag.SERIES,
+            VGMDBParser.AdditionalTag.THEME,            
+            EditorTag.ALBUM,
+            EditorTag.ARTIST,
+            EditorTag.YEAR};
+    
+        List<TagBase<?>> expected = Arrays.asList(tags);
+        
+        assertEquals(parser.getDisplayKeywordTagClassName(), "VGMDB");
+        assertEquals(keywordsTest(parser.getKeywordTags(), expected), "");
     }
 
     @Override

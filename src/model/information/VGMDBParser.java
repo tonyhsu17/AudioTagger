@@ -475,9 +475,9 @@ public class VGMDBParser implements InformationBase, Logger {
         keywords.add(EditorTag.ALBUM);
         keywords.add(EditorTag.ARTIST);
         keywords.add(EditorTag.YEAR);
-        for(TagBase<?> t : AdditionalTag.values()) {
-            keywords.add(t);
-        }
+        keywords.add(AdditionalTag.SERIES);
+        keywords.add(AdditionalTag.THEME);
+        // other values are not necessary for autofill tags
         return keywords;
     }
 }

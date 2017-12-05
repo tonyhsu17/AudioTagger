@@ -7,6 +7,7 @@ import static org.testng.Assert.fail;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -18,13 +19,14 @@ import org.testng.annotations.Test;
 
 import model.Settings;
 import model.Settings.SettingsKey;
+import model.base.TagBase;
 import model.information.AudioFiles;
 import support.Constants;
 import support.util.Utilities.EditorTag;
 
 
 
-public class AudioFilesTest {
+public class AudioFilesTest extends ModelInformationTestBase {
     private static final String WORKING_DIR = "TestResources/Audios/";
     private static final String FOLDER_A = "FolderA";
     private static final String FOLDER_B = "FolderB";
@@ -34,7 +36,7 @@ public class AudioFilesTest {
     private static final String FILE_C = "testFileC.mp3";
     private static final String FILE_D = "testFileD.mp3";
     private static final String TEMP_DIR = "TestResources/Temp/";
-    
+
     private File tempDir;
     private AudioFiles audioList;
 
@@ -263,9 +265,9 @@ public class AudioFilesTest {
         assertEquals(audioList.getDataForTag(EditorTag.GENRE), genre, "Genre " + testDesc);
         assertEquals(audioList.getDataForTag(EditorTag.YEAR), year, "Year " + testDesc);
         assertEquals(audioList.getDataForTag(EditorTag.COMMENT), comment, "Comment " + testDesc);
-
-//      assertEquals(audioList.getDataForTag(EditorTag.ALBUM_ART), Constants.KEYWORD_DIFF_VALUE);
-//      assertEquals(audioList.getDataForTag(EditorTag.ALBUM_ART_META), Constants.KEYWORD_DIFF_VALUE);
+        // TODO verify image
+//        Image im = audioList.getAlbumArt();
+//        assertEquals(audioList.getDataForTag(EditorTag.ALBUM_ART_META), "TODO");
     }
 
     @DataProvider(name = "audioSaveMeta")
@@ -463,7 +465,7 @@ public class AudioFilesTest {
                 "FolderA Comments",
                 1,
                 2}
-                // No need to test selecting folder at it gets converted to indicies 
+            // No need to test selecting folder at it gets converted to indicies 
         };
     }
 
@@ -472,13 +474,13 @@ public class AudioFilesTest {
         List<Integer> indicies = new ArrayList<Integer>();
         indicies.add(index1);
         indicies.add(index2);
-       
+
         try {
             FileUtils.copyDirectory(new File(WORKING_DIR), tempDir);
 
             audioList.setWorkingDirectory(TEMP_DIR);
-            audioList.selectTags(indicies); 
-            
+            audioList.selectTags(indicies);
+
             audioList.setDataForTag(tag, newVal);
             audioList.save();
 
@@ -506,6 +508,21 @@ public class AudioFilesTest {
             fail("Unable to copy test resources");
         }
     }
-    
-    
+
+    @Test
+    public void testKeywords() {
+        TagBase<?>[] tags = {EditorTag.ALBUM,
+            EditorTag.ALBUM_ARTIST,
+            EditorTag.ARTIST,
+            EditorTag.COMMENT,
+            EditorTag.FILE_NAME,
+            EditorTag.GENRE,
+            EditorTag.TITLE,
+            EditorTag.TRACK,
+            EditorTag.YEAR};
+        List<TagBase<?>> expected = Arrays.asList(tags);
+        
+        assertEquals(audioList.getDisplayKeywordTagClassName(), "Audio");
+        assertEquals(keywordsTest(audioList.getKeywordTags(), expected), "");
+    }
 }

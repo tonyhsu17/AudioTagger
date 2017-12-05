@@ -5,6 +5,8 @@ import java.util.List;
 
 import model.base.InformationBase;
 import model.base.TagBase;
+import support.Constants;
+import support.util.StringUtil;
 
 /**
  * Interprets preferred formatting using settings.
@@ -80,9 +82,15 @@ public class KeywordInterpreter
 //        System.out.println("buildstr: " + replaceValues.size() + " stringReplace: " + replaceValues.size() );
         for(int i = 0; i < replaceValues.size(); i++)
         {
+            // if keyword and not valid value, immediately finish string
+            if(StringUtil.isKeyword(replaceStrings.get(i))) {
+                temp = Constants.KEYWORD_DIFF_VALUE;
+                break;
+            }
             replaceVal = replaceStrings.get(i);
             temp = temp.replaceFirst("%s", replaceVal != null ? replaceVal : "");
         }
+        
         return temp;
     }
     
