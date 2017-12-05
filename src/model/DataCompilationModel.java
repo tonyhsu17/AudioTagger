@@ -134,7 +134,7 @@ public class DataCompilationModel implements Logger {
                 }
 
                 String finalValue = builder.buildString(); // get the final results
-                //                System.out.println("Entry: " + entry.getKey() + " DecodedString: " + finalValue);
+//                                System.out.println("Entry: " + entry.getKey() + " DecodedString: " + finalValue);
                 //                meta.getTextProperty().set(finalValue); // set input box text
 
                 // check db for caps matching text to replace
@@ -253,7 +253,8 @@ public class DataCompilationModel implements Logger {
         else {
             // stop auto-complete since there is human input
             // unless text is empty then revert back to allow auto-fill
-            editorMap.getMeta(tag).setAllowAutoFill(editorMap.getMeta(tag).getTextProperty().get().isEmpty() ? true : false);
+            // TODO get rid of stop autofill on click?
+            //editorMap.getMeta(tag).setAllowAutoFill(editorMap.getMeta(tag).getTextProperty().get().isEmpty() ? true : false);
             String originalText = audioFilesModel.getDataForTag(tag);
 
             int size = addPossibleDataForTag(tag, originalText);
