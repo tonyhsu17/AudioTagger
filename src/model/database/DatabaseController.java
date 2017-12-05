@@ -37,7 +37,7 @@ public class DatabaseController implements InformationBase, Logger {
 
     //    
     public enum Table {
-        ANIME,
+        ALBUM_ARTIST,
         ARTIST,
         GROUP_ARTIST,
         ARTIST_TO_GROUP,
@@ -76,7 +76,7 @@ public class DatabaseController implements InformationBase, Logger {
 
     private void initializeTables() {
         boolean sucess = true;
-        sucess &= createTableIfNotExist(Table.ANIME +
+        sucess &= createTableIfNotExist(Table.ALBUM_ARTIST +
                                         "(" +
                                         AlbumArtist.ID +
                                         " INT PRIMARY KEY," +
@@ -372,7 +372,8 @@ public class DatabaseController implements InformationBase, Logger {
             try {
                 // Individuals: first - dbFirst, last - dbLast
                 statements = conn.prepareStatement(
-                    String.format("SELECT %s FROM %s WHERE LOWER(%s) = ?", AlbumArtist.ANIME_NAME, Table.ANIME, AlbumArtist.ANIME_NAME));
+                    String.format("SELECT %s FROM %s WHERE LOWER(%s) = ?", AlbumArtist.ANIME_NAME, Table.ALBUM_ARTIST,
+                        AlbumArtist.ANIME_NAME));
                 statements.setString(1, anime);
                 rs = statements.executeQuery();
                 if(rs.next()) {
@@ -403,7 +404,7 @@ public class DatabaseController implements InformationBase, Logger {
                 statements = conn.prepareStatement(
                     String.format("SELECT %s FROM %s WHERE LOWER(%s) LIKE ? " +
                                   "ORDER BY %s DESC FETCH NEXT 10 ROWS ONLY",
-                        AlbumArtist.ANIME_NAME, Table.ANIME, AlbumArtist.ANIME_NAME, AlbumArtist.USE_FREQUENCY));
+                        AlbumArtist.ANIME_NAME, Table.ALBUM_ARTIST, AlbumArtist.ANIME_NAME, AlbumArtist.USE_FREQUENCY));
                 statements.setString(1, '%' + compareValue + '%');
                 ResultSet rs = statements.executeQuery();
                 while(rs.next()) {
@@ -530,7 +531,7 @@ public class DatabaseController implements InformationBase, Logger {
         List<String> fullValues = new ArrayList<String>();
         int insertedId = -1;
         switch (table) {
-            case ANIME: // AnimeName
+            case ALBUM_ARTIST: // AnimeName
                 if(values.length != 1) {
                     error("Invalid num of args for: " + table + " w/ length: " + values.length);
                 }
@@ -563,29 +564,15 @@ public class DatabaseController implements InformationBase, Logger {
                 if(values.length < 2) {
                     error("Invalid num of args for: " + table + " w/ length: " + values.length);
                 }
-
-                // create idHash
-                StringBuffer idHash = new StringBuffer("");
-                List<Integer> artistIds = new ArrayList<Integer>();
-                for(int i = 0; i < values.length; i++) {
-                    String[] splitName = StringUtil.splitName(values[i]);
-                    int artistId = getId(Table.ARTIST, splitName[0], splitName[1]);
-                    if(artistId == -1) // if artist not found
-                    {
-                        // add new entry for artist
-                        artistId = prepareInsertThenExecute(Table.ARTIST, splitName[0], splitName[1]);
-                    }
-                    idHash.append(artistId + "-");
-                    artistIds.add(artistId);
-                }
+                String idHash = getGroupHash(values);
                 fullValues.add(id);
                 fullValues.add(StringUtil.getCommaSeparatedStringWithAnd(Arrays.asList(values)));
-                fullValues.add(idHash.toString());
+                fullValues.add(idHash);
                 fullValues.add("0");
                 insertedId = executeInsert(table, fullValues);
 
                 // populate lookup table
-                for(int i : artistIds) {
+                for(int i : decodeGroupHash(idHash)) {
                     prepareInsertThenExecute(Table.ARTIST_TO_GROUP, i + "", id + "");
                 }
                 break;
@@ -628,7 +615,7 @@ public class DatabaseController implements InformationBase, Logger {
 
             statements = conn.prepareStatement("INSERT INTO " + table + " VALUES (" + StringUtil.createQuestionMarks(numCols) + ")");
             switch (table) {
-                case ANIME:
+                case ALBUM_ARTIST:
                     if(numCols == 3) {
                         statements.setInt(1, Integer.valueOf(values.get(0)));
                         statements.setString(2, values.get(1));
@@ -695,7 +682,7 @@ public class DatabaseController implements InformationBase, Logger {
         ResultSet rs;
         int usableId = -1;
         try {
-            if(table.equals(Table.ANIME) || table.equals(Table.ARTIST) || table.equals(Table.GROUP_ARTIST)) {
+            if(table.equals(Table.ALBUM_ARTIST) || table.equals(Table.ARTIST) || table.equals(Table.GROUP_ARTIST)) {
                 rs = statement.executeQuery("SELECT Id FROM " + table + " ORDER BY Id DESC FETCH FIRST ROW ONLY");
                 if(rs.next()) {
                     usableId = rs.getInt(1) + 1;
@@ -761,12 +748,18 @@ public class DatabaseController implements InformationBase, Logger {
                 e.printStackTrace();
             }
         }
-        else if(table == Table.GROUP_ARTIST && values.length == 1) {
+        else if(table == Table.GROUP_ARTIST) {
+            String hash = "";
+            if(values.length == 1) {
+                hash = getGroupHash(values[0]);
+            } else {
+                hash = getGroupHash(values);
+            }
             try {
                 statements = conn.prepareStatement(
                     String.format("SELECT %s, %s FROM %s WHERE %s = ? FETCH FIRST ROW ONLY",
-                        GroupArtist.GROUP_NAME, GroupArtist.ID, Table.GROUP_ARTIST, GroupArtist.GROUP_NAME));
-                statements.setString(1, values[0]);
+                        GroupArtist.GROUP_NAME, GroupArtist.ID, Table.GROUP_ARTIST, GroupArtist.ARTIST_ID_HASH));
+                statements.setString(1, hash); //
                 ResultSet rs = statements.executeQuery();
                 if(rs.next()) {
                     id = rs.getInt(2);
@@ -777,11 +770,11 @@ public class DatabaseController implements InformationBase, Logger {
                 e.printStackTrace();
             }
         }
-        else if(table == Table.ANIME && values.length == 1) {
+        else if(table == Table.ALBUM_ARTIST && values.length == 1) {
             try {
                 statements = conn.prepareStatement(
                     String.format("SELECT %s, %s FROM %s WHERE %s = ?",
-                        AlbumArtist.ANIME_NAME, AlbumArtist.ID, Table.ANIME, AlbumArtist.ANIME_NAME));
+                        AlbumArtist.ANIME_NAME, AlbumArtist.ID, Table.ALBUM_ARTIST, AlbumArtist.ANIME_NAME));
                 statements.setString(1, values[0]);
                 ResultSet rs = statements.executeQuery();
                 if(rs.next()) {
@@ -810,6 +803,78 @@ public class DatabaseController implements InformationBase, Logger {
             }
         }
         return id;
+    }
+
+    /**
+     * Generates the hash value for the artists.
+     * Will add in new artist entry in db if artist does not exist
+     * 
+     * @param str Format Artist1, Artist2 & Artist3
+     * @return Hash of artists
+     */
+    private String getGroupHash(String values) {
+        // create idHash
+        StringBuffer idHash = new StringBuffer("");
+        String[] names = StringUtil.splitBySeparators(values);
+        for(int i = 0; i < names.length; i++) {
+            String[] splitName = StringUtil.splitName(names[i]);
+            int artistId = getId(Table.ARTIST, splitName[0], splitName[1]);
+            if(artistId == -1) { // if artist not found
+                // add new entry for artist
+                artistId = prepareInsertThenExecute(Table.ARTIST, splitName[0], splitName[1]);
+            }
+            else {
+                idHash.append(artistId + "-");
+            }
+
+        }
+        return idHash.toString();
+    }
+
+    /**
+     * Generates the hash value for the artists.
+     * Will add in new artist entry in db if artist does not exist
+     * 
+     * @param str Format: [Artist1, Artist2, Artist3]
+     * @return Hash of artists
+     */
+    private String getGroupHash(String[] values) {
+        // create idHash
+        StringBuffer idHash = new StringBuffer("");
+        List<Integer> artistIds = new ArrayList<Integer>();
+        for(int i = 0; i < values.length; i++) {
+            String[] splitName = StringUtil.splitName(values[i]);
+            int artistId = getId(Table.ARTIST, splitName[0], splitName[1]);
+            if(artistId == -1) {// if artist not found
+                // add new entry for artist
+                artistId = prepareInsertThenExecute(Table.ARTIST, splitName[0], splitName[1]);
+            }
+            else {
+                idHash.append(artistId + "-");
+            }
+
+            artistIds.add(artistId);
+        }
+        return idHash.toString();
+    }
+
+    /**
+     * Decode group id hash into artist ids
+     * @param hash GroupHash format is #-#-...-
+     * @return List of artist ids
+     */
+    private List<Integer> decodeGroupHash(String hash) {
+        List<Integer> ids = new ArrayList<Integer>();
+        String[] splitId = hash.split("-");
+        for(String id : splitId) {
+            try {
+                ids.add(Integer.parseInt(id));
+            }
+            catch(NumberFormatException e){
+               // dont do anything with bad numbers
+            }
+        }
+        return ids;
     }
 
     public void dumpTable(Table t) {
@@ -857,7 +922,7 @@ public class DatabaseController implements InformationBase, Logger {
             statement.execute("DROP TABLE " + Table.ARTIST_TO_GROUP);
             statement.execute("DROP TABLE " + Table.GROUP_ARTIST);
             statement.execute("DROP TABLE " + Table.ARTIST);
-            statement.execute("DROP TABLE " + Table.ANIME);
+            statement.execute("DROP TABLE " + Table.ALBUM_ARTIST);
             statement.execute("DROP TABLE " + Table.WORD_REPLACEMENT);
             conn.commit();
         }
@@ -916,8 +981,8 @@ public class DatabaseController implements InformationBase, Logger {
 
     @Override
     public void setDataForTag(TagBase<?> tag, String... values) {
-        if(tag == EditorTag.ALBUM_ARTIST) {
-            add(Table.ANIME, values[0]);
+        if(tag == EditorTag.ALBUM_ARTIST && values.length > 0 && !values[0].isEmpty()) {
+            add(Table.ALBUM_ARTIST, values[0]);
         }
         else if(tag == EditorTag.ARTIST) {
             if(values.length == 1) {

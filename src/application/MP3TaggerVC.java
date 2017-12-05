@@ -514,7 +514,7 @@ public class MP3TaggerVC implements Logger
         {
             if(event.getClickCount() >= 2)
             {
-                vgmdbParserModel.selectAlbum(vgmdbInfoLV.getSelectionModel().getSelectedIndex());
+                vgmdbParserModel.selectOption(vgmdbInfoLV.getSelectionModel().getSelectedIndex());
                 debug("Double clicked");
             }
         }
