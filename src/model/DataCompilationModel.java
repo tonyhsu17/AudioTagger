@@ -246,7 +246,7 @@ public class DataCompilationModel implements Logger {
         cb.done("DONE");
     }
 
-    public void updateChoicesForTag(EditorTag tag, DataCompilationModelCallback cb) {
+    public void updateChoicesForTag(EditorTag tag, String text, DataCompilationModelCallback cb) {
         if(tag.equals(EditorTag.ALBUM_ART) || tag.equals(EditorTag.ALBUM_ART_META)) {
             cb.done(0);
         }
@@ -255,9 +255,9 @@ public class DataCompilationModel implements Logger {
             // unless text is empty then revert back to allow auto-fill
             // TODO get rid of stop autofill on click?
             //editorMap.getMeta(tag).setAllowAutoFill(editorMap.getMeta(tag).getTextProperty().get().isEmpty() ? true : false);
-            String originalText = audioFilesModel.getDataForTag(tag);
+//            String originalText = audioFilesModel.getDataForTag(tag); // unneeded now
 
-            int size = addPossibleDataForTag(tag, originalText);
+            int size = addPossibleDataForTag(tag, text);
 
             cb.done(size);
         }

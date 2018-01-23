@@ -1,7 +1,9 @@
 package application;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
@@ -19,7 +21,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
@@ -33,8 +34,8 @@ import support.util.Utilities;
 import support.util.Utilities.EditorTag;
 
 
-public class MP3TaggerVC implements Logger
-{
+
+public class MP3TaggerVC implements Logger {
     @FXML
     private ListView<String> songListLV;
     @FXML
@@ -75,7 +76,7 @@ public class MP3TaggerVC implements Logger
     private ListView<String> vgmdbInfoLV;
     @FXML
     private ImageView vgmdbAlbumArtIV;
-    
+
     @FXML
     private Label autofillEnabledLabel;
 
@@ -83,19 +84,32 @@ public class MP3TaggerVC implements Logger
     // HashMap<String, KeyAndName> idToName; // TextFieldId to SuggestorKey and DisplayName
     DataCompilationModel model;
     VGMDBParser vgmdbParserModel;
+    private HashMap<ComboBox<String>, EditorTag> comboBoxToTag;
 
-    public MP3TaggerVC()
-    {
+    public MP3TaggerVC() {
         model = new DataCompilationModel();
         vgmdbParserModel = new VGMDBParser();
         pressedIndex = 0;
 
         model.setVGMDBParser(vgmdbParserModel);
+
+
     }
 
     @FXML
-    private void initialize()
-    {
+    private void initialize() {
+        comboBoxToTag = new HashMap<ComboBox<String>, EditorTag>();
+
+        comboBoxToTag.put(fileNameCB, EditorTag.FILE_NAME);
+        comboBoxToTag.put(titleCB, EditorTag.TITLE);
+        comboBoxToTag.put(artistCB, EditorTag.ARTIST);
+        comboBoxToTag.put(albumCB, EditorTag.ALBUM);
+        comboBoxToTag.put(albumArtistCB, EditorTag.ALBUM_ARTIST);
+        comboBoxToTag.put(trackCB, EditorTag.TRACK);
+        comboBoxToTag.put(yearCB, EditorTag.YEAR);
+        comboBoxToTag.put(genreCB, EditorTag.GENRE);
+        comboBoxToTag.put(commentCB, EditorTag.COMMENT);
+        
         bindProperties();
         addOnMouseClickedListners();
         addOnKeyReleasedListeners();
@@ -106,13 +120,13 @@ public class MP3TaggerVC implements Logger
         initializeAlbumArtMenu();
     }
 
-    private void bindProperties()
-    {
+    private void bindProperties() {
         // binds
         songListLV.itemsProperty().bindBidirectional(model.processingFilesProperty());
 
         fileNameCB.itemsProperty().bindBidirectional(model.getPropertyForTag(EditorTag.FILE_NAME).getDropDownListProperty());
-        fileNameCB.editorProperty().getValue().textProperty().bindBidirectional(model.getPropertyForTag(EditorTag.FILE_NAME).getTextProperty());
+        fileNameCB.editorProperty().getValue().textProperty()
+            .bindBidirectional(model.getPropertyForTag(EditorTag.FILE_NAME).getTextProperty());
         titleCB.itemsProperty().bindBidirectional(model.getPropertyForTag(EditorTag.TITLE).getDropDownListProperty());
         titleCB.editorProperty().getValue().textProperty().bindBidirectional(model.getPropertyForTag(EditorTag.TITLE).getTextProperty());
         artistCB.itemsProperty().bindBidirectional(model.getPropertyForTag(EditorTag.ARTIST).getDropDownListProperty());
@@ -129,7 +143,8 @@ public class MP3TaggerVC implements Logger
         genreCB.itemsProperty().bindBidirectional(model.getPropertyForTag(EditorTag.GENRE).getDropDownListProperty());
         genreCB.editorProperty().getValue().textProperty().bindBidirectional(model.getPropertyForTag(EditorTag.GENRE).getTextProperty());
         commentCB.itemsProperty().bindBidirectional(model.getPropertyForTag(EditorTag.COMMENT).getDropDownListProperty());
-        commentCB.editorProperty().getValue().textProperty().bindBidirectional(model.getPropertyForTag(EditorTag.COMMENT).getTextProperty());
+        commentCB.editorProperty().getValue().textProperty()
+            .bindBidirectional(model.getPropertyForTag(EditorTag.COMMENT).getTextProperty());
         albumArtIV.imageProperty().bindBidirectional(model.albumArtProperty());
         albumArtMetaLabel.textProperty().bind(model.getPropertyForTag(EditorTag.ALBUM_ART_META).getTextProperty());
 
@@ -142,195 +157,92 @@ public class MP3TaggerVC implements Logger
         // suggestionPredictionCB.itemsProperty().bind(sug.suggestedValuesProperty());
     }
 
-    private void addOnMouseClickedListners()
-    {
-        // MouseClicked
-        fileNameCB.getEditor().setOnMouseClicked(new EventHandler<MouseEvent>()
-        {
-            @Override
-            public void handle(MouseEvent event)
-            {
-                onMouseClickedEventHandler(event, EditorTag.FILE_NAME);
-            }
-        });
-        titleCB.getEditor().setOnMouseClicked(new EventHandler<MouseEvent>()
-        {
-            @Override
-            public void handle(MouseEvent event)
-            {
-                onMouseClickedEventHandler(event, EditorTag.TITLE);
-            }
-        });
-        artistCB.getEditor().setOnMouseClicked(new EventHandler<MouseEvent>()
-        {
-            @Override
-            public void handle(MouseEvent event)
-            {
-                onMouseClickedEventHandler(event, EditorTag.ARTIST);
-            }
-        });
-        albumCB.getEditor().setOnMouseClicked(new EventHandler<MouseEvent>()
-        {
-            @Override
-            public void handle(MouseEvent event)
-            {
-                onMouseClickedEventHandler(event, EditorTag.ALBUM);
-            }
-        });
-        albumArtistCB.getEditor().setOnMouseClicked(new EventHandler<MouseEvent>()
-        {
-            @Override
-            public void handle(MouseEvent event)
-            {
-                onMouseClickedEventHandler(event, EditorTag.ALBUM_ARTIST);
-            }
-        });
-        trackCB.getEditor().setOnMouseClicked(new EventHandler<MouseEvent>()
-        {
-            @Override
-            public void handle(MouseEvent event)
-            {
-                onMouseClickedEventHandler(event, EditorTag.TRACK);
-            }
-        });
-        yearCB.getEditor().setOnMouseClicked(new EventHandler<MouseEvent>()
-        {
-            @Override
-            public void handle(MouseEvent event)
-            {
-                onMouseClickedEventHandler(event, EditorTag.YEAR);
-            }
-        });
-        genreCB.getEditor().setOnMouseClicked(new EventHandler<MouseEvent>()
-        {
-            @Override
-            public void handle(MouseEvent event)
-            {
-                onMouseClickedEventHandler(event, EditorTag.GENRE);
-            }
-        });
-        commentCB.getEditor().setOnMouseClicked(new EventHandler<MouseEvent>()
-        {
-            @Override
-            public void handle(MouseEvent event)
-            {
-                onMouseClickedEventHandler(event, EditorTag.COMMENT);
-            }
-        });
+
+    private void addOnMouseClickedListners() {
+        // Show dropdown items when clicked on textfield
+        for(Entry<ComboBox<String>, EditorTag> entry : comboBoxToTag.entrySet()) {
+            ComboBox<String> temp = entry.getKey();
+            TextField tf = temp.getEditor();
+            tf.setOnMouseClicked((mouseEvent) -> {
+                // highlighting is removed when showing dropdown, so need to rehighlight
+                Range range = Utilities.getRange(tf.getText(), tf.getCaretPosition(), tf.getSelectedText());
+                model.updateChoicesForTag(entry.getValue(), tf.getText(), (size) -> {
+                    tf.selectRange(range.start(), range.end());
+                    temp.show();
+                });
+            });
+        }
     }
 
-    @SuppressWarnings("unchecked")
-    private void onMouseClickedEventHandler(MouseEvent e, EditorTag tag)
-    {
-        TextField cb = (TextField)e.getSource();
-        Range range = Utilities.getRange(cb.getText(), cb.getCaretPosition(), cb.getSelectedText());
-        model.updateChoicesForTag(tag, (size) ->
-        {
-            cb.selectRange(range.start(), range.end());
-            ((ComboBox<String>)cb.getParent()).show();
-        });
+    private void addOnKeyReleasedListeners() {
+        for(Entry<ComboBox<String>, EditorTag> entry : comboBoxToTag.entrySet()) {
+            ComboBox<String> temp = entry.getKey();
+            if(temp == artistCB || temp == albumArtistCB || temp == genreCB) {
+                TextField tf = temp.getEditor();
+                tf.textProperty().addListener((obs, oldVal, newVal) -> {
+                    if(oldVal != null) {
+                        model.updateChoicesForTag(entry.getValue(), newVal, (size) -> {
+                            temp.hide();
+                            temp.show();
+                        });
+                    } else {
+                        // first time initialization
+                        model.updateChoicesForTag(entry.getValue(), newVal, (size) -> {
+                            //noop
+                        });
+                    }
+                });
+            }
+        }
     }
 
-    private void addOnKeyReleasedListeners()
-    {
-        // KeyPressed
-        artistCB.getEditor().setOnKeyReleased(new EventHandler<KeyEvent>()
-        {
-            @Override
-            public void handle(KeyEvent event)
-            {
-                onKeyReleasedEventHandler(event, EditorTag.ARTIST);
-            }
-        });
-        albumArtistCB.getEditor().setOnKeyReleased(new EventHandler<KeyEvent>()
-        {
-            @Override
-            public void handle(KeyEvent event)
-            {
-                onKeyReleasedEventHandler(event, EditorTag.ALBUM_ARTIST);
-            }
-        });
-        genreCB.getEditor().setOnKeyReleased(new EventHandler<KeyEvent>()
-        {
-            @Override
-            public void handle(KeyEvent event)
-            {
-                onKeyReleasedEventHandler(event, EditorTag.GENRE);
-            }
-        });
-    }
-    
-    @SuppressWarnings("unchecked")
-    private void onKeyReleasedEventHandler(KeyEvent e, EditorTag tag) {
-        TextField tf = (TextField)e.getSource();
-        ComboBox<String> cb = ((ComboBox<String>)tf.getParent());
-        model.updateChoicesForTag(EditorTag.GENRE, (size) ->
-        {
-            cb.hide();
-            cb.show();
-        });
-    }
-
-    private void initializeAlbumArtMenu()
-    {
+    private void initializeAlbumArtMenu() {
         final ContextMenu contextMenu = new ContextMenu();
 
         MenuItem browse = new MenuItem("Browse");
-        browse.setOnAction(new EventHandler<ActionEvent>()
-        {
+        browse.setOnAction(new EventHandler<ActionEvent>() {
             @Override
-            public void handle(ActionEvent event)
-            {
+            public void handle(ActionEvent event) {
                 error("To be Implemented");
             }
         });
 
         MenuItem copy = new MenuItem("Copy");
-        copy.setOnAction(new EventHandler<ActionEvent>()
-        {
+        copy.setOnAction(new EventHandler<ActionEvent>() {
             @Override
-            public void handle(ActionEvent event)
-            {
+            public void handle(ActionEvent event) {
                 error("To be Implemented");
             }
         });
 
         MenuItem paste = new MenuItem("Paste");
-        paste.setOnAction(new EventHandler<ActionEvent>()
-        {
+        paste.setOnAction(new EventHandler<ActionEvent>() {
             @Override
-            public void handle(ActionEvent event)
-            {
+            public void handle(ActionEvent event) {
                 error("To be Implemented");
             }
         });
 
         MenuItem remove = new MenuItem("Remove");
-        remove.setOnAction(new EventHandler<ActionEvent>()
-        {
+        remove.setOnAction(new EventHandler<ActionEvent>() {
             @Override
-            public void handle(ActionEvent event)
-            {
+            public void handle(ActionEvent event) {
                 error("To be Implemented");
             }
         });
 
         MenuItem export = new MenuItem("Export");
-        export.setOnAction(new EventHandler<ActionEvent>()
-        {
+        export.setOnAction(new EventHandler<ActionEvent>() {
             @Override
-            public void handle(ActionEvent event)
-            {
+            public void handle(ActionEvent event) {
                 error("To be Implemented");
             }
         });
 
         MenuItem replace = new MenuItem("Replace from VGDB");
-        replace.setOnAction(new EventHandler<ActionEvent>()
-        {
+        replace.setOnAction(new EventHandler<ActionEvent>() {
             @Override
-            public void handle(ActionEvent event)
-            {
+            public void handle(ActionEvent event) {
                 model.setImage(ImageFrom.VGMDB, "null");
                 // albumArtIV.setImage(vgmdbParserModel.getAlbumArt());
             }
@@ -338,33 +250,27 @@ public class MP3TaggerVC implements Logger
 
         contextMenu.getItems().addAll(browse, copy, paste, remove, export, replace);
 
-        albumArtIV.setOnMousePressed(new EventHandler<MouseEvent>()
-        {
+        albumArtIV.setOnMousePressed(new EventHandler<MouseEvent>() {
             @Override
-            public void handle(MouseEvent event)
-            {
-                if(event.isSecondaryButtonDown())
-                {
+            public void handle(MouseEvent event) {
+                if(event.isSecondaryButtonDown()) {
                     contextMenu.show(albumArtIV, event.getScreenX(), event.getScreenY());
                 }
             }
         });
     }
 
-    private void showSelectedTag()
-    {
+    private void showSelectedTag() {
         List<Integer> indices = songListLV.getSelectionModel().getSelectedIndices();
         if(indices.size() > 1) // if multiple selected
         {
-            model.requestDataFor(indices, (asd) ->
-            {
+            model.requestDataFor(indices, (asd) -> {
                 selectFirstIndex();
             });
         }
         else // else only 1 selected
         {
-            model.requestDataFor(songListLV.getSelectionModel().getSelectedIndex(), (asd) ->
-            {
+            model.requestDataFor(songListLV.getSelectionModel().getSelectedIndex(), (asd) -> {
                 selectFirstIndex();
             });
         }
@@ -372,34 +278,24 @@ public class MP3TaggerVC implements Logger
         vgmdbParserModel.searchByAlbum(model.getPropertyForTag(EditorTag.ALBUM).getTextProperty().get());
     }
 
-    private void selectFirstIndex()
-    {
-        fileNameCB.getSelectionModel().select(0);
-        titleCB.getSelectionModel().select(0);
-        artistCB.getSelectionModel().select(0);
-        albumCB.getSelectionModel().select(0);
-        albumArtistCB.getSelectionModel().select(0);
-        trackCB.getSelectionModel().select(0);
-        yearCB.getSelectionModel().select(0);
-        genreCB.getSelectionModel().select(0);
-        commentCB.getSelectionModel().select(0);
+    private void selectFirstIndex() {
+        for(Entry<ComboBox<String>, EditorTag> entry : comboBoxToTag.entrySet()) {
+            entry.getKey().getSelectionModel().select(0);
+        }
     }
 
-    public void saveTags()
-    {
+    public void saveTags() {
         model.save();
     }
 
-    public void toggleAutoFill()
-    {
+    public void toggleAutoFill() {
         model.toggleAutoFill();
         setAutoFillLabel(model.isAutoFillEnabled() ? "Autofill Enabled" : "Autofill disabled");
     }
-    
-    private void setAutoFillLabel(String msg)
-    {
+
+    private void setAutoFillLabel(String msg) {
         autofillEnabledLabel.setText(msg);
-    } 
+    }
 
     // ~~~~~~~~~~~~~~~~~~~ //
     // FXML Event Handlers //
@@ -407,10 +303,8 @@ public class MP3TaggerVC implements Logger
 
     // ~~~~~ songListLV ~~~~~ //
     @FXML
-    private void songListLVOnMousePressed(MouseEvent event)
-    {
-        try
-        {
+    private void songListLVOnMousePressed(MouseEvent event) {
+        try {
             Node textDraggedOver = event.getPickResult().getIntersectedNode(); // get item dragged on
             int indexDraggedOver = model.getSongList().indexOf(((Text)textDraggedOver).getText()); // get index of text of item
 
@@ -423,20 +317,16 @@ public class MP3TaggerVC implements Logger
     }
 
     @FXML
-    private void songListLVOnMouseDragged(MouseEvent event)
-    {
-        try
-        {
+    private void songListLVOnMouseDragged(MouseEvent event) {
+        try {
             Node textDraggedOver = event.getPickResult().getIntersectedNode(); // get item dragged on
             int indexDraggedOver = model.getSongList().indexOf(((Text)textDraggedOver).getText()); // get index of text of item
             songListLV.getSelectionModel().clearSelection(); // reset current selection as selectRange() appends
             // if dragged index is less than start index, reverse them
-            if(indexDraggedOver < pressedIndex)
-            {
+            if(indexDraggedOver < pressedIndex) {
                 songListLV.getSelectionModel().selectRange(indexDraggedOver, pressedIndex + 1);
             }
-            else
-            {
+            else {
                 songListLV.getSelectionModel().selectRange(pressedIndex, indexDraggedOver + 1);
             }
         }
@@ -447,38 +337,30 @@ public class MP3TaggerVC implements Logger
     }
 
     @FXML
-    private void songListLVDragOver(DragEvent de)
-    {
+    private void songListLVDragOver(DragEvent de) {
         Dragboard board = de.getDragboard();
-        if(board.hasFiles())
-        {
+        if(board.hasFiles()) {
             de.acceptTransferModes(TransferMode.ANY);
         }
     }
 
     @FXML
-    private void songListLVDropped(DragEvent de)
-    {
+    private void songListLVDropped(DragEvent de) {
         Dragboard board = de.getDragboard();
         List<File> phil = board.getFiles();
         // lol don't need threading for toArray, hangs if i include board.getFiles()
-        Service<File[]> serv = new Service<File[]>()
-        {
+        Service<File[]> serv = new Service<File[]>() {
             @Override
-            protected Task<File[]> createTask()
-            {
-                return new Task<File[]>()
-                {
+            protected Task<File[]> createTask() {
+                return new Task<File[]>() {
                     @Override
-                    protected File[] call() throws Exception
-                    {
+                    protected File[] call() throws Exception {
                         return phil.toArray(new File[0]);
                     }
                 };
             }
         };
-        serv.setOnSucceeded((status) ->
-        {
+        serv.setOnSucceeded((status) -> {
             model.appendWorkingDirectory(serv.getValue());
         });
         serv.start();
@@ -486,19 +368,16 @@ public class MP3TaggerVC implements Logger
 
     // ~~~~~ FXML albumArtIV ~~~~~ //
     @FXML
-    private void albumArtIVOnDragOver(DragEvent de)
-    {
+    private void albumArtIVOnDragOver(DragEvent de) {
         Dragboard board = de.getDragboard();
-        if(board.hasFiles())
-        {
+        if(board.hasFiles()) {
             de.acceptTransferModes(TransferMode.ANY);
             debug("albumArtIVOnDragOver");
         }
     }
 
     @FXML
-    private void albumArtIVOnDropped(DragEvent de)
-    {
+    private void albumArtIVOnDropped(DragEvent de) {
         Dragboard board = de.getDragboard();
         List<File> phil = board.getFiles();
         File f = phil.get(0);
@@ -508,12 +387,9 @@ public class MP3TaggerVC implements Logger
 
     // ~~~~~ FXML vgmdbInfo ~~~~~ //
     @FXML
-    private void vgmdbInfoLVOnMouseClicked(MouseEvent event)
-    {
-        if(event.getButton().equals(MouseButton.PRIMARY))
-        {
-            if(event.getClickCount() >= 2)
-            {
+    private void vgmdbInfoLVOnMouseClicked(MouseEvent event) {
+        if(event.getButton().equals(MouseButton.PRIMARY)) {
+            if(event.getClickCount() >= 2) {
                 vgmdbParserModel.selectOption(vgmdbInfoLV.getSelectionModel().getSelectedIndex());
                 debug("Double clicked");
             }
@@ -522,16 +398,14 @@ public class MP3TaggerVC implements Logger
 
     // ~~~~~ FXML albumSearchTF ~~~~~ //
     @FXML
-    private void searchAlbumTFOnEnterPressed(ActionEvent event)
-    {
+    private void searchAlbumTFOnEnterPressed(ActionEvent event) {
         info("Manual Search: " + searchAlbumTF.getText());
         vgmdbParserModel.searchByAlbum(searchAlbumTF.getText());
     }
 
     // ~~~~~ FXML clearListButton ~~~~~ //
     @FXML
-    private void clearListOnAction(ActionEvent event)
-    {
+    private void clearListOnAction(ActionEvent event) {
         info("List Cleared");
         model.reset();
     }
