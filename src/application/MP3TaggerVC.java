@@ -150,51 +150,48 @@ public class MP3TaggerVC implements Logger {
 
         vgmdbInfoLV.itemsProperty().bind(vgmdbParserModel.vgmdbInfoProperty());
         vgmdbAlbumArtIV.imageProperty().bind(vgmdbParserModel.albumArtProperty());
-
-        // suggestionCurrentLabel.textProperty().bind(currentHeader);
-        // suggestionCurrentTF.textProperty().bind(sug.currentValueProperty());
-        // suggestionPredictionLabel.textProperty().bind(suggestedHeader);
-        // suggestionPredictionCB.itemsProperty().bind(sug.suggestedValuesProperty());
     }
-
-
-    private void addOnMouseClickedListners() {
-        // Show dropdown items when clicked on textfield
-        for(Entry<ComboBox<String>, EditorTag> entry : comboBoxToTag.entrySet()) {
-            ComboBox<String> temp = entry.getKey();
-            TextField tf = temp.getEditor();
-            tf.setOnMouseClicked((mouseEvent) -> {
-                // highlighting is removed when showing dropdown, so need to rehighlight
-                Range range = Utilities.getRange(tf.getText(), tf.getCaretPosition(), tf.getSelectedText());
-                model.updateChoicesForTag(entry.getValue(), tf.getText(), (size) -> {
-                    tf.selectRange(range.start(), range.end());
-                    temp.show();
-                });
+    
+    private void showSelectedTag() {
+        List<Integer> indices = songListLV.getSelectionModel().getSelectedIndices();
+        if(indices.size() > 1) // if multiple selected
+        {
+            model.requestDataFor(indices, (asd) -> {
+                selectFirstIndex();
             });
         }
+        else // else only 1 selected
+        {
+            model.requestDataFor(songListLV.getSelectionModel().getSelectedIndex(), (asd) -> {
+                selectFirstIndex();
+            });
+        }
+
+        vgmdbParserModel.searchByAlbum(model.getPropertyForTag(EditorTag.ALBUM).getTextProperty().get());
     }
 
-    private void addOnKeyReleasedListeners() {
+    private void selectFirstIndex() {
         for(Entry<ComboBox<String>, EditorTag> entry : comboBoxToTag.entrySet()) {
-            ComboBox<String> temp = entry.getKey();
-            if(temp == artistCB || temp == albumArtistCB || temp == genreCB) {
-                TextField tf = temp.getEditor();
-                tf.textProperty().addListener((obs, oldVal, newVal) -> {
-                    if(oldVal != null) {
-                        model.updateChoicesForTag(entry.getValue(), newVal, (size) -> {
-                            temp.hide();
-                            temp.show();
-                        });
-                    } else {
-                        // first time initialization
-                        model.updateChoicesForTag(entry.getValue(), newVal, (size) -> {
-                            //noop
-                        });
-                    }
-                });
-            }
+            entry.getKey().getSelectionModel().select(0);
         }
     }
+
+    public void saveTags() {
+        model.save();
+    }
+
+    public void toggleAutoFill() {
+        model.toggleAutoFill();
+        setAutoFillLabel(model.isAutoFillEnabled() ? "Autofill Enabled" : "Autofill disabled");
+    }
+
+    private void setAutoFillLabel(String msg) {
+        autofillEnabledLabel.setText(msg);
+    }
+    
+    // ~~~~~~~~~~~~~~~~~~~ //
+    //    Event Handlers   //
+    // ~~~~~~~~~~~~~~~~~~~ //
 
     private void initializeAlbumArtMenu() {
         final ContextMenu contextMenu = new ContextMenu();
@@ -260,43 +257,45 @@ public class MP3TaggerVC implements Logger {
         });
     }
 
-    private void showSelectedTag() {
-        List<Integer> indices = songListLV.getSelectionModel().getSelectedIndices();
-        if(indices.size() > 1) // if multiple selected
-        {
-            model.requestDataFor(indices, (asd) -> {
-                selectFirstIndex();
-            });
-        }
-        else // else only 1 selected
-        {
-            model.requestDataFor(songListLV.getSelectionModel().getSelectedIndex(), (asd) -> {
-                selectFirstIndex();
-            });
-        }
 
-        vgmdbParserModel.searchByAlbum(model.getPropertyForTag(EditorTag.ALBUM).getTextProperty().get());
-    }
-
-    private void selectFirstIndex() {
+    private void addOnMouseClickedListners() {
+        // Show dropdown items when clicked on textfield
         for(Entry<ComboBox<String>, EditorTag> entry : comboBoxToTag.entrySet()) {
-            entry.getKey().getSelectionModel().select(0);
+            ComboBox<String> temp = entry.getKey();
+            TextField tf = temp.getEditor();
+            tf.setOnMouseClicked((mouseEvent) -> {
+                // highlighting is removed when showing dropdown, so need to rehighlight
+                Range range = Utilities.getRange(tf.getText(), tf.getCaretPosition(), tf.getSelectedText());
+                model.updateChoicesForTag(entry.getValue(), tf.getText(), (size) -> {
+                    tf.selectRange(range.start(), range.end());
+                    temp.show();
+                });
+            });
         }
     }
 
-    public void saveTags() {
-        model.save();
+    private void addOnKeyReleasedListeners() {
+        for(Entry<ComboBox<String>, EditorTag> entry : comboBoxToTag.entrySet()) {
+            ComboBox<String> temp = entry.getKey();
+            if(temp == artistCB || temp == albumArtistCB || temp == genreCB) {
+                TextField tf = temp.getEditor();
+                tf.textProperty().addListener((obs, oldVal, newVal) -> {
+                    if(oldVal != null) {
+                        model.updateChoicesForTag(entry.getValue(), newVal, (size) -> {
+                            temp.hide();
+                            temp.show();
+                        });
+                    } else {
+                        // first time initialization
+                        model.updateChoicesForTag(entry.getValue(), newVal, (size) -> {
+                            //noop
+                        });
+                    }
+                });
+            }
+        }
     }
-
-    public void toggleAutoFill() {
-        model.toggleAutoFill();
-        setAutoFillLabel(model.isAutoFillEnabled() ? "Autofill Enabled" : "Autofill disabled");
-    }
-
-    private void setAutoFillLabel(String msg) {
-        autofillEnabledLabel.setText(msg);
-    }
-
+    
     // ~~~~~~~~~~~~~~~~~~~ //
     // FXML Event Handlers //
     // ~~~~~~~~~~~~~~~~~~~ //
