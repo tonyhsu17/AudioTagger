@@ -20,6 +20,7 @@ import model.database.DatabaseController;
 import model.information.AudioFiles;
 import model.information.EditorComboBoxModel;
 import model.information.VGMDBParser;
+import modules.AutoCorrect;
 import support.EventCenter;
 import support.EventCenter.Events;
 import support.Genres;
@@ -50,8 +51,9 @@ public class DataCompilationModel implements Logger {
 
     private EditorComboBoxModel editorMap; // Tag to ComboBox data (editor text and drop down)
     private AudioFiles audioFilesModel; // audio files meta
-    private InformationBase dbManagement; // database for prediction of common tag fields
+    private DatabaseController dbManagement; // database for prediction of common tag fields
     private VGMDBParser vgmdbModel; // data handler for vgmdb website
+    private AutoCorrect autoCorrecter;
 
     private HashMap<EditorTag, KeywordInterpreter> editorAutoComplete; // store auto complete fields
     private Scheduler editorAutoUpdater; // thread of each polling to update auto compete field
@@ -68,6 +70,8 @@ public class DataCompilationModel implements Logger {
 
         editorAutoComplete = new HashMap<EditorTag, KeywordInterpreter>();
         // updateAutoCompleteRules(); // activate when vgmdb parser set
+        
+        autoCorrecter = new AutoCorrect(editorMap, dbManagement);
 
         EventCenter.getInstance().subscribeEvent(Events.SettingChanged, this, (obj) -> {
             updateAutoCompleteRules();
@@ -138,7 +142,7 @@ public class DataCompilationModel implements Logger {
                 //                meta.getTextProperty().set(finalValue); // set input box text
 
                 // check db for caps matching text to replace
-                setTextFormattedFromDB(entry.getKey(), finalValue);
+                autoCorrecter.setTextFormattedFromDB(entry.getKey(), finalValue);
 
                 //TODO create class that does text replacement (ie (karoke) -> (intrumental), (tv edit) -> (tv size) etc) 
             }
@@ -167,37 +171,7 @@ public class DataCompilationModel implements Logger {
         }
     }
 
-    private void setTextFormattedFromDB(EditorTag type, String value) {
-        if(type == EditorTag.ALBUM_ARTIST) {
-            String formattedText = dbManagement.getDataForTag(EditorTag.ALBUM_ARTIST, value);
-
-            if(!formattedText.isEmpty()) {
-                value = formattedText;
-            }
-        }
-        else if(type == EditorTag.ARTIST) {
-            String[] artists = StringUtil.splitBySeparators(value);
-            List<String> formattedArtists = new ArrayList<String>();
-
-            for(String artist : artists) {
-                String[] byFirstLast = StringUtil.splitName(artist);
-                String formattedText = dbManagement.getDataForTag(type, byFirstLast[0], byFirstLast[1]);
-                if(!formattedText.isEmpty()) { // if exist in db use that one
-                    formattedArtists.add(formattedText);
-                }
-                else { // else use original one
-                    formattedArtists.add(artist);
-                }
-            }
-
-            String formattedText = StringUtil.getCommaSeparatedStringWithAnd(formattedArtists);
-            if(!formattedText.isEmpty()) {
-                value = formattedText;
-            }
-        }
-
-        getPropertyForTag(type).getTextProperty().set(value); // set the final value
-    }
+    
 
     /**
      * Retrieves standardized tags in delimiters based on user preferences
@@ -273,8 +247,8 @@ public class DataCompilationModel implements Logger {
     private int addPossibleDataForTag(EditorTag tag, String... additional) {
         String editorText = getDelimTagReplacement(editorMap.getMeta(tag).getTextProperty().get());
         List<String> dropDownList = editorMap.getMeta(tag).getDropDownListProperty().get();
-        dropDownList.clear();
-
+//        dropDownList.clear();
+//        editorMap.getComboBox(tag).getSelectionModel().clearSelection();
         // add original
         for(String str : additional) {
             if(str != null && !str.isEmpty() && !dropDownList.contains(str)) {
@@ -282,7 +256,7 @@ public class DataCompilationModel implements Logger {
             }
         }
 
-        setTextFormattedFromDB(tag, editorText);
+        autoCorrecter.setTextFormattedFromDB(tag, editorText);
 
         // now handle base on specific
         switch (tag) {

@@ -92,8 +92,6 @@ public class MP3TaggerVC implements Logger {
         pressedIndex = 0;
 
         model.setVGMDBParser(vgmdbParserModel);
-
-
     }
 
     @FXML
