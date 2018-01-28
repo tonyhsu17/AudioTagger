@@ -163,7 +163,6 @@ public class Settings implements Logger {
     }
 
     public SettingsTableViewMeta getKeyValuePair(SettingsKey key) {
-        dumpMap();
         return map.get(key);
     }
 
