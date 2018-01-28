@@ -53,7 +53,7 @@ public class DataCompilationModel implements Logger {
     
     // modules
     private AutoCorrecter autoCorrecter;
-    private AutoCompleter autoComplete;
+    private AutoCompleter autoCompleter;
     
 
     public DataCompilationModel() {
@@ -69,7 +69,7 @@ public class DataCompilationModel implements Logger {
          // updateAutoCompleteRules(); // activate when vgmdb parser set
         
         autoCorrecter = new AutoCorrecter(editorMap, dbManagement);
-        autoComplete = new AutoCompleter(editorMap, autoCorrecter);
+        autoCompleter = new AutoCompleter(autoCorrecter);
         
 
         audioFilesModel.setWorkingDirectory(TEMPFOLDER);
@@ -85,7 +85,7 @@ public class DataCompilationModel implements Logger {
     public void setVGMDBParser(VGMDBParser parser) {
         vgmdbModel = parser;
         setPossibleKeywordTag();
-        autoComplete.updateAutoFillRules();
+        autoCompleter.updateAutoFillRules();
     }
     
 

@@ -97,7 +97,7 @@ public class MP3TaggerVC implements Logger {
 
         model.setVGMDBParser(vgmdbParserModel);
     }
-
+    
     @FXML
     private void initialize() {
         comboBoxToTag = new HashMap<ComboBox<String>, EditorTag>();
@@ -111,13 +111,12 @@ public class MP3TaggerVC implements Logger {
         comboBoxToTag.put(yearCB, EditorTag.YEAR);
         comboBoxToTag.put(genreCB, EditorTag.GENRE);
         comboBoxToTag.put(commentCB, EditorTag.COMMENT);
-        
+
         bindProperties();
         addOnMouseClickedListners();
         addOnKeyReleasedListeners();
 
         songListLV.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        songListLV.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> showSelectedTag());
 
         initializeAlbumArtMenu();
     }
@@ -153,25 +152,10 @@ public class MP3TaggerVC implements Logger {
         vgmdbInfoLV.itemsProperty().bind(vgmdbParserModel.vgmdbInfoProperty());
         vgmdbAlbumArtIV.imageProperty().bind(vgmdbParserModel.albumArtProperty());
     }
-    
-    private void showSelectedTag() {
-        List<Integer> indices = songListLV.getSelectionModel().getSelectedIndices();
-        if(indices.size() > 1) // if multiple selected
-        {
-            model.requestDataFor(indices, (asd) -> {
-                selectFirstIndex();
-            });
-        }
-        else // else only 1 selected
-        {
-            model.requestDataFor(songListLV.getSelectionModel().getSelectedIndex(), (asd) -> {
-                selectFirstIndex();
-            });
-        }
 
-        vgmdbParserModel.searchByAlbum(model.getPropertyForTag(EditorTag.ALBUM).getTextProperty().get());
-    }
-
+    /**
+     * Selects the first index of dropdown
+     */
     private void selectFirstIndex() {
         for(Entry<ComboBox<String>, EditorTag> entry : comboBoxToTag.entrySet()) {
             entry.getKey().getSelectionModel().select(0);
@@ -183,21 +167,17 @@ public class MP3TaggerVC implements Logger {
     }
 
     /**
-     * Trigger an auto-fill to replace editor values with pre-defined rules
+     * Trigger an auto-fill to replace editor values with pre-defined rules. Notification lasts for 5 seconds.
      */
     public void triggerAutoFill() {
         EventCenter.getInstance().postEvent(Events.TRIGGER_AUTO_FILL, null);
-        
-        setAutoFillLabel("Autofill Triggered");
+
+        autofillEnabledLabel.setText("Autofill Triggered");
         new Scheduler(3, () -> {
             Platform.runLater(() -> {
-                setAutoFillLabel("");
+                autofillEnabledLabel.setText("");
             });
         }).runNTimes(1);
-    }
-
-    private void setAutoFillLabel(String msg) {
-        autofillEnabledLabel.setText(msg);
     }
     
     // ~~~~~~~~~~~~~~~~~~~ //
@@ -268,9 +248,26 @@ public class MP3TaggerVC implements Logger {
         });
     }
 
-
     private void addOnMouseClickedListners() {
-        // Show dropdown items when clicked on textfield
+        // SongList selecting files - display in editor
+        songListLV.getSelectionModel().selectedItemProperty().addListener((mouseEvent) -> {
+            List<Integer> indices = songListLV.getSelectionModel().getSelectedIndices();
+            if(indices.size() > 1) {// if multiple selected
+                model.requestDataFor(indices, (asd) -> {
+                    selectFirstIndex();
+                });
+            }
+            else { // else only 1 selected
+                model.requestDataFor(songListLV.getSelectionModel().getSelectedIndex(), (asd) -> {
+                    selectFirstIndex();
+                });
+            }
+            // trigger a search on vgmdb
+            vgmdbParserModel.searchByAlbum(model.getPropertyForTag(EditorTag.ALBUM).getTextProperty().get());
+        });
+
+
+        // ComboBox dropdown - Show dropdown items when clicked on textfield
         for(Entry<ComboBox<String>, EditorTag> entry : comboBoxToTag.entrySet()) {
             ComboBox<String> temp = entry.getKey();
             TextField tf = temp.getEditor();
@@ -291,22 +288,23 @@ public class MP3TaggerVC implements Logger {
             if(temp == artistCB || temp == albumArtistCB || temp == genreCB) {
                 TextField tf = temp.getEditor();
                 tf.textProperty().addListener((obs, oldVal, newVal) -> {
-                    if(oldVal != null) {
+                    if(oldVal != null && !oldVal.isEmpty()) {
                         model.updateChoicesForTag(entry.getValue(), newVal, (size) -> {
                             temp.hide();
                             temp.show();
                         });
-                    } else {
-                        // first time initialization
+                    }
+                    else {
+                        // if oldVal is empty don't show dropdown (first time launch and changing files)
                         model.updateChoicesForTag(entry.getValue(), newVal, (size) -> {
-                            //noop
+                            temp.hide();
                         });
                     }
                 });
             }
         }
     }
-    
+
     // ~~~~~~~~~~~~~~~~~~~ //
     // FXML Event Handlers //
     // ~~~~~~~~~~~~~~~~~~~ //

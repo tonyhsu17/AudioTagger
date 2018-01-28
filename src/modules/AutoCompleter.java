@@ -7,24 +7,20 @@ import model.KeywordInterpreter;
 import model.Settings;
 import model.base.InformationBase;
 import model.base.TagBase;
-import model.information.EditorComboBoxModel;
 import support.EventCenter;
 import support.EventCenter.Events;
 import support.Logger;
-import support.structure.EditorComboBoxMeta;
 import support.util.Utilities.EditorTag;
 
 public class AutoCompleter implements Logger{
     private HashMap<EditorTag, KeywordInterpreter> editorAutoComplete; // store auto complete fields
-    private EditorComboBoxModel editorMap; // Tag to ComboBox data (editor text and drop down)
     private AutoCorrecter autoCorrecter;
     
-    public AutoCompleter(EditorComboBoxModel editorMap, AutoCorrecter autoCorecter) {
-        this.editorMap = editorMap;
+    public AutoCompleter(AutoCorrecter autoCorecter) {
         autoCorrecter = autoCorecter;
         editorAutoComplete = new HashMap<EditorTag, KeywordInterpreter>();
         
-        
+        // Subscribe to events
         EventCenter.getInstance().subscribeEvent(Events.SETTINGS_CHANGED, this, (obj) -> {
             updateAutoFillRules();
         });
@@ -45,12 +41,13 @@ public class AutoCompleter implements Logger{
             }
         }
     }
-    
 
+    /**
+     * Triggers a fetch of data based on rule and applies formatted text
+     */
+    // TODO mark if build has empty values and dont autofill?
     public void triggerAutoFill() {
         for(Entry<EditorTag, KeywordInterpreter> entry : editorAutoComplete.entrySet()) {
-            EditorComboBoxMeta meta = editorMap.getMeta(entry.getKey()); // get combo box to modify
-
             KeywordInterpreter builder = entry.getValue();
             InformationBase classObj;
             TagBase<?> tag;
@@ -61,12 +58,10 @@ public class AutoCompleter implements Logger{
                 tag = builder.getTag(i);
                 builder.setValue(i, classObj.getDataForTag(tag, "")); // pass data to builder
             }
-
+           
             String finalValue = builder.buildString(); // get the final results
-//                            System.out.println("Entry: " + entry.getKey() + " DecodedString: " + finalValue);
-            //                meta.getTextProperty().set(finalValue); // set input box text
 
-            // check db for caps matching text to replace
+            // send data to autoCorrect to be displayed
             autoCorrecter.setTextFormattedFromDB(entry.getKey(), finalValue);
 
             //TODO create class that does text replacement (ie (karoke) -> (intrumental), (tv edit) -> (tv size) etc) 
