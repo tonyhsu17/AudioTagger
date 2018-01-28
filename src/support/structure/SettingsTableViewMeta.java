@@ -18,7 +18,7 @@ public class SettingsTableViewMeta
     {
         this.key = key;
         this.value = value;
-        this.displayValue = new SimpleStringProperty(value);
+        displayValue = new SimpleStringProperty(value);
     }
 
     public SettingsKey getKey()

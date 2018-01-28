@@ -8,11 +8,11 @@ import model.information.EditorComboBoxModel;
 import support.util.StringUtil;
 import support.util.Utilities.EditorTag;
 
-public class AutoCorrect {
+public class AutoCorrecter {
     private EditorComboBoxModel editorMap; // Tag to ComboBox data (editor text and drop down)
     private DatabaseController dbManagement; // database for prediction of common tag fields
     
-    public AutoCorrect(EditorComboBoxModel editorMap, DatabaseController dbManagement) {
+    public AutoCorrecter(EditorComboBoxModel editorMap, DatabaseController dbManagement) {
         this.editorMap = editorMap;
         this.dbManagement = dbManagement;
     }

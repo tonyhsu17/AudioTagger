@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.IllegalFormatException;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 import javafx.beans.property.ListProperty;
@@ -20,12 +19,10 @@ import model.database.DatabaseController;
 import model.information.AudioFiles;
 import model.information.EditorComboBoxModel;
 import model.information.VGMDBParser;
-import modules.AutoCorrect;
-import support.EventCenter;
-import support.EventCenter.Events;
+import modules.AutoCompleter;
+import modules.AutoCorrecter;
 import support.Genres;
 import support.Logger;
-import support.Scheduler;
 import support.structure.EditorComboBoxMeta;
 import support.util.ImageUtil;
 import support.util.StringUtil;
@@ -53,10 +50,11 @@ public class DataCompilationModel implements Logger {
     private AudioFiles audioFilesModel; // audio files meta
     private DatabaseController dbManagement; // database for prediction of common tag fields
     private VGMDBParser vgmdbModel; // data handler for vgmdb website
-    private AutoCorrect autoCorrecter;
-
-    private HashMap<EditorTag, KeywordInterpreter> editorAutoComplete; // store auto complete fields
-    private Scheduler editorAutoUpdater; // thread of each polling to update auto compete field
+    
+    // modules
+    private AutoCorrecter autoCorrecter;
+    private AutoCompleter autoComplete;
+    
 
     public DataCompilationModel() {
         editorMap = new EditorComboBoxModel();
@@ -68,14 +66,11 @@ public class DataCompilationModel implements Logger {
 
         albumArt = new SimpleObjectProperty<Image>();
 
-        editorAutoComplete = new HashMap<EditorTag, KeywordInterpreter>();
-        // updateAutoCompleteRules(); // activate when vgmdb parser set
+         // updateAutoCompleteRules(); // activate when vgmdb parser set
         
-        autoCorrecter = new AutoCorrect(editorMap, dbManagement);
-
-        EventCenter.getInstance().subscribeEvent(Events.SettingChanged, this, (obj) -> {
-            updateAutoCompleteRules();
-        });
+        autoCorrecter = new AutoCorrecter(editorMap, dbManagement);
+        autoComplete = new AutoCompleter(editorMap, autoCorrecter);
+        
 
         audioFilesModel.setWorkingDirectory(TEMPFOLDER);
     }
@@ -90,87 +85,8 @@ public class DataCompilationModel implements Logger {
     public void setVGMDBParser(VGMDBParser parser) {
         vgmdbModel = parser;
         setPossibleKeywordTag();
-        updateAutoCompleteRules();
+        autoComplete.updateAutoFillRules();
     }
-
-    private void updateAutoCompleteRules() {
-        if(editorAutoUpdater != null) // if thread exist, stop thread
-        {
-            editorAutoUpdater.stopThread();
-            editorAutoUpdater = null;
-        }
-
-        editorAutoComplete.clear(); // clear list and add/re-add rules
-        for(EditorTag t : EditorTag.values()) // for each tag
-        {
-            KeywordInterpreter temp = null;
-            // if there is a rule, add to list
-            if((temp = Settings.getInstance().getRuleFor(t)) != null) {
-                info("Adding rule for: " + t);
-                editorAutoComplete.put(t, temp);
-            }
-        }
-
-        // if there is at least one auto-complete, start polling to update field
-        if(editorAutoComplete.size() > 0) {
-            // create polling in a separate thread
-            editorAutoUpdater = new Scheduler(1, () -> {
-                updateAutoFills();
-            });
-            editorAutoUpdater.start();
-        }
-    }
-
-    private void updateAutoFills() {
-        for(Entry<EditorTag, KeywordInterpreter> entry : editorAutoComplete.entrySet()) {
-            EditorComboBoxMeta meta = editorMap.getMeta(entry.getKey()); // get combo box to modify
-
-            if(!meta.isPaused() && meta.shouldStopAutoFill()) {
-                KeywordInterpreter builder = entry.getValue();
-                InformationBase classObj;
-                TagBase<?> tag;
-
-                // pass values into builder to construct the value with given tags and info
-                for(int i = 0; i < builder.getCount(); i++) {
-                    classObj = builder.getClass(i);
-                    tag = builder.getTag(i);
-                    builder.setValue(i, classObj.getDataForTag(tag, "")); // pass data to builder
-                }
-
-                String finalValue = builder.buildString(); // get the final results
-//                                System.out.println("Entry: " + entry.getKey() + " DecodedString: " + finalValue);
-                //                meta.getTextProperty().set(finalValue); // set input box text
-
-                // check db for caps matching text to replace
-                autoCorrecter.setTextFormattedFromDB(entry.getKey(), finalValue);
-
-                //TODO create class that does text replacement (ie (karoke) -> (intrumental), (tv edit) -> (tv size) etc) 
-            }
-        }
-    }
-
-    public boolean isAutoFillEnabled() {
-        for(Entry<EditorTag, KeywordInterpreter> entry : editorAutoComplete.entrySet()) {
-            EditorComboBoxMeta meta = editorMap.getMeta(entry.getKey()); // get combo box to modify
-            return !meta.isPaused();
-        }
-        return false;
-    }
-
-    private void setPauseAutoFill(boolean flag) {
-        for(Entry<EditorTag, KeywordInterpreter> entry : editorAutoComplete.entrySet()) {
-            EditorComboBoxMeta meta = editorMap.getMeta(entry.getKey()); // get combo box to modify
-            meta.setPaused(flag);
-        }
-    }
-
-    public void toggleAutoFill() {
-        for(Entry<EditorTag, KeywordInterpreter> entry : editorAutoComplete.entrySet()) {
-            EditorComboBoxMeta meta = editorMap.getMeta(entry.getKey()); // get combo box to modify
-            meta.setPaused(!meta.isPaused());
-        }
-    }
-
     
 
     /**
@@ -442,7 +358,6 @@ public class DataCompilationModel implements Logger {
     }
 
     public void save() {
-        setPauseAutoFill(true); //stop auto fill to prevent corruption
         // store meta info to db - start
         dbManagement.setDataForTag(EditorTag.ALBUM_ARTIST, editorMap.getMeta(EditorTag.ALBUM_ARTIST).getTextProperty().get());
 
@@ -467,9 +382,6 @@ public class DataCompilationModel implements Logger {
         audioFilesModel.setAlbumArtFromFile(artwork);
         artwork.delete();
         audioFilesModel.save();
-
-
-        setPauseAutoFill(false);
     }
 
     /**

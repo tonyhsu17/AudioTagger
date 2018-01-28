@@ -10,7 +10,6 @@ import java.util.Hashtable;
  * 
  * Modeled after Notification Center on the iOS.
  * 
- * TODO generate UID instead of passing it in
  * @author Tony Hsu
  * @structure Hashtable containing events to subscribers and their function to call.
  */
@@ -31,7 +30,7 @@ public class EventCenter
      * List of possible events to subscribe or publish to.
      */
     public static enum Events { 
-        SettingChanged,
+        SETTINGS_CHANGED, TRIGGER_AUTO_FILL
     }; 
 
     /**

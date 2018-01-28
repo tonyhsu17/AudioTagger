@@ -60,7 +60,7 @@ public class RootVC implements Logger
                     break;
                 case "r":
                     info("Hotkey AutoFill Toggle");
-                    taggerVC.toggleAutoFill();
+                    taggerVC.triggerAutoFill();
                     break;
             }
         }

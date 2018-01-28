@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -35,10 +36,10 @@ public class Settings implements Logger {
     private static Settings self = new Settings();
 
     public static enum SettingsKey {
-        PROPAGATE_SAVE_ARTIST("Propagate Save for Artist"), PROPAGATE_SAVE_ALBUM("Propagate Save for Artist"),
-        PROPAGATE_SAVE_ALBUM_ARTIST("Propagate Save for Artist"), PROPAGATE_SAVE_YEAR("Propagate Save for Artist"),
-        PROPAGATE_SAVE_GENRE("Propagate Save for Artist"), PROPAGATE_SAVE_COMMENT("Propagate Save for Artist"),
-        PROPAGATE_SAVE_ALBUM_ART("Propagate Save for Artist"), RULE_FILENAME("Autocomplete Filename"),
+        PROPAGATE_SAVE_ARTIST("Propagate Save for Artist"), PROPAGATE_SAVE_ALBUM("Propagate Save for Album"),
+        PROPAGATE_SAVE_ALBUM_ARTIST("Propagate Save for Album Artist"), PROPAGATE_SAVE_YEAR("Propagate Save for Year"),
+        PROPAGATE_SAVE_GENRE("Propagate Save for Genre"), PROPAGATE_SAVE_COMMENT("Propagate Save for Comment"),
+        PROPAGATE_SAVE_ALBUM_ART("Propagate Save for Album Art"), RULE_FILENAME("Autocomplete Filename"),
         // RULE_TITLE("Autocomplete Title with Rule"),
         // RULE_ARTIST("Autocomplete Artist with Rule"),
         // RULE_ALBUM("Autocomplete Album with Rule"),
@@ -140,14 +141,14 @@ public class Settings implements Logger {
             while(sc.hasNextLine()) {
                 String line = sc.nextLine(); // Grab each setting line
                 String[] splitLine = line.split("=", 2); // parse setting to [key, value]
-
+                info(Arrays.toString(splitLine));
                 SettingsKey key = SettingsKey.toKey(splitLine[0]);
-                info(key.toString());
-
                 if(key != null) {
                     map.put(key, new SettingsTableViewMeta(key, splitLine[1]));
                 }
+//                dumpMap();
             }
+            
         }
         catch (FileNotFoundException e) {
             // Should not come here since file is confirmed first
@@ -162,6 +163,7 @@ public class Settings implements Logger {
     }
 
     public SettingsTableViewMeta getKeyValuePair(SettingsKey key) {
+        dumpMap();
         return map.get(key);
     }
 
@@ -306,7 +308,7 @@ public class Settings implements Logger {
         }
         writeSettings();
 
-        EventCenter.getInstance().postEvent(Events.SettingChanged, null);
+        EventCenter.getInstance().postEvent(Events.SETTINGS_CHANGED, null);
     }
 
     public void revertSettings() {

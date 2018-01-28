@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
+import javafx.application.Platform;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -28,7 +29,10 @@ import javafx.scene.text.Text;
 import model.DataCompilationModel;
 import model.DataCompilationModel.ImageFrom;
 import model.information.VGMDBParser;
+import support.EventCenter;
+import support.EventCenter.Events;
 import support.Logger;
+import support.Scheduler;
 import support.structure.Range;
 import support.util.Utilities;
 import support.util.Utilities.EditorTag;
@@ -178,9 +182,18 @@ public class MP3TaggerVC implements Logger {
         model.save();
     }
 
-    public void toggleAutoFill() {
-        model.toggleAutoFill();
-        setAutoFillLabel(model.isAutoFillEnabled() ? "Autofill Enabled" : "Autofill disabled");
+    /**
+     * Trigger an auto-fill to replace editor values with pre-defined rules
+     */
+    public void triggerAutoFill() {
+        EventCenter.getInstance().postEvent(Events.TRIGGER_AUTO_FILL, null);
+        
+        setAutoFillLabel("Autofill Triggered");
+        new Scheduler(3, () -> {
+            Platform.runLater(() -> {
+                setAutoFillLabel("");
+            });
+        }).runNTimes(1);
     }
 
     private void setAutoFillLabel(String msg) {
