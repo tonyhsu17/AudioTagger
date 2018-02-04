@@ -412,6 +412,10 @@ public class VGMDBParser implements InformationBase, Logger {
     @Override
     public String getDataForTag(TagBase<?> tag, String... values) {
         String returnValue = "";
+        // Don't get data if it is not on album view
+        if(!isOnAlbumInfo) {
+            return returnValue;
+        }
         // TagBase<?> newTag = Utilities.getEnum(tag, AdditionalTag.class, Tag.class);
         if(tag == EditorTag.ALBUM) {
             returnValue = tagDataLookup.get(EditorTag.ALBUM);

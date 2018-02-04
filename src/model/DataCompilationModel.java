@@ -50,11 +50,11 @@ public class DataCompilationModel implements Logger {
     private AudioFiles audioFilesModel; // audio files meta
     private DatabaseController dbManagement; // database for prediction of common tag fields
     private VGMDBParser vgmdbModel; // data handler for vgmdb website
-    
+
     // modules
     private AutoCorrecter autoCorrecter;
     private AutoCompleter autoCompleter;
-    
+
 
     public DataCompilationModel() {
         editorMap = new EditorComboBoxModel();
@@ -66,11 +66,11 @@ public class DataCompilationModel implements Logger {
 
         albumArt = new SimpleObjectProperty<Image>();
 
-         // updateAutoCompleteRules(); // activate when vgmdb parser set
-        
+        // updateAutoCompleteRules(); // activate when vgmdb parser set
+
         autoCorrecter = new AutoCorrecter(editorMap, dbManagement);
         autoCompleter = new AutoCompleter(autoCorrecter);
-        
+
 
         audioFilesModel.setWorkingDirectory(TEMPFOLDER);
     }
@@ -87,7 +87,7 @@ public class DataCompilationModel implements Logger {
         setPossibleKeywordTag();
         autoCompleter.updateAutoFillRules();
     }
-    
+
 
     /**
      * Retrieves standardized tags in delimiters based on user preferences
@@ -117,7 +117,7 @@ public class DataCompilationModel implements Logger {
     public void requestDataFor(int index, DataCompilationModelCallback cb) {
         clearAllTags();
         audioFilesModel.selectTag(index);
-        addAudioModelDataToList();
+        addAudioModelDataToEditor();
 
         albumArt.set(audioFilesModel.getAlbumArt());
         editorMap.getMeta(EditorTag.ALBUM_ART_META).getTextProperty().set(audioFilesModel.getDataForTag(EditorTag.ALBUM_ART_META));
@@ -128,7 +128,7 @@ public class DataCompilationModel implements Logger {
     public void requestDataFor(List<Integer> indicies, DataCompilationModelCallback cb) {
         clearAllTags();
         audioFilesModel.selectTags(indicies);
-        addAudioModelDataToList();
+        addAudioModelDataToEditor();
 
         albumArt.set(audioFilesModel.getAlbumArt());
         editorMap.getMeta(EditorTag.ALBUM_ART_META).getTextProperty().set(audioFilesModel.getDataForTag(EditorTag.ALBUM_ART_META));
@@ -145,7 +145,7 @@ public class DataCompilationModel implements Logger {
             // unless text is empty then revert back to allow auto-fill
             // TODO get rid of stop autofill on click?
             //editorMap.getMeta(tag).setAllowAutoFill(editorMap.getMeta(tag).getTextProperty().get().isEmpty() ? true : false);
-//            String originalText = audioFilesModel.getDataForTag(tag); // unneeded now
+            //            String originalText = audioFilesModel.getDataForTag(tag); // unneeded now
 
             int size = addPossibleDataForTag(tag, text);
 
@@ -163,12 +163,13 @@ public class DataCompilationModel implements Logger {
     private int addPossibleDataForTag(EditorTag tag, String... additional) {
         String editorText = getDelimTagReplacement(editorMap.getMeta(tag).getTextProperty().get());
         List<String> dropDownList = editorMap.getMeta(tag).getDropDownListProperty().get();
-//        dropDownList.clear();
-//        editorMap.getComboBox(tag).getSelectionModel().clearSelection();
+        List<String> newDropdownList = new ArrayList<String>();
+        //        editorMap.getMeta(tag).clearDropdown();
+        //        editorMap.getComboBox(tag).getSelectionModel().clearSelection();
         // add original
         for(String str : additional) {
             if(str != null && !str.isEmpty() && !dropDownList.contains(str)) {
-                dropDownList.add(str);
+                //                dropDownList.add(str);
             }
         }
 
@@ -177,29 +178,20 @@ public class DataCompilationModel implements Logger {
         // now handle base on specific
         switch (tag) {
             case ALBUM:
-                addAdditionalPossibleAlbums(dropDownList);
+            case ALBUM_ARTIST:
+            case ARTIST:
+            case COMMENT:
+            case FILE_NAME:
+            case TITLE:
+            case YEAR:
+                newDropdownList = getPossibleValues(tag);
                 break;
             case ALBUM_ART:
                 break;
             case ALBUM_ART_META:
                 break;
-            case ALBUM_ARTIST:
-                addAdditionalPossibleAlbumArtists(dropDownList);
-                break;
-            case ARTIST:
-                addAdditionalPossibleArtists(dropDownList);
-                break;
-            case COMMENT:
-                addAdditionalPossibleComments(dropDownList);
-                break;
-            case FILE_NAME:
-                addAdditionalPossibleFileNames(dropDownList);
-                break;
             case GENRE:
-                addAdditionalPossibleGenres(dropDownList);
-                break;
-            case TITLE:
-                addAdditionalPossibleTitles(dropDownList);
+                newDropdownList = addPossibleGenres();
                 break;
             case TRACK:
                 try {
@@ -208,149 +200,84 @@ public class DataCompilationModel implements Logger {
                 catch (IllegalFormatException e) {
                 }
                 break;
-            case YEAR:
-                addAdditionalPossibleYears(dropDownList);
-                break;
             default:
                 break;
 
         }
+        //        debug("dropDownList: " + Arrays.toString(dropDownList.toArray(new String[0])));
+        //        debug("newDropdownList: " + Arrays.toString(newDropdownList.toArray(new String[0])));
+
+        List<String> toRemove = new ArrayList<String>();
+        List<String> toAdd = new ArrayList<String>();
+        //        debug("to remove:" + Arrays.toString(toRemove.toArray(new String[0])));
+        //        debug("to add: " + Arrays.toString(toAdd.toArray(new String[0])));
+        // TODO cleanup (selecting dropdown works, typing in location work
+        // broken: when changing selection with keyboard it sets editor test too...
+        for(String str : dropDownList) {
+            if(!newDropdownList.contains(str)) {
+                toRemove.add(str);
+            }
+        }
+        for(String str : newDropdownList) {
+            if(!dropDownList.contains(str)) {
+                toAdd.add(str);
+            }
+        }
+        dropDownList.removeAll(toRemove);
+        dropDownList.addAll(toAdd);
         return dropDownList.size();
     }
 
-    private void addAdditionalPossibleFileNames(List<String> dropDownList) {
-        //        EditorComboBoxMeta field = editorMap.getMeta(EditorTag.FILE_NAME);
-        //        String textFieldText = field.getTextProperty().get();
-        //        if(!textFieldText.isEmpty() && !Utilities.isKeyword(textFieldText))
-        //        {
-        //            String formatted = String.format("%02d", Integer.valueOf(textFieldText)) + " " +
-        //                fieldMap.getMeta(Tag.TITLE).getTextProperty().get() + "." + audioFilesModel.getSelectedFileType();
-        //            if(!dropDownList.contains(formatted))
-        //            {
-        //                dropDownList.add(formatted);
-        //            }
-        //        }
-    }
-
-    private void addAdditionalPossibleTitles(List<String> dropDownList) {
-        // add from vgmdb
-        if(vgmdbModel != null) {
-            try {
-                String temp = vgmdbModel.getDataForTag(EditorTag.TRACK, audioFilesModel.getDataForTag(EditorTag.TRACK));
-                if(temp != null && !temp.isEmpty() && !dropDownList.contains(temp)) {
-                    dropDownList.add(temp);
-                }
-            }
-            catch (NumberFormatException e) {
-            }
-        }
-    }
-
-    // adding compilation
-    private void addAdditionalPossibleArtists(List<String> dropDownList) {
-        EditorComboBoxMeta field = editorMap.getMeta(EditorTag.ARTIST);
+    private List<String> getPossibleValues(EditorTag tag) {
+        List<String> returnList = new ArrayList<String>();
+        EditorComboBoxMeta field = editorMap.getMeta(tag);
         String textFieldText = field.getTextProperty().get();
+
         // add from db
-        List<String> possibleArtist = dbManagement.getPossibleDataForTag(EditorTag.ARTIST, textFieldText);
+        List<String> possibleArtist = dbManagement.getPossibleDataForTag(tag, textFieldText);
         if(possibleArtist != null) {
-            for(String str : possibleArtist) {
-                if(!dropDownList.contains(str)) {
-                    dropDownList.add(str);
-                }
-            }
+            returnList.addAll(possibleArtist);
         }
+
 
         // add from vgmdb
         if(vgmdbModel != null) {
-            String temp = vgmdbModel.getDataForTag(EditorTag.ARTIST, "");
-            if(temp != null && !temp.isEmpty() && !dropDownList.contains(temp)) {
-                dropDownList.add(temp);
+            String temp = vgmdbModel.getDataForTag(tag, "");
+            if(tag == EditorTag.TITLE) { // special case, where more info is needed for tag
+                temp = vgmdbModel.getDataForTag(EditorTag.TRACK, audioFilesModel.getDataForTag(EditorTag.TRACK));
+            }
+
+            if(temp != null && !temp.isEmpty() && !returnList.contains(temp)) {
+                returnList.add(temp);
             }
         }
+
+        if(!returnList.contains(audioFilesModel.getDataForTag(tag))) {
+            returnList.add(audioFilesModel.getDataForTag(tag)); // add original value 
+        }
+        
+
+        return returnList;
     }
 
-    private void addAdditionalPossibleAlbums(List<String> dropDownList) {
-        // add from vgmdb
-        if(vgmdbModel != null) {
-            try {
-                String temp = vgmdbModel.getDataForTag(EditorTag.ALBUM, "");
-                if(temp != null && !temp.isEmpty() && !dropDownList.contains(temp)) {
-                    dropDownList.add(temp);
-                }
-            }
-            catch (NumberFormatException e) {
-            }
-        }
-    }
-
-    // adding compilation
-    private void addAdditionalPossibleAlbumArtists(List<String> dropDownList) {
-        EditorComboBoxMeta field = editorMap.getMeta(EditorTag.ALBUM_ARTIST);
-        String textFieldText = field.getTextProperty().get();
-        // add from db
-        List<String> possibleArtist = dbManagement.getPossibleDataForTag(EditorTag.ALBUM_ARTIST, textFieldText);
-        for(String str : possibleArtist) {
-            if(!dropDownList.contains(str)) {
-                dropDownList.add(str);
-            }
-        }
-
-        // add from vgmdb
-        if(vgmdbModel != null) {
-            String temp = vgmdbModel.getDataForTag(EditorTag.ALBUM_ARTIST);
-            if(temp != null && !temp.isEmpty() && !dropDownList.contains(temp)) {
-                dropDownList.add(temp);
-            }
-        }
-    }
-
-    private void addAdditionalPossibleYears(List<String> dropDownList) {
-        // add from vgmdb
-        if(vgmdbModel != null) {
-            try {
-                String temp = vgmdbModel.getDataForTag(EditorTag.YEAR, "");
-                if(temp != null && !temp.isEmpty() && !dropDownList.contains(temp)) {
-                    dropDownList.add(temp);
-                }
-            }
-            catch (NumberFormatException e) {
-            }
-        }
-    }
-
-    private void addAdditionalPossibleGenres(List<String> dropDownList) {
+    private List<String> addPossibleGenres() {
         EditorComboBoxMeta field = editorMap.getMeta(EditorTag.GENRE);
         String textFieldText = field.getTextProperty().get();
-
+        
         List<String> possibleGenres = Genres.containsIgnoreCase(textFieldText);
-        for(String genre : possibleGenres) {
-            if(!dropDownList.contains(genre)) {
-                dropDownList.add(genre);
-            }
+        if(!possibleGenres.contains(audioFilesModel.getDataForTag(EditorTag.GENRE))) {
+            possibleGenres.add(audioFilesModel.getDataForTag(EditorTag.GENRE)); // add original value 
         }
+        return possibleGenres;
     }
-
-    private void addAdditionalPossibleComments(List<String> dropDownList) {
-        // add from vgmdb
-        if(vgmdbModel != null) {
-            String theme = vgmdbModel.getDataForTag(EditorTag.COMMENT, "");
-            if(theme != null) {
-                String albumArtist = editorMap.getMeta(EditorTag.ALBUM_ARTIST).getTextProperty().get();
-                String album = editorMap.getMeta(EditorTag.ALBUM).getTextProperty().get();
-                String artist = editorMap.getMeta(EditorTag.ARTIST).getTextProperty().get();
-                String formatted = albumArtist + " " + theme + " Single - " + album + " [" + artist + "]";
-                if(!dropDownList.contains(formatted)) {
-                    dropDownList.add(formatted);
-                }
-            }
-        }
-    }
-
-    // add file's tag to display list
-    private void addAudioModelDataToList() {
+    
+    /**
+     * Add audio meta data to editor view
+     */
+    private void addAudioModelDataToEditor() {
         for(EditorTag tag : EditorTag.values()) {
             if(!tag.equals(EditorTag.ALBUM_ART) && !tag.equals(EditorTag.ALBUM_ART_META)) {
-                editorMap.getMeta(tag).getDropDownListProperty().add(audioFilesModel.getDataForTag(tag));
+                editorMap.getMeta(tag).getTextProperty().set(audioFilesModel.getDataForTag(tag));
             }
         }
         albumArt.setValue(audioFilesModel.getAlbumArt());
@@ -386,7 +313,8 @@ public class DataCompilationModel implements Logger {
 
     /**
      * hella inelegant code.
-     * Check each editor field's final value and store delim tag diff compared to VGMDB and original audio file's tag
+     * Check each editor field's final value and store delim tag diff compared to VGMDB and original
+     * audio file's tag
      */
     private void saveDelimTagInDB() {
         List<String[]> delimDiffs = StringUtil.getDiffInDelim(vgmdbModel.getDataForTag(EditorTag.FILE_NAME),
@@ -454,7 +382,7 @@ public class DataCompilationModel implements Logger {
 
     public void clearAllTags() {
         for(EditorTag t : EditorTag.values()) {
-            editorMap.getMeta(t).clear();
+            editorMap.getMeta(t).clearAll();
         }
         albumArt.set(null);
     }

@@ -97,7 +97,7 @@ public class MP3TaggerVC implements Logger {
 
         model.setVGMDBParser(vgmdbParserModel);
     }
-    
+
     @FXML
     private void initialize() {
         comboBoxToTag = new HashMap<ComboBox<String>, EditorTag>();
@@ -114,7 +114,7 @@ public class MP3TaggerVC implements Logger {
 
         bindProperties();
         addOnMouseClickedListners();
-        addOnKeyReleasedListeners();
+        addOnChangeListeners();
 
         songListLV.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
@@ -167,7 +167,8 @@ public class MP3TaggerVC implements Logger {
     }
 
     /**
-     * Trigger an auto-fill to replace editor values with pre-defined rules. Notification lasts for 5 seconds.
+     * Trigger an auto-fill to replace editor values with pre-defined rules. Notification lasts for
+     * 5 seconds.
      */
     public void triggerAutoFill() {
         EventCenter.getInstance().postEvent(Events.TRIGGER_AUTO_FILL, null);
@@ -179,7 +180,7 @@ public class MP3TaggerVC implements Logger {
             });
         }).runNTimes(1);
     }
-    
+
     // ~~~~~~~~~~~~~~~~~~~ //
     //    Event Handlers   //
     // ~~~~~~~~~~~~~~~~~~~ //
@@ -282,7 +283,7 @@ public class MP3TaggerVC implements Logger {
         }
     }
 
-    private void addOnKeyReleasedListeners() {
+    private void addOnChangeListeners() {
         for(Entry<ComboBox<String>, EditorTag> entry : comboBoxToTag.entrySet()) {
             ComboBox<String> temp = entry.getKey();
             if(temp == artistCB || temp == albumArtistCB || temp == genreCB) {
@@ -291,6 +292,7 @@ public class MP3TaggerVC implements Logger {
                     if(oldVal != null && !oldVal.isEmpty()) {
                         model.updateChoicesForTag(entry.getValue(), newVal, (size) -> {
                             temp.hide();
+                            temp.visibleRowCountProperty().set((int)size);
                             temp.show();
                         });
                     }

@@ -32,7 +32,7 @@ public class EditorComboBoxMeta
         return textProperty;
     }
     
-    public void clear()
+    public void clearAll()
     {
         dropDownProperty.clear();
         textProperty.set("");
