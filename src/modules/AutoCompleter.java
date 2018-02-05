@@ -62,7 +62,7 @@ public class AutoCompleter implements Logger{
             String finalValue = builder.buildString(); // get the final results
 
             // send data to autoCorrect to be displayed
-            autoCorrecter.setTextFormattedFromDB(entry.getKey(), finalValue);
+            autoCorrecter.getFormattedText(entry.getKey(), finalValue);
 
             //TODO create class that does text replacement (ie (karoke) -> (intrumental), (tv edit) -> (tv size) etc) 
         }

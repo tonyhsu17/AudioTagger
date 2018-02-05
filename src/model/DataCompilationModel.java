@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.IllegalFormatException;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
@@ -88,31 +87,6 @@ public class DataCompilationModel implements Logger {
         autoCompleter.updateAutoFillRules();
     }
 
-
-    /**
-     * Retrieves standardized tags in delimiters based on user preferences
-     * 
-     * @return New delimieter tag if found in database, else original
-     */
-    private String getDelimTagReplacement(String text) {
-        List<String> tags = StringUtil.getStrInDelim(text); // all delim tags in text
-        ArrayList<String> dbTags = new ArrayList<String>();
-        for(String tag : tags) { // get all user stored delim tags that have been replaced
-            dbTags.add(dbManagement.getDataForTag(DatabaseController.AdditionalTag.REPLACE_WORD, tag));
-        }
-
-        for(int i = 0; i < tags.size(); i++) { // tags.size() == dbTags.size()
-            // db returns empty string for non replaced tags
-            if(!dbTags.get(i).isEmpty()) {
-                info("replacing: " + tags.get(i) + " with: " + dbTags.get(i));
-                //text.re
-                text = text.replaceFirst(Pattern.quote(tags.get(i)), dbTags.get(i));
-            }
-        }
-        return text;
-    }
-
-
     // get the tag data for the selected index
     public void requestDataFor(int index, DataCompilationModelCallback cb) {
         clearAllTags();
@@ -161,9 +135,9 @@ public class DataCompilationModel implements Logger {
      * @return size of dropdown
      */
     private int addPossibleDataForTag(EditorTag tag, String... additional) {
-        String editorText = getDelimTagReplacement(editorMap.getMeta(tag).getTextProperty().get());
         List<String> dropDownList = editorMap.getMeta(tag).getDropDownListProperty().get();
         List<String> newDropdownList = new ArrayList<String>();
+        String editorText = editorMap.getMeta(tag).getTextProperty().get();
         //        editorMap.getMeta(tag).clearDropdown();
         //        editorMap.getComboBox(tag).getSelectionModel().clearSelection();
         // add original
@@ -173,7 +147,7 @@ public class DataCompilationModel implements Logger {
             }
         }
 
-        autoCorrecter.setTextFormattedFromDB(tag, editorText);
+        autoCorrecter.setFormattedText(tag, editorMap.getMeta(tag).getTextProperty().get());
 
         // now handle base on specific
         switch (tag) {
