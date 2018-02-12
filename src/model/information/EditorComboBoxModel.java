@@ -9,6 +9,7 @@ import javafx.scene.image.Image;
 import model.base.InformationBase;
 import model.base.TagBase;
 import support.structure.EditorComboBoxMeta;
+import support.structure.TagDetails;
 import support.util.Utilities.EditorTag;
 
 
@@ -48,7 +49,7 @@ public class EditorComboBoxModel implements InformationBase {
     public void setAlbumArtFromURL(String url) {}
 
     @Override
-    public void save() {}
+    public void save(TagDetails details) {}
 
     @Override
     public List<String> getPossibleDataForTag(TagBase<?> tag, String values) {

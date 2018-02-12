@@ -20,8 +20,9 @@ import org.testng.annotations.Test;
 import model.Settings;
 import model.Settings.SettingsKey;
 import model.base.TagBase;
-import model.information.AudioFiles;
+import model.information.AudioFilesModel;
 import support.Constants;
+import support.structure.TagDetails;
 import support.util.Utilities.EditorTag;
 
 
@@ -38,7 +39,7 @@ public class AudioFilesTest extends ModelInformationTestBase {
     private static final String TEMP_DIR = "TestResources/Temp/";
 
     private File tempDir;
-    private AudioFiles audioList;
+    private AudioFilesModel audioList;
 
     @BeforeClass
     public void setUp() {
@@ -60,7 +61,7 @@ public class AudioFilesTest extends ModelInformationTestBase {
 
     @BeforeMethod
     public void beforeMethod() {
-        audioList = new AudioFiles();
+        audioList = new AudioFilesModel();
     }
 
     @AfterClass
@@ -113,227 +114,225 @@ public class AudioFilesTest extends ModelInformationTestBase {
 
     @DataProvider(name = "audioMeta")
     public static Object[][] audioMeta() {
+
+
         return new Object[][] {
             {"Selected folder with multiple",
-                Constants.KEYWORD_DIFF_VALUE,
-                Constants.KEYWORD_DIFF_VALUE,
-                "ArtistA",
-                "AlbumA",
-                "TestCollection",
-                Constants.KEYWORD_DIFF_VALUE,
-                "2011",
-                "Anime",
-                "FolderA Comments",
+                makeTagDetails(Constants.KEYWORD_DIFF_VALUE,
+                    Constants.KEYWORD_DIFF_VALUE,
+                    "ArtistA",
+                    "AlbumA",
+                    "TestCollection",
+                    Constants.KEYWORD_DIFF_VALUE,
+                    "2011",
+                    "Anime",
+                    "FolderA Comments"),
                 0},
             {"Selected single",
-                "testFileA.mp3",
-                "TestA",
-                "ArtistA",
-                "AlbumA",
-                "TestCollection",
-                "01",
-                "2011",
-                "Anime",
-                "FolderA Comments",
+                makeTagDetails("testFileA.mp3",
+                    "TestA",
+                    "ArtistA",
+                    "AlbumA",
+                    "TestCollection",
+                    "01",
+                    "2011",
+                    "Anime",
+                    "FolderA Comments"),
                 1},
             {"Selected single",
-                "testFileB.mp3",
-                "TestB",
-                "ArtistA",
-                "AlbumA",
-                "TestCollection",
-                "02",
-                "2011",
-                "Anime",
-                "FolderA Comments",
+                makeTagDetails("testFileB.mp3",
+                    "TestB",
+                    "ArtistA",
+                    "AlbumA",
+                    "TestCollection",
+                    "02",
+                    "2011",
+                    "Anime",
+                    "FolderA Comments"),
                 2},
             {"Selected folder with single",
-                "testFileC.mp3",
-                "TestC",
-                "ArtistB",
-                "TestB",
-                "TestCollectionB",
-                "01",
-                "2011",
-                "Anime",
-                "FolderB Comments",
+                makeTagDetails("testFileC.mp3",
+                    "TestC",
+                    "ArtistB",
+                    "TestB",
+                    "TestCollectionB",
+                    "01",
+                    "2011",
+                    "Anime",
+                    "FolderB Comments"),
                 3},
             {"Selected single",
-                "testFileC.mp3",
-                "TestC",
-                "ArtistB",
-                "TestB",
-                "TestCollectionB",
-                "01",
-                "2011",
-                "Anime",
-                "FolderB Comments",
+                makeTagDetails("testFileC.mp3",
+                    "TestC",
+                    "ArtistB",
+                    "TestB",
+                    "TestCollectionB",
+                    "01",
+                    "2011",
+                    "Anime",
+                    "FolderB Comments"),
                 4},
             {"Selected folder with single",
-                "testFileD.mp3",
-                "TestD",
-                "ArtistC",
-                "TestD",
-                "TestCollectionB",
-                "01",
-                "2011",
-                "Anime",
-                "FolderC Comments",
+                makeTagDetails("testFileD.mp3",
+                    "TestD",
+                    "ArtistC",
+                    "TestD",
+                    "TestCollectionB",
+                    "01",
+                    "2011",
+                    "Anime",
+                    "FolderC Comments"),
                 5},
             {"Selected single",
-                "testFileD.mp3",
-                "TestD",
-                "ArtistC",
-                "TestD",
-                "TestCollectionB",
-                "01",
-                "2011",
-                "Anime",
-                "FolderC Comments",
+                makeTagDetails("testFileD.mp3",
+                    "TestD",
+                    "ArtistC",
+                    "TestD",
+                    "TestCollectionB",
+                    "01",
+                    "2011",
+                    "Anime",
+                    "FolderC Comments"),
                 6},
             {"Selected singles same folder",
-                Constants.KEYWORD_DIFF_VALUE,
-                Constants.KEYWORD_DIFF_VALUE,
-                "ArtistA",
-                "AlbumA",
-                "TestCollection",
-                Constants.KEYWORD_DIFF_VALUE,
-                "2011",
-                "Anime",
-                "FolderA Comments",
+                makeTagDetails(Constants.KEYWORD_DIFF_VALUE,
+                    Constants.KEYWORD_DIFF_VALUE,
+                    "ArtistA",
+                    "AlbumA",
+                    "TestCollection",
+                    Constants.KEYWORD_DIFF_VALUE,
+                    "2011",
+                    "Anime",
+                    "FolderA Comments"),
                 0},
             {"Selected singles diff folder",
-                Constants.KEYWORD_DIFF_VALUE,
-                Constants.KEYWORD_DIFF_VALUE,
-                Constants.KEYWORD_DIFF_VALUE,
-                Constants.KEYWORD_DIFF_VALUE,
-                "TestCollectionB",
-                Constants.KEYWORD_DIFF_VALUE,
-                "2011",
-                "Anime",
-                Constants.KEYWORD_DIFF_VALUE,
+                makeTagDetails(Constants.KEYWORD_DIFF_VALUE,
+                    Constants.KEYWORD_DIFF_VALUE,
+                    Constants.KEYWORD_DIFF_VALUE,
+                    Constants.KEYWORD_DIFF_VALUE,
+                    "TestCollectionB",
+                    "01",
+                    "2011",
+                    "Anime",
+                    Constants.KEYWORD_DIFF_VALUE),
                 4,
                 6},
             {"Selected 2 folders",
-                Constants.KEYWORD_DIFF_VALUE,
-                Constants.KEYWORD_DIFF_VALUE,
-                Constants.KEYWORD_DIFF_VALUE,
-                Constants.KEYWORD_DIFF_VALUE,
-                "TestCollectionB",
-                Constants.KEYWORD_DIFF_VALUE,
-                "2011",
-                "Anime",
-                Constants.KEYWORD_DIFF_VALUE,
+                makeTagDetails(Constants.KEYWORD_DIFF_VALUE,
+                    Constants.KEYWORD_DIFF_VALUE,
+                    Constants.KEYWORD_DIFF_VALUE,
+                    Constants.KEYWORD_DIFF_VALUE,
+                    "TestCollectionB",
+                    "01",
+                    "2011",
+                    "Anime",
+                    Constants.KEYWORD_DIFF_VALUE),
                 3,
                 5},
             {"Selected folder and single",
-                Constants.KEYWORD_DIFF_VALUE,
-                Constants.KEYWORD_DIFF_VALUE,
-                Constants.KEYWORD_DIFF_VALUE,
-                Constants.KEYWORD_DIFF_VALUE,
-                Constants.KEYWORD_DIFF_VALUE,
-                Constants.KEYWORD_DIFF_VALUE,
-                "2011",
-                "Anime",
-                Constants.KEYWORD_DIFF_VALUE,
+                makeTagDetails(Constants.KEYWORD_DIFF_VALUE,
+                    Constants.KEYWORD_DIFF_VALUE,
+                    Constants.KEYWORD_DIFF_VALUE,
+                    Constants.KEYWORD_DIFF_VALUE,
+                    Constants.KEYWORD_DIFF_VALUE,
+                    Constants.KEYWORD_DIFF_VALUE,
+                    "2011",
+                    "Anime",
+                    Constants.KEYWORD_DIFF_VALUE),
                 0,
                 3}};
     }
 
+    private static TagDetails makeTagDetails(String fileName, String title, String artist, String album, String albumArtist,
+        String track, String year, String genre, String comment) {
+        TagDetails info = new TagDetails();
+        info.set(EditorTag.FILE_NAME, fileName);
+        info.set(EditorTag.TITLE, title);
+        info.set(EditorTag.ARTIST, artist);
+        info.set(EditorTag.ALBUM, album);
+        info.set(EditorTag.ALBUM_ARTIST, albumArtist);
+        info.set(EditorTag.TRACK, track);
+        info.set(EditorTag.YEAR, year);
+        info.set(EditorTag.GENRE, genre);
+        info.set(EditorTag.COMMENT, comment);
+        return info;
+    }
+
     @Test(dataProvider = "audioMeta")
-    public void testSetTagFields(String testDesc, String fileName, String title, String artist, String album, String albumArtist,
-        String track, String year, String genre, String comment, int... indicies) {
+    public void testSetTagFields(String testDesc, TagDetails expctTags, int... indicies) {
         audioList.setWorkingDirectory(WORKING_DIR);
         if(indicies.length == 0) {
             return;
         }
-        audioList.selectTag(indicies[0]); // will always select 1 before multiple
+        //        audioList.selectTag(indicies[0]); // will always select 1 before multiple
         if(indicies.length > 1) {
             List<Integer> selected = new ArrayList<Integer>();
-            for(int i = 1; i < indicies.length; i++) {
-                selected.add(indicies[i]);
+            for(int i : indicies) {
+                selected.add(i);
             }
-            audioList.selectTags(selected);
+            audioList.selectTags(selected, (info) -> {
+                TagDetails details = info;
+                for(EditorTag tag : EditorTag.values()) {
+                    assertEquals(details.get(tag), expctTags.get(tag), tag + ": " + testDesc);
+                }
+            });
         }
-
-        assertEquals(audioList.getDataForTag(EditorTag.FILE_NAME), fileName, "FileName " + testDesc);
-        assertEquals(audioList.getDataForTag(EditorTag.TITLE), title, "Title " + testDesc);
-        assertEquals(audioList.getDataForTag(EditorTag.ARTIST), artist, "Artist " + testDesc);
-        assertEquals(audioList.getDataForTag(EditorTag.ALBUM), album, "Album " + testDesc);
-        assertEquals(audioList.getDataForTag(EditorTag.ALBUM_ARTIST), albumArtist, "Album Artist " + testDesc);
-        assertEquals(audioList.getDataForTag(EditorTag.TRACK), track, "Track " + testDesc);
-        assertEquals(audioList.getDataForTag(EditorTag.GENRE), genre, "Genre " + testDesc);
-        assertEquals(audioList.getDataForTag(EditorTag.YEAR), year, "Year " + testDesc);
-        assertEquals(audioList.getDataForTag(EditorTag.COMMENT), comment, "Comment " + testDesc);
         // TODO verify image
-//        Image im = audioList.getAlbumArt();
-//        assertEquals(audioList.getDataForTag(EditorTag.ALBUM_ART_META), "TODO");
+        //        Image im = audioList.getAlbumArt();
+        //        assertEquals(audioList.getDataForTag(EditorTag.ALBUM_ART_META), "TODO");
     }
 
     @DataProvider(name = "audioSaveMeta")
     public static Object[][] audioSaveMeta() {
         return new Object[][] {
             {"Save single same name",
-                "testFileA.mp3",
-                "RenamedTestA",
-                "RenamedArtistA",
-                "RenamedAlbumA",
-                "RenamedTestCollection",
-                "05",
-                "2017",
-                "JPop",
-                "RenamedFolderA Comments",
+                makeTagDetails("testFileA.mp3",
+                    "RenamedTestA",
+                    "RenamedArtistA",
+                    "RenamedAlbumA",
+                    "RenamedTestCollection",
+                    "05",
+                    "2017",
+                    "JPop",
+                    "RenamedFolderA Comments"),
                 1},
             {"Save single diff name",
-                "renamedTestFileA.mp3",
-                "RenamedTestA",
-                "RenamedArtistA",
-                "RenamedAlbumA",
-                "RenamedTestCollection",
-                "05",
-                "2017",
-                "JPop",
-                "RenamedFolderA Comments",
+                makeTagDetails("renamedTestFileA.mp3",
+                    "RenamedTestA",
+                    "RenamedArtistA",
+                    "RenamedAlbumA",
+                    "RenamedTestCollection",
+                    "05",
+                    "2017",
+                    "JPop",
+                    "RenamedFolderA Comments"),
                 1}
         };
     }
 
     @Test(dataProvider = "audioSaveMeta")
-    public void testSaveTags(String testDesc, String fileName, String title, String artist, String album, String albumArtist,
-        String track, String year, String genre, String comment, int... indicies) {
+    public void testSaveTags(String testDesc, TagDetails expctTags, int... indicies) {
         try {
             FileUtils.copyDirectory(new File(WORKING_DIR), tempDir);
         }
         catch (IOException e) {
             fail("Unable to copy test resources");
         }
-        audioList.setWorkingDirectory(TEMP_DIR);
-        audioList.selectTag(1);
-
-        audioList.setDataForTag(EditorTag.FILE_NAME, fileName);
-        audioList.setDataForTag(EditorTag.TITLE, title);
-        audioList.setDataForTag(EditorTag.ARTIST, artist);
-        audioList.setDataForTag(EditorTag.ALBUM, album);
-        audioList.setDataForTag(EditorTag.ALBUM_ARTIST, albumArtist);
-        audioList.setDataForTag(EditorTag.TRACK, track);
-        audioList.setDataForTag(EditorTag.GENRE, genre);
-        audioList.setDataForTag(EditorTag.YEAR, year);
-        audioList.setDataForTag(EditorTag.COMMENT, comment);
-        audioList.save();
-
 
         audioList.setWorkingDirectory(TEMP_DIR);
-        audioList.selectTag(1);
+        audioList.selectTag(1, (info) -> {
+        });
 
-        assertEquals(audioList.getDataForTag(EditorTag.FILE_NAME), fileName, "FileName " + testDesc);
-        assertEquals(audioList.getDataForTag(EditorTag.TITLE), title, "Title " + testDesc);
-        assertEquals(audioList.getDataForTag(EditorTag.ARTIST), artist, "Artist " + testDesc);
-        assertEquals(audioList.getDataForTag(EditorTag.ALBUM), album, "Album " + testDesc);
-        assertEquals(audioList.getDataForTag(EditorTag.ALBUM_ARTIST), albumArtist, "Album Artist " + testDesc);
-        assertEquals(audioList.getDataForTag(EditorTag.TRACK), track, "Track " + testDesc);
-        assertEquals(audioList.getDataForTag(EditorTag.GENRE), genre, "Genre " + testDesc);
-        assertEquals(audioList.getDataForTag(EditorTag.YEAR), year, "Year " + testDesc);
-        assertEquals(audioList.getDataForTag(EditorTag.COMMENT), comment, "Comment " + testDesc);
+        audioList.save(expctTags);
+
+        audioList.setWorkingDirectory(TEMP_DIR);
+        audioList.selectTag(1, (info) -> {
+            TagDetails details = info;
+
+            for(EditorTag tag : EditorTag.values()) {
+                assertEquals(details.get(tag), expctTags.get(tag), tag + testDesc);
+            }
+        });
     }
 
     @DataProvider(name = "audioSaveMetaMulti")
@@ -479,28 +478,31 @@ public class AudioFilesTest extends ModelInformationTestBase {
             FileUtils.copyDirectory(new File(WORKING_DIR), tempDir);
 
             audioList.setWorkingDirectory(TEMP_DIR);
-            audioList.selectTags(indicies);
+            audioList.selectTags(indicies, (info) -> {
+                info.set(tag, newVal);
+                audioList.save(info);
 
-            audioList.setDataForTag(tag, newVal);
-            audioList.save();
+                audioList.setWorkingDirectory(TEMP_DIR); // refresh the data // shouldnt need to in future
 
-            audioList.setWorkingDirectory(TEMP_DIR); // refresh the data
+                audioList.selectTag(index1, (info2) -> {
+                    if(newVal.equals(Constants.KEYWORD_DIFF_VALUE) || tag == EditorTag.FILE_NAME) {
+                        assertEquals(info2.get(tag), origVal1, "arg1 - " + testDesc); // value that should stay original
+                    }
+                    else {
+                        assertEquals(info2.get(tag), newVal, "arg1 - " + testDesc);
+                    }
+                });
 
-            audioList.selectTag(index1);
-            if(newVal.equals(Constants.KEYWORD_DIFF_VALUE) || tag == EditorTag.FILE_NAME) {
-                assertEquals(audioList.getDataForTag(tag), origVal1, "arg1 - " + testDesc);
-            }
-            else {
-                assertEquals(audioList.getDataForTag(tag), newVal, "arg1 - " + testDesc);
-            }
+                audioList.selectTag(index2, (info3) -> {
+                    if(newVal.equals(Constants.KEYWORD_DIFF_VALUE) || tag == EditorTag.FILE_NAME) {
+                        assertEquals(info3.get(tag), origVal2, "arg2 - " + testDesc);  // value that should stay original
+                    }
+                    else {
+                        assertEquals(info3.get(tag), newVal, "arg2 - " + testDesc);
+                    }
+                });
+            });
 
-            audioList.selectTag(index2);
-            if(newVal.equals(Constants.KEYWORD_DIFF_VALUE) || tag == EditorTag.FILE_NAME) {
-                assertEquals(audioList.getDataForTag(tag), origVal2, "arg2 - " + testDesc);
-            }
-            else {
-                assertEquals(audioList.getDataForTag(tag), newVal, "arg2 - " + testDesc);
-            }
 
             FileUtils.deleteDirectory(tempDir);
         }
@@ -521,7 +523,7 @@ public class AudioFilesTest extends ModelInformationTestBase {
             EditorTag.TRACK,
             EditorTag.YEAR};
         List<TagBase<?>> expected = Arrays.asList(tags);
-        
+
         assertEquals(audioList.getDisplayKeywordTagClassName(), "Audio");
         assertEquals(keywordsTest(audioList.getKeywordTags(), expected), "");
     }

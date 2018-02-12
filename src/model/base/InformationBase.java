@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.List;
 
 import javafx.scene.image.Image;
+import support.structure.TagDetails;
 
 
 
@@ -30,7 +31,7 @@ public interface InformationBase {
 
     public void setAlbumArtFromURL(String url);
 
-    public void save();
+    public void save(TagDetails details);
 
     public List<String> getPossibleDataForTag(TagBase<?> tag, String values);
 

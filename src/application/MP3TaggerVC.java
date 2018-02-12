@@ -1,6 +1,7 @@
 package application;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -259,7 +260,9 @@ public class MP3TaggerVC implements Logger {
                 });
             }
             else { // else only 1 selected
-                model.requestDataFor(songListLV.getSelectionModel().getSelectedIndex(), (asd) -> {
+                List<Integer> list = new ArrayList<Integer>();
+                list.add(songListLV.getSelectionModel().getSelectedIndex());
+                model.requestDataFor(list, (asd) -> {
                     selectFirstIndex();
                 });
             }

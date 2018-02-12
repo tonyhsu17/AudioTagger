@@ -15,7 +15,7 @@ import javafx.scene.image.Image;
 import model.base.InformationBase;
 import model.base.TagBase;
 import model.database.DatabaseController;
-import model.information.AudioFiles;
+import model.information.AudioFilesModel;
 import model.information.EditorComboBoxModel;
 import model.information.VGMDBParser;
 import modules.AutoCompleter;
@@ -23,7 +23,7 @@ import modules.AutoCorrecter;
 import support.Genres;
 import support.Logger;
 import support.structure.EditorComboBoxMeta;
-import support.util.ImageUtil;
+import support.structure.TagDetails;
 import support.util.StringUtil;
 import support.util.Utilities.EditorTag;
 
@@ -46,7 +46,7 @@ public class DataCompilationModel implements Logger {
     private ObjectProperty<Image> albumArt; // album art pic
 
     private EditorComboBoxModel editorMap; // Tag to ComboBox data (editor text and drop down)
-    private AudioFiles audioFilesModel; // audio files meta
+    private AudioFilesModel audioFilesModel; // audio files meta
     private DatabaseController dbManagement; // database for prediction of common tag fields
     private VGMDBParser vgmdbModel; // data handler for vgmdb website
 
@@ -57,7 +57,7 @@ public class DataCompilationModel implements Logger {
 
     public DataCompilationModel() {
         editorMap = new EditorComboBoxModel();
-        audioFilesModel = new AudioFiles();
+        audioFilesModel = new AudioFilesModel();
         dbManagement = new DatabaseController("");
 
         fileNamesList = new SimpleListProperty<String>();
@@ -88,26 +88,17 @@ public class DataCompilationModel implements Logger {
     }
 
     // get the tag data for the selected index
-    public void requestDataFor(int index, DataCompilationModelCallback cb) {
+    public void requestDataFor(List<Integer> indices, DataCompilationModelCallback cb) {
         clearAllTags();
-        audioFilesModel.selectTag(index);
-        addAudioModelDataToEditor();
-
-        albumArt.set(audioFilesModel.getAlbumArt());
-        editorMap.getMeta(EditorTag.ALBUM_ART_META).getTextProperty().set(audioFilesModel.getDataForTag(EditorTag.ALBUM_ART_META));
-
-        cb.done("DONE");
-    }
-
-    public void requestDataFor(List<Integer> indicies, DataCompilationModelCallback cb) {
-        clearAllTags();
-        audioFilesModel.selectTags(indicies);
-        addAudioModelDataToEditor();
-
-        albumArt.set(audioFilesModel.getAlbumArt());
-        editorMap.getMeta(EditorTag.ALBUM_ART_META).getTextProperty().set(audioFilesModel.getDataForTag(EditorTag.ALBUM_ART_META));
-
-        cb.done("DONE");
+        audioFilesModel.selectTags(indices, (tagDetails) -> {
+            for(EditorTag tag : EditorTag.values()) {
+                editorMap.getMeta(tag).getTextProperty().set(tagDetails.get(tag));
+            }
+            albumArt.set(tagDetails.getAlbumArt());
+            editorMap.getMeta(EditorTag.ALBUM_ART_META).getTextProperty().set(tagDetails.get(EditorTag.ALBUM_ART_META));
+        
+            cb.done("DONE");
+        });
     }
 
     public void updateChoicesForTag(EditorTag tag, String text, DataCompilationModelCallback cb) {
@@ -115,12 +106,6 @@ public class DataCompilationModel implements Logger {
             cb.done(0);
         }
         else {
-            // stop auto-complete since there is human input
-            // unless text is empty then revert back to allow auto-fill
-            // TODO get rid of stop autofill on click?
-            //editorMap.getMeta(tag).setAllowAutoFill(editorMap.getMeta(tag).getTextProperty().get().isEmpty() ? true : false);
-            //            String originalText = audioFilesModel.getDataForTag(tag); // unneeded now
-
             int size = addPossibleDataForTag(tag, text);
 
             cb.done(size);
@@ -269,20 +254,16 @@ public class DataCompilationModel implements Logger {
         // store meta info to db - end
 
         // go through each element and set tag
-        audioFilesModel.setDataForTag(EditorTag.FILE_NAME, editorMap.getMeta(EditorTag.FILE_NAME).getTextProperty().get());
-        audioFilesModel.setDataForTag(EditorTag.TITLE, editorMap.getMeta(EditorTag.TITLE).getTextProperty().get());
-        audioFilesModel.setDataForTag(EditorTag.ARTIST, editorMap.getMeta(EditorTag.ARTIST).getTextProperty().get());
-        audioFilesModel.setDataForTag(EditorTag.ALBUM, editorMap.getMeta(EditorTag.ALBUM).getTextProperty().get());
-        audioFilesModel.setDataForTag(EditorTag.ALBUM_ARTIST, editorMap.getMeta(EditorTag.ALBUM_ARTIST).getTextProperty().get());
-        audioFilesModel.setDataForTag(EditorTag.TRACK, editorMap.getMeta(EditorTag.TRACK).getTextProperty().get());
-        audioFilesModel.setDataForTag(EditorTag.YEAR, editorMap.getMeta(EditorTag.YEAR).getTextProperty().get());
-        audioFilesModel.setDataForTag(EditorTag.GENRE, editorMap.getMeta(EditorTag.GENRE).getTextProperty().get());
-        audioFilesModel.setDataForTag(EditorTag.COMMENT, editorMap.getMeta(EditorTag.COMMENT).getTextProperty().get());
+        TagDetails details = new TagDetails();
+        for(EditorTag tag: EditorTag.values()) {
+            details.set(tag, editorMap.getMeta(tag).getTextProperty().get());
+        }
+//        File artwork = ImageUtil.saveImage(albumArt.get());
+//        audioFilesModel.setAlbumArtFromFile(artwork);
+//     artwork.delete();
+        details.setAlbumArt(albumArt.get());
 
-        File artwork = ImageUtil.saveImage(albumArt.get());
-        audioFilesModel.setAlbumArtFromFile(artwork);
-        artwork.delete();
-        audioFilesModel.save();
+        audioFilesModel.save(details);
     }
 
     /**

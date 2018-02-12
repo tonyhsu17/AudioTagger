@@ -34,6 +34,7 @@ import javafx.scene.input.ClipboardContent;
 import model.base.InformationBase;
 import model.base.TagBase;
 import support.Logger;
+import support.structure.TagDetails;
 import support.util.ImageUtil;
 import support.util.StringUtil;
 import support.util.Utilities;
@@ -461,7 +462,7 @@ public class VGMDBParser implements InformationBase, Logger {
     public void setAlbumArtFromURL(String url) {}
 
     @Override
-    public void save() {}
+    public void save(TagDetails details) {}
 
     @Override
     public List<String> getPossibleDataForTag(TagBase<?> tag, String values) {

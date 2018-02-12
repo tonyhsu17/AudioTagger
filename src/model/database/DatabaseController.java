@@ -21,6 +21,7 @@ import model.database.tables.ArtistToGroup;
 import model.database.tables.GroupArtist;
 import model.database.tables.WordReplacement;
 import support.Logger;
+import support.structure.TagDetails;
 import support.util.StringUtil;
 import support.util.Utilities.EditorTag;
 
@@ -943,7 +944,7 @@ public class DatabaseController implements InformationBase, Logger {
     }
 
     @Override
-    public void save() {}
+    public void save(TagDetails details) {}
 
     @Override
     public void setAlbumArtFromFile(File file) {}
