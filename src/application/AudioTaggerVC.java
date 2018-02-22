@@ -40,7 +40,7 @@ import support.util.Utilities.EditorTag;
 
 
 
-public class MP3TaggerVC implements Logger {
+public class AudioTaggerVC implements Logger {
     @FXML
     private ListView<String> songListLV;
     @FXML
@@ -91,7 +91,7 @@ public class MP3TaggerVC implements Logger {
     VGMDBParser vgmdbParserModel;
     private HashMap<ComboBox<String>, EditorTag> comboBoxToTag;
 
-    public MP3TaggerVC() {
+    public AudioTaggerVC() {
         model = new DataCompilationModel();
         vgmdbParserModel = new VGMDBParser();
         pressedIndex = 0;

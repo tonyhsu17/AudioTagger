@@ -15,7 +15,7 @@ import support.Logger;
 
 public class RootVC implements Logger
 {
-    private MP3TaggerVC taggerVC;
+    private AudioTaggerVC taggerVC;
     
     
     @FXML
@@ -25,7 +25,7 @@ public class RootVC implements Logger
     {
     }
     
-    public void setMP3TaggerVC(MP3TaggerVC tagger)
+    public void setAudioTaggerVC(AudioTaggerVC tagger)
     {
         taggerVC = tagger;
     }

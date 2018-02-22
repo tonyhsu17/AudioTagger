@@ -10,20 +10,20 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
 
-public class MP3Tagger extends Application
+public class AudioTagger extends Application
 {
    
     private Stage primaryStage;
     private BorderPane rootLayout;
     
     RootVC rootVC;
-    MP3TaggerVC mp3TaggerVC;
+    AudioTaggerVC mp3TaggerVC;
 
     @Override
     public void start(Stage primaryStage)
     {
         this.primaryStage = primaryStage;
-        this.primaryStage.setTitle("MP3Tagger");
+        this.primaryStage.setTitle("AudioTagger");
 
         initRootLayout();
         showMP3TaggerView();
@@ -59,10 +59,10 @@ public class MP3Tagger extends Application
         {
             // Load overview.
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(getClass().getResource("../application/MP3TaggerView.fxml"));
+            loader.setLocation(getClass().getResource("../application/AudioTaggerView.fxml"));
             AnchorPane view = (AnchorPane)loader.load();
             mp3TaggerVC = loader.getController();
-            rootVC.setMP3TaggerVC(mp3TaggerVC);
+            rootVC.setAudioTaggerVC(mp3TaggerVC);
             
             rootLayout.setCenter(view);
 
