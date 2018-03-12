@@ -14,18 +14,17 @@ import support.util.Utilities.EditorTag;
 
 public class AutoCompleter implements Logger{
     private HashMap<EditorTag, KeywordInterpreter> editorAutoComplete; // store auto complete fields
-    private AutoCorrecter autoCorrecter;
     
-    public AutoCompleter(AutoCorrecter autoCorecter) {
-        autoCorrecter = autoCorecter;
+    public interface AutoCompleterCB {
+        public void result(EditorTag tag, String finalVal);
+    }
+    
+    public AutoCompleter() {
         editorAutoComplete = new HashMap<EditorTag, KeywordInterpreter>();
         
         // Subscribe to events
         EventCenter.getInstance().subscribeEvent(Events.SETTINGS_CHANGED, this, (obj) -> {
-            updateAutoFillRules();
-        });
-        EventCenter.getInstance().subscribeEvent(Events.TRIGGER_AUTO_FILL, this, (obj) -> {
-            triggerAutoFill();
+            updateAutoFillRules(); // if settings updates, update rule
         });
     }
     
@@ -43,10 +42,10 @@ public class AutoCompleter implements Logger{
     }
 
     /**
-     * Triggers a fetch of data based on rule and applies formatted text
+     * For each EditorTag with a rule, Fetch and constructs data based on the rule.
+     * @param cb AutoCompleterCB, Callback of (EditorTag tag, String constructedText)
      */
-    // TODO mark if build has empty values and dont autofill?
-    public void triggerAutoFill() {
+    public void triggerAutoFill(AutoCompleterCB cb) {
         for(Entry<EditorTag, KeywordInterpreter> entry : editorAutoComplete.entrySet()) {
             KeywordInterpreter builder = entry.getValue();
             InformationBase classObj;
@@ -62,9 +61,7 @@ public class AutoCompleter implements Logger{
             String finalValue = builder.buildString(); // get the final results
 
             // send data to autoCorrect to be displayed
-            autoCorrecter.getFormattedText(entry.getKey(), finalValue);
-
-            //TODO create class that does text replacement (ie (karoke) -> (intrumental), (tv edit) -> (tv size) etc) 
+            cb.result(entry.getKey(), finalValue);
         }
     }
 

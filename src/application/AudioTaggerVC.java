@@ -1,7 +1,6 @@
 package application;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -252,20 +251,24 @@ public class AudioTaggerVC implements Logger {
 
     private void addOnMouseClickedListners() {
         // SongList selecting files - display in editor
+        
         songListLV.getSelectionModel().selectedItemProperty().addListener((mouseEvent) -> {
             List<Integer> indices = songListLV.getSelectionModel().getSelectedIndices();
-            if(indices.size() > 1) {// if multiple selected
-                model.requestDataFor(indices, (asd) -> {
-                    selectFirstIndex();
-                });
-            }
-            else { // else only 1 selected
-                List<Integer> list = new ArrayList<Integer>();
-                list.add(songListLV.getSelectionModel().getSelectedIndex());
-                model.requestDataFor(list, (asd) -> {
-                    selectFirstIndex();
-                });
-            }
+            model.requestDataFor(indices, (asd) -> {
+//              selectFirstIndex();
+          });
+//            if(indices.size() > 1) {// if multiple selected
+//                model.requestDataFor(indices, (asd) -> {
+////                    selectFirstIndex();
+//                });
+//            }
+//            else { // else only 1 selected
+//                List<Integer> list = new ArrayList<Integer>();
+//                list.add(songListLV.getSelectionModel().getSelectedIndex());
+//                model.requestDataFor(list, (asd) -> {
+////                    selectFirstIndex();
+//                });
+//            }
             // trigger a search on vgmdb
             vgmdbParserModel.searchByAlbum(model.getPropertyForTag(EditorTag.ALBUM).getTextProperty().get());
         });
@@ -275,10 +278,11 @@ public class AudioTaggerVC implements Logger {
         for(Entry<ComboBox<String>, EditorTag> entry : comboBoxToTag.entrySet()) {
             ComboBox<String> temp = entry.getKey();
             TextField tf = temp.getEditor();
+            
             tf.setOnMouseClicked((mouseEvent) -> {
                 // highlighting is removed when showing dropdown, so need to rehighlight
                 Range range = Utilities.getRange(tf.getText(), tf.getCaretPosition(), tf.getSelectedText());
-                model.updateChoicesForTag(entry.getValue(), tf.getText(), (size) -> {
+                model.requestDropdownForTag(entry.getValue(), tf.getText(), temp.getItems(), (size) -> {
                     tf.selectRange(range.start(), range.end());
                     temp.show();
                 });
@@ -293,7 +297,7 @@ public class AudioTaggerVC implements Logger {
                 TextField tf = temp.getEditor();
                 tf.textProperty().addListener((obs, oldVal, newVal) -> {
                     if(oldVal != null && !oldVal.isEmpty()) {
-                        model.updateChoicesForTag(entry.getValue(), newVal, (size) -> {
+                        model.requestDropdownForTag(entry.getValue(), newVal, temp.getItems(), (size) -> {
                             temp.hide();
                             temp.visibleRowCountProperty().set((int)size);
                             temp.show();
@@ -301,7 +305,7 @@ public class AudioTaggerVC implements Logger {
                     }
                     else {
                         // if oldVal is empty don't show dropdown (first time launch and changing files)
-                        model.updateChoicesForTag(entry.getValue(), newVal, (size) -> {
+                        model.requestDropdownForTag(entry.getValue(), newVal, temp.getItems(), (size) -> {
                             temp.hide();
                         });
                     }
