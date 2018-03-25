@@ -28,7 +28,9 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.text.Text;
 import model.DataCompilationModel;
 import model.DataCompilationModel.ImageFrom;
+import model.database.DatabaseController;
 import model.information.VGMDBParser;
+import modules.EditorDataController;
 import support.EventCenter;
 import support.EventCenter.Events;
 import support.Logger;
@@ -86,15 +88,19 @@ public class AudioTaggerVC implements Logger {
 
     int pressedIndex; // used for mouse dragging range
     // HashMap<String, KeyAndName> idToName; // TextFieldId to SuggestorKey and DisplayName
-    DataCompilationModel model;
-    VGMDBParser vgmdbParserModel;
+    private DataCompilationModel model;
+    private DatabaseController dbManagement; // database for prediction of common tag fields
+    private EditorDataController editorFields; // ComboBox controller (editor text and drop down)
+    private VGMDBParser vgmdbParserModel;
     private HashMap<ComboBox<String>, EditorTag> comboBoxToTag;
 
     public AudioTaggerVC() {
-        model = new DataCompilationModel();
         vgmdbParserModel = new VGMDBParser();
+        dbManagement = new DatabaseController("");
+        editorFields = new EditorDataController(dbManagement);
+        model = new DataCompilationModel(dbManagement, editorFields);
+        
         pressedIndex = 0;
-
         model.setVGMDBParser(vgmdbParserModel);
     }
 
@@ -125,41 +131,32 @@ public class AudioTaggerVC implements Logger {
         // binds
         songListLV.itemsProperty().bindBidirectional(model.processingFilesProperty());
 
-        fileNameCB.itemsProperty().bindBidirectional(model.getPropertyForTag(EditorTag.FILE_NAME).getDropDownListProperty());
+        fileNameCB.itemsProperty().bindBidirectional(editorFields.getMeta(EditorTag.FILE_NAME).getDropDownListProperty());
         fileNameCB.editorProperty().getValue().textProperty()
-            .bindBidirectional(model.getPropertyForTag(EditorTag.FILE_NAME).getTextProperty());
-        titleCB.itemsProperty().bindBidirectional(model.getPropertyForTag(EditorTag.TITLE).getDropDownListProperty());
-        titleCB.editorProperty().getValue().textProperty().bindBidirectional(model.getPropertyForTag(EditorTag.TITLE).getTextProperty());
-        artistCB.itemsProperty().bindBidirectional(model.getPropertyForTag(EditorTag.ARTIST).getDropDownListProperty());
-        artistCB.editorProperty().getValue().textProperty().bindBidirectional(model.getPropertyForTag(EditorTag.ARTIST).getTextProperty());
-        albumCB.itemsProperty().bindBidirectional(model.getPropertyForTag(EditorTag.ALBUM).getDropDownListProperty());
-        albumCB.editorProperty().getValue().textProperty().bindBidirectional(model.getPropertyForTag(EditorTag.ALBUM).getTextProperty());
-        albumArtistCB.itemsProperty().bindBidirectional(model.getPropertyForTag(EditorTag.ALBUM_ARTIST).getDropDownListProperty());
+            .bindBidirectional(editorFields.getMeta(EditorTag.FILE_NAME).getTextProperty());
+        titleCB.itemsProperty().bindBidirectional(editorFields.getMeta(EditorTag.TITLE).getDropDownListProperty());
+        titleCB.editorProperty().getValue().textProperty().bindBidirectional(editorFields.getMeta(EditorTag.TITLE).getTextProperty());
+        artistCB.itemsProperty().bindBidirectional(editorFields.getMeta(EditorTag.ARTIST).getDropDownListProperty());
+        artistCB.editorProperty().getValue().textProperty().bindBidirectional(editorFields.getMeta(EditorTag.ARTIST).getTextProperty());
+        albumCB.itemsProperty().bindBidirectional(editorFields.getMeta(EditorTag.ALBUM).getDropDownListProperty());
+        albumCB.editorProperty().getValue().textProperty().bindBidirectional(editorFields.getMeta(EditorTag.ALBUM).getTextProperty());
+        albumArtistCB.itemsProperty().bindBidirectional(editorFields.getMeta(EditorTag.ALBUM_ARTIST).getDropDownListProperty());
         albumArtistCB.editorProperty().getValue().textProperty()
-            .bindBidirectional(model.getPropertyForTag(EditorTag.ALBUM_ARTIST).getTextProperty());
-        trackCB.itemsProperty().bindBidirectional(model.getPropertyForTag(EditorTag.TRACK).getDropDownListProperty());
-        trackCB.editorProperty().getValue().textProperty().bindBidirectional(model.getPropertyForTag(EditorTag.TRACK).getTextProperty());
-        yearCB.itemsProperty().bindBidirectional(model.getPropertyForTag(EditorTag.YEAR).getDropDownListProperty());
-        yearCB.editorProperty().getValue().textProperty().bindBidirectional(model.getPropertyForTag(EditorTag.YEAR).getTextProperty());
-        genreCB.itemsProperty().bindBidirectional(model.getPropertyForTag(EditorTag.GENRE).getDropDownListProperty());
-        genreCB.editorProperty().getValue().textProperty().bindBidirectional(model.getPropertyForTag(EditorTag.GENRE).getTextProperty());
-        commentCB.itemsProperty().bindBidirectional(model.getPropertyForTag(EditorTag.COMMENT).getDropDownListProperty());
+            .bindBidirectional(editorFields.getMeta(EditorTag.ALBUM_ARTIST).getTextProperty());
+        trackCB.itemsProperty().bindBidirectional(editorFields.getMeta(EditorTag.TRACK).getDropDownListProperty());
+        trackCB.editorProperty().getValue().textProperty().bindBidirectional(editorFields.getMeta(EditorTag.TRACK).getTextProperty());
+        yearCB.itemsProperty().bindBidirectional(editorFields.getMeta(EditorTag.YEAR).getDropDownListProperty());
+        yearCB.editorProperty().getValue().textProperty().bindBidirectional(editorFields.getMeta(EditorTag.YEAR).getTextProperty());
+        genreCB.itemsProperty().bindBidirectional(editorFields.getMeta(EditorTag.GENRE).getDropDownListProperty());
+        genreCB.editorProperty().getValue().textProperty().bindBidirectional(editorFields.getMeta(EditorTag.GENRE).getTextProperty());
+        commentCB.itemsProperty().bindBidirectional(editorFields.getMeta(EditorTag.COMMENT).getDropDownListProperty());
         commentCB.editorProperty().getValue().textProperty()
-            .bindBidirectional(model.getPropertyForTag(EditorTag.COMMENT).getTextProperty());
-        albumArtIV.imageProperty().bindBidirectional(model.albumArtProperty());
-        albumArtMetaLabel.textProperty().bind(model.getPropertyForTag(EditorTag.ALBUM_ART_META).getTextProperty());
+            .bindBidirectional(editorFields.getMeta(EditorTag.COMMENT).getTextProperty());
+        albumArtIV.imageProperty().bindBidirectional(editorFields.getAlbumArtProperty());
+        albumArtMetaLabel.textProperty().bind(editorFields.getMeta(EditorTag.ALBUM_ART_META).getTextProperty());
 
         vgmdbInfoLV.itemsProperty().bind(vgmdbParserModel.vgmdbInfoProperty());
         vgmdbAlbumArtIV.imageProperty().bind(vgmdbParserModel.albumArtProperty());
-    }
-
-    /**
-     * Selects the first index of dropdown
-     */
-    private void selectFirstIndex() {
-        for(Entry<ComboBox<String>, EditorTag> entry : comboBoxToTag.entrySet()) {
-            entry.getKey().getSelectionModel().select(0);
-        }
     }
 
     public void saveTags() {
@@ -270,7 +267,7 @@ public class AudioTaggerVC implements Logger {
 //                });
 //            }
             // trigger a search on vgmdb
-            vgmdbParserModel.searchByAlbum(model.getPropertyForTag(EditorTag.ALBUM).getTextProperty().get());
+            vgmdbParserModel.searchByAlbum(editorFields.getDataForTag(EditorTag.ALBUM));
         });
 
 

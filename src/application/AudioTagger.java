@@ -17,7 +17,7 @@ public class AudioTagger extends Application
     private BorderPane rootLayout;
     
     RootVC rootVC;
-    AudioTaggerVC mp3TaggerVC;
+    AudioTaggerVC audioTaggerTaggerVC;
 
     @Override
     public void start(Stage primaryStage)
@@ -61,8 +61,8 @@ public class AudioTagger extends Application
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getResource("../application/AudioTaggerView.fxml"));
             AnchorPane view = (AnchorPane)loader.load();
-            mp3TaggerVC = loader.getController();
-            rootVC.setAudioTaggerVC(mp3TaggerVC);
+            audioTaggerTaggerVC = loader.getController();
+            rootVC.setAudioTaggerVC(audioTaggerTaggerVC);
             
             rootLayout.setCenter(view);
 

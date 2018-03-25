@@ -49,6 +49,9 @@ public class DatabaseController implements InformationBase, Logger {
         REPLACE_WORD
     }
 
+    /**
+     * @param name Name of db, empty for default
+     */
     public DatabaseController(String name) {
         initializeDB(name.isEmpty() ? "defaultDB" : name);
         initializeTables();

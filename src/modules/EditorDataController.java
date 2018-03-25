@@ -1,4 +1,4 @@
-package model.information;
+package modules;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -6,28 +6,36 @@ import java.util.HashMap;
 import java.util.IllegalFormatException;
 import java.util.List;
 
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.image.Image;
 import model.base.InformationBase;
 import model.base.TagBase;
 import model.database.DatabaseController;
-import modules.AutoCompleter;
-import modules.AutoCorrecter;
 import support.EventCenter;
 import support.EventCenter.Events;
+import support.Logger;
 import support.structure.EditorComboBoxMeta;
 import support.structure.TagDetails;
 import support.util.Utilities.EditorTag;
 
 
 
-public class EditorDataController implements InformationBase {
+/**
+ * Controller class to handle editor combo box and album art.
+ * @author tony
+ *
+ */
+public class EditorDataController implements InformationBase, Logger {
     private HashMap<EditorTag, EditorComboBoxMeta> tagToData;
-
+    private ObjectProperty<Image> albumArt; // album art pic
+    
     // modules
     private AutoCorrecter autoCorrecter;
     private AutoCompleter autoCompleter;
 
     public EditorDataController(DatabaseController dbManagement) {
+        albumArt = new SimpleObjectProperty<Image>();
         tagToData = new HashMap<EditorTag, EditorComboBoxMeta>();
 
         for(EditorTag t : EditorTag.values()) {
@@ -36,8 +44,6 @@ public class EditorDataController implements InformationBase {
 
         autoCorrecter = new AutoCorrecter(dbManagement);
         autoCompleter = new AutoCompleter();
-
-
         EventCenter.getInstance().subscribeEvent(Events.TRIGGER_AUTO_FILL, this, (obj) -> {
             autoFillForAllTags();
         });
@@ -46,7 +52,11 @@ public class EditorDataController implements InformationBase {
     public EditorComboBoxMeta getMeta(EditorTag t) {
         return tagToData.get(t);
     }
-
+    
+    public ObjectProperty<Image> getAlbumArtProperty() {
+        return albumArt;
+    }
+    
     @Override
     public String getDataForTag(TagBase<?> tag, String... extraArgs) {
         return tagToData.get(tag).getTextProperty().get();
@@ -54,7 +64,7 @@ public class EditorDataController implements InformationBase {
 
     @Override
     public Image getAlbumArt() {
-        return null;
+        return albumArt.get();
     }
 
     /**
@@ -104,6 +114,10 @@ public class EditorDataController implements InformationBase {
     @Override
     public void setAlbumArtFromURL(String url) {}
 
+    public void setAlbumArtFromImage(Image img) {
+        albumArt.set(img);
+    }
+    
     @Override
     public void save(TagDetails details) {}
 
@@ -149,9 +163,11 @@ public class EditorDataController implements InformationBase {
      * Clears all editor text and dropdown
      */
     public void clearAllTags() {
+        debug("clearing tags");
         for(EditorTag t : EditorTag.values()) {
             getMeta(t).clearAll();
         }
+        albumArt.set(null);
     }
 
     /**
