@@ -51,6 +51,7 @@ public class AudioFilesModel implements InformationBase, Logger {
     private TagDetails editorMeta;
 
     private List<Integer> selectedindices; // index of selected file
+    private TagDetails selectedTagInfo; // info of selected file
 
 
     public AudioFilesModel() {
@@ -61,11 +62,11 @@ public class AudioFilesModel implements InformationBase, Logger {
     }
 
     private void reset() {
-        selectedindices = new ArrayList<Integer>();
-        songListMP3Files = new ArrayList<>();
         songListDirectories = new ArrayList<String>();
-
         songListFileNames.clear();
+        songListMP3Files = new ArrayList<>();
+        selectedindices = new ArrayList<Integer>();
+        selectedTagInfo = null;
         editorMeta.reset();
     }
 
@@ -124,35 +125,6 @@ public class AudioFilesModel implements InformationBase, Logger {
                 appendWorkingDirectory(dir.listFiles());
             }
         }
-    }
-
-    /**
-     * Returns a list of indices that are part of the selected album.
-     * 
-     * @param n Selected index, must not be a header
-     * @param includeSelf Include selected index in list
-     * @return list of indices in the same album
-     */
-    private List<Integer> getAllIndexFromAlbum(int n, boolean includeSelf) {
-        List<Integer> indices = new ArrayList<Integer>();
-
-        int lower = n - 1;
-        int upper = n + 1;
-
-        if(includeSelf && songListMP3Files.get(n) != null) {
-            indices.add(n);
-        }
-
-        while(lower >= 0 && songListMP3Files.get(lower) != null) {
-            indices.add(lower);
-            lower--;
-        }
-        while(upper < songListMP3Files.size() && songListMP3Files.get(upper) != null) {
-            indices.add(upper);
-            upper++;
-        }
-        debug("indices Selected: " + Arrays.toString(indices.toArray(new Integer[0])));
-        return indices;
     }
 
     /**
@@ -215,6 +187,7 @@ public class AudioFilesModel implements InformationBase, Logger {
                 }
             }
         }
+        selectedTagInfo = tagsFinalized;
         cb.getTags(tagsFinalized);
     }
 
@@ -301,7 +274,9 @@ public class AudioFilesModel implements InformationBase, Logger {
         try {
             BufferedImage buffImage = ImageIO.read(file);
             Image image = SwingFXUtils.toFXImage(buffImage, null);
-            //            albumArt = ImageUtil.scaleImage(image, 500, 500, true);
+            if(selectedTagInfo != null) {
+                selectedTagInfo.setAlbumArt(image);
+            }
         }
         catch (IOException e) {
             e.printStackTrace();
@@ -313,22 +288,24 @@ public class AudioFilesModel implements InformationBase, Logger {
         try {
             BufferedImage buffImage = ImageIO.read(new URL(url));
             Image image = SwingFXUtils.toFXImage(buffImage, null);
-            //            albumArt = ImageUtil.scaleImage(image, 500, 500, true);
+            if(selectedTagInfo != null) {
+                selectedTagInfo.setAlbumArt(image);
+            }
         }
         catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-
-    // save new tags
     /**
+     * Save new tags
+     * 
      * @param index
-     * @param tags
+     * @param tags TagDetails
      * @param overrideFileName true = save with original name
      */
     private void saveForIndex(int index, TagDetails tags, boolean overrideFileName) {
-//        info("Save for [" + index + "] tags: " + tags);
+        //        info("Save for [" + index + "] tags: " + tags);
         AudioFile file = songListMP3Files.get(index);
         for(EditorTag tag : EditorTag.values()) {
             String tagVal = tags.get(tag);
@@ -352,7 +329,7 @@ public class AudioFilesModel implements InformationBase, Logger {
 
     @Override
     public void save(TagDetails tags) {
-//        info("Starting Save: " + Arrays.toString(selectedindices.toArray(new Integer[0])));
+        //        info("Starting Save: " + Arrays.toString(selectedindices.toArray(new Integer[0])));
         Set<Integer> processed = new HashSet<Integer>();
         // go through each index
         for(int index : selectedindices) {
@@ -395,84 +372,33 @@ public class AudioFilesModel implements InformationBase, Logger {
         return keywords;
     }
 
-    // get the info for a specific tag
+    /**
+     * Get meta for a specific tag
+     * 
+     * @see model.base.InformationBase#getDataForTag(model.base.TagBase, java.lang.String[])
+     */
     @Override
     public String getDataForTag(TagBase<?> tag, String... extraArgs) {
-        String returnValue = "";
-        //        if(tag == EditorTag.ALBUM) {
-        //            returnValue = album;
-        //        }
-        //        else if(tag == EditorTag.ALBUM_ART_META) {
-        //            returnValue = albumArtMeta;
-        //        }
-        //        else if(tag == EditorTag.ALBUM_ARTIST) {
-        //            returnValue = albumArtist;
-        //        }
-        //        else if(tag == EditorTag.ARTIST) {
-        //            returnValue = artist;
-        //        }
-        //        else if(tag == EditorTag.COMMENT) {
-        //            returnValue = comment;
-        //        }
-        //        else if(tag == EditorTag.FILE_NAME) {
-        //            returnValue = fileName;
-        //        }
-        //        else if(tag == EditorTag.GENRE) {
-        //            returnValue = genre;
-        //        }
-        //        else if(tag == EditorTag.TITLE) {
-        //            returnValue = title;
-        //        }
-        //        else if(tag == EditorTag.TRACK) {
-        //            if(StringUtil.isKeyword(track)) {
-        //                returnValue = track;
-        //            }
-        //            else {
-        //                returnValue = String.format("%02d", Integer.valueOf(track));
-        //            }
-        //        }
-        //        else if(tag == EditorTag.YEAR) {
-        //            returnValue = year;
-        //        }
-        //        else {
-        //            info("no data for tag: " + tag);
-        //        }
-        return returnValue;
+        if(selectedTagInfo == null) {
+            return null;
+        }
+        else {
+            return selectedTagInfo.get((EditorTag)tag);
+        }
     }
 
-    // replace tagData with new tagData
+    // 
+    /**
+     * Replace meta info for tag
+     * 
+     * @see model.base.InformationBase#setDataForTag(model.base.TagBase, java.lang.String[])
+     */
     @Override
     public void setDataForTag(TagBase<?> tag, String... values) {
-        //        if(tag == EditorTag.ALBUM) {
-        //            album = values[0];
-        //        }
-        //        else if(tag == EditorTag.ALBUM_ART_META) {
-        //            albumArtMeta = values[0];
-        //        }
-        //        else if(tag == EditorTag.ALBUM_ARTIST) {
-        //            albumArtist = values[0];
-        //        }
-        //        else if(tag == EditorTag.ARTIST) {
-        //            artist = values[0];
-        //        }
-        //        else if(tag == EditorTag.COMMENT) {
-        //            comment = values[0];
-        //        }
-        //        else if(tag == EditorTag.FILE_NAME) {
-        //            fileName = values[0];
-        //        }
-        //        else if(tag == EditorTag.GENRE) {
-        //            genre = values[0];
-        //        }
-        //        else if(tag == EditorTag.TITLE) {
-        //            title = values[0];
-        //        }
-        //        else if(tag == EditorTag.TRACK) {
-        //            track = values[0];
-        //        }
-        //        else if(tag == EditorTag.YEAR) {
-        //            year = values[0];
-        //        }
+        if(selectedTagInfo == null) {
+            return;
+        }
+        selectedTagInfo.set((EditorTag)tag, values[0]);
     }
 
     @Override

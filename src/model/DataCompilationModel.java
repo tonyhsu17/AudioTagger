@@ -4,12 +4,12 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.IllegalFormatException;
 import java.util.List;
 
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import model.base.InformationBase;
 import model.base.TagBase;
 import model.database.DatabaseController;
@@ -38,11 +38,11 @@ public class DataCompilationModel implements Logger {
     }
 
     private EditorDataController editorMap; // ComboBox controller (editor text and drop down)
-    
+
     private ListProperty<String> fileNamesList; // currently working files
     private DatabaseController dbManagement; // database for prediction of common tag fields
     private AudioFilesModel audioFilesModel; // audio files meta
-   
+
     private VGMDBParser vgmdbModel; // data handler for vgmdb website
 
 
@@ -96,9 +96,9 @@ public class DataCompilationModel implements Logger {
         }
         else {
             List<String> possibleValues = getPossibleDataForTag(tag, text, ""); // TODO defaults add file defaults?
-            int size = addPossibleDataForTag(tag, text);
-
-            cb.done(size);
+            //            int size = addPossibleDataForTag(tag, text);
+            ObservableList<String> list = FXCollections.observableArrayList(possibleValues);
+            cb.done(list);
         }
     }
 
@@ -131,7 +131,7 @@ public class DataCompilationModel implements Logger {
             default:
                 break;
         }
-
+        debug(tag + " size: " + dropDownList.size() + " : " + Arrays.toString(dropDownList.toArray(new String[0])));
         return dropDownList;
     }
 
@@ -142,75 +142,6 @@ public class DataCompilationModel implements Logger {
      * @param additional optional args if needed
      * @return size of dropdown
      */
-    private int addPossibleDataForTag(EditorTag tag, String... additional) {
-        List<String> dropDownList = editorMap.getMeta(tag).getDropDownListProperty().get();
-        List<String> newDropdownList = new ArrayList<String>();
-        String editorText = editorMap.getMeta(tag).getTextProperty().get();
-        //        editorMap.getMeta(tag).clearDropdown();
-        //        editorMap.getComboBox(tag).getSelectionModel().clearSelection();
-        // add original
-        for(String str : additional) {
-            if(str != null && !str.isEmpty() && !dropDownList.contains(str)) {
-                dropDownList.add(str);
-            }
-        }
-
-        editorMap.setFormattedDataForTag(tag, editorMap.getMeta(tag).getTextProperty().get());
-
-        // now handle base on specific
-        switch (tag) {
-            case ALBUM:
-            case ALBUM_ARTIST:
-            case ARTIST:
-            case COMMENT:
-            case FILE_NAME:
-            case TITLE:
-            case YEAR:
-                newDropdownList = getPossibleValues(tag);
-                break;
-            case ALBUM_ART:
-                break;
-            case ALBUM_ART_META:
-                break;
-            case GENRE:
-                newDropdownList = addPossibleGenres();
-                break;
-            case TRACK:
-                try {
-                    editorMap.getMeta(tag).getTextProperty().set(String.format("%02d", editorText));
-                }
-                catch (IllegalFormatException e) {
-                }
-                break;
-            default:
-                break;
-
-        }
-        //        debug("dropDownList: " + Arrays.toString(dropDownList.toArray(new String[0])));
-        //        debug("newDropdownList: " + Arrays.toString(newDropdownList.toArray(new String[0])));
-
-        List<String> toRemove = new ArrayList<String>();
-        List<String> toAdd = new ArrayList<String>();
-        //        debug("to remove:" + Arrays.toString(toRemove.toArray(new String[0])));
-        //        debug("to add: " + Arrays.toString(toAdd.toArray(new String[0])));
-        // TODO cleanup (selecting dropdown works, typing in location work
-        // broken: when changing selection with keyboard it sets editor test too...
-        for(String str : dropDownList) {
-            if(!newDropdownList.contains(str)) {
-                toRemove.add(str);
-            }
-        }
-        for(String str : newDropdownList) {
-            if(!dropDownList.contains(str)) {
-                toAdd.add(str);
-            }
-        }
-        dropDownList.removeAll(toRemove);
-        dropDownList.addAll(toAdd);
-        debug(tag + " : " + Arrays.toString(dropDownList.toArray(new String[0])));
-        return dropDownList.size();
-    }
-
     private List<String> getPossibleValues(EditorTag tag) {
         List<String> returnList = new ArrayList<String>();
         EditorComboBoxMeta field = editorMap.getMeta(tag);
@@ -234,11 +165,10 @@ public class DataCompilationModel implements Logger {
             }
         }
 
-        if(!returnList.contains(audioFilesModel.getDataForTag(tag))) {
+        String audioOriginal = audioFilesModel.getDataForTag(tag);
+        if(audioOriginal != null && !audioOriginal.isEmpty() && !returnList.contains(audioOriginal)) {
             returnList.add(audioFilesModel.getDataForTag(tag)); // add original value 
         }
-
-
         return returnList;
     }
 
@@ -344,7 +274,7 @@ public class DataCompilationModel implements Logger {
             dbManagement.setDataForTag(DatabaseController.AdditionalTag.REPLACE_WORD, delimDiff[0], delimDiff[1]);
         }
     }
-    
+
     public void setImage(ImageFrom type, String ummm) {
         // TODO set meta too
         switch (type) {
@@ -401,5 +331,5 @@ public class DataCompilationModel implements Logger {
         return audioFilesModel.getFileNames();
     }
 
-    
+
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import javafx.application.Platform;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -41,6 +42,12 @@ import support.util.Utilities.EditorTag;
 
 
 
+/**
+ * ViewController for main view. Its job is to handle bindings to view and event listeners.
+ * 
+ * @author Ikersaro
+ *
+ */
 public class AudioTaggerVC implements Logger {
     @FXML
     private ListView<String> songListLV;
@@ -94,12 +101,15 @@ public class AudioTaggerVC implements Logger {
     private VGMDBParser vgmdbParserModel;
     private HashMap<ComboBox<String>, EditorTag> comboBoxToTag;
 
+    /**
+     * Initializes view controller including the other back-end components.
+     */
     public AudioTaggerVC() {
         vgmdbParserModel = new VGMDBParser();
         dbManagement = new DatabaseController("");
         editorFields = new EditorDataController(dbManagement);
         model = new DataCompilationModel(dbManagement, editorFields);
-        
+
         pressedIndex = 0;
         model.setVGMDBParser(vgmdbParserModel);
     }
@@ -127,6 +137,9 @@ public class AudioTaggerVC implements Logger {
         initializeAlbumArtMenu();
     }
 
+    /**
+     * Property binding
+     */
     private void bindProperties() {
         // binds
         songListLV.itemsProperty().bindBidirectional(model.processingFilesProperty());
@@ -159,6 +172,9 @@ public class AudioTaggerVC implements Logger {
         vgmdbAlbumArtIV.imageProperty().bind(vgmdbParserModel.albumArtProperty());
     }
 
+    /**
+     * Triggers a cascading effect for saving.
+     */
     public void saveTags() {
         model.save();
     }
@@ -182,6 +198,9 @@ public class AudioTaggerVC implements Logger {
     //    Event Handlers   //
     // ~~~~~~~~~~~~~~~~~~~ //
 
+    /**
+     * Event listners for album art's right click menu
+     */
     private void initializeAlbumArtMenu() {
         final ContextMenu contextMenu = new ContextMenu();
 
@@ -246,36 +265,24 @@ public class AudioTaggerVC implements Logger {
         });
     }
 
+    /**
+     * Event listeners mouse click actions for song list view and editor's combo box
+     */
     private void addOnMouseClickedListners() {
         // SongList selecting files - display in editor
-        
         songListLV.getSelectionModel().selectedItemProperty().addListener((mouseEvent) -> {
             List<Integer> indices = songListLV.getSelectionModel().getSelectedIndices();
-            model.requestDataFor(indices, (asd) -> {
-//              selectFirstIndex();
-          });
-//            if(indices.size() > 1) {// if multiple selected
-//                model.requestDataFor(indices, (asd) -> {
-////                    selectFirstIndex();
-//                });
-//            }
-//            else { // else only 1 selected
-//                List<Integer> list = new ArrayList<Integer>();
-//                list.add(songListLV.getSelectionModel().getSelectedIndex());
-//                model.requestDataFor(list, (asd) -> {
-////                    selectFirstIndex();
-//                });
-//            }
+            model.requestDataFor(indices, (size) -> {
+            });
             // trigger a search on vgmdb
             vgmdbParserModel.searchByAlbum(editorFields.getDataForTag(EditorTag.ALBUM));
         });
-
 
         // ComboBox dropdown - Show dropdown items when clicked on textfield
         for(Entry<ComboBox<String>, EditorTag> entry : comboBoxToTag.entrySet()) {
             ComboBox<String> temp = entry.getKey();
             TextField tf = temp.getEditor();
-            
+
             tf.setOnMouseClicked((mouseEvent) -> {
                 // highlighting is removed when showing dropdown, so need to rehighlight
                 Range range = Utilities.getRange(tf.getText(), tf.getCaretPosition(), tf.getSelectedText());
@@ -287,6 +294,9 @@ public class AudioTaggerVC implements Logger {
         }
     }
 
+    /**
+     * Event listeners on change actions for typing in editor's combo box
+     */
     private void addOnChangeListeners() {
         for(Entry<ComboBox<String>, EditorTag> entry : comboBoxToTag.entrySet()) {
             ComboBox<String> temp = entry.getKey();
@@ -296,7 +306,11 @@ public class AudioTaggerVC implements Logger {
                     if(oldVal != null && !oldVal.isEmpty()) {
                         model.requestDropdownForTag(entry.getValue(), newVal, temp.getItems(), (size) -> {
                             temp.hide();
-                            temp.visibleRowCountProperty().set((int)size);
+//                            debug((int)size);
+//                            temp.visibleRowCountProperty().set((int)size);
+                            
+                            temp.setItems((ObservableList<String>)size);
+                            temp.visibleRowCountProperty().set(((ObservableList<String>)size).size());
                             temp.show();
                         });
                     }
