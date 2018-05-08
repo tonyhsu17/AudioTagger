@@ -78,8 +78,7 @@ public class SettingsVC implements Logger
     {
         for(SettingsKey key : SettingsKey.values())
         {
-            debug(key.name());
-            debug(settings.getKeyValuePair(key).getDisplayValue() + " " + settings.getKeyValuePair(key).getKeyDescription());
+            debug(key.debug());
             data.add(settings.getKeyValuePair(key));
         }
         table.refresh();

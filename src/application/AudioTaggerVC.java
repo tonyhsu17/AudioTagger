@@ -29,9 +29,9 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.text.Text;
 import model.DataCompilationModel;
 import model.DataCompilationModel.ImageFrom;
-import model.database.DatabaseController;
-import model.information.VGMDBParser;
-import modules.EditorDataController;
+import modules.controllers.DatabaseController;
+import modules.controllers.EditorDataController;
+import modules.controllers.VGMDBParser;
 import support.EventCenter;
 import support.EventCenter.Events;
 import support.Logger;
@@ -297,6 +297,7 @@ public class AudioTaggerVC implements Logger {
     /**
      * Event listeners on change actions for typing in editor's combo box
      */
+    @SuppressWarnings("unchecked")
     private void addOnChangeListeners() {
         for(Entry<ComboBox<String>, EditorTag> entry : comboBoxToTag.entrySet()) {
             ComboBox<String> temp = entry.getKey();
@@ -306,9 +307,6 @@ public class AudioTaggerVC implements Logger {
                     if(oldVal != null && !oldVal.isEmpty()) {
                         model.requestDropdownForTag(entry.getValue(), newVal, temp.getItems(), (size) -> {
                             temp.hide();
-//                            debug((int)size);
-//                            temp.visibleRowCountProperty().set((int)size);
-                            
                             temp.setItems((ObservableList<String>)size);
                             temp.visibleRowCountProperty().set(((ObservableList<String>)size).size());
                             temp.show();
@@ -410,7 +408,7 @@ public class AudioTaggerVC implements Logger {
         List<File> phil = board.getFiles();
         File f = phil.get(0);
 
-        model.changeAlbumArtFromFile(f);
+        model.setAlbumArt(f);
     }
 
     // ~~~~~ FXML vgmdbInfo ~~~~~ //

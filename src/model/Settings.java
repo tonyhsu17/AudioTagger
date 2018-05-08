@@ -15,6 +15,7 @@ import java.util.Scanner;
 
 import model.base.InformationBase;
 import model.base.TagBase;
+import modules.KeywordInterpreter;
 import support.EventCenter;
 import support.EventCenter.Events;
 import support.Logger;
@@ -59,6 +60,10 @@ public class Settings implements Logger {
             return description;
         }
 
+        public String debug() {
+            return "SettingsKey [name=" + name() + ", description=" + description + "]";
+        }
+
         public static SettingsKey toKey(String str) {
             for(SettingsKey key : SettingsKey.values()) {
                 if(key.toString().equals(str)) {
@@ -66,6 +71,20 @@ public class Settings implements Logger {
                 }
             }
             return null;
+        }
+
+        public static SettingsKey[] getPropagates() {
+            return new SettingsKey[] {PROPAGATE_SAVE_ALBUM,
+                PROPAGATE_SAVE_ALBUM_ART,
+                PROPAGATE_SAVE_ALBUM_ARTIST,
+                PROPAGATE_SAVE_ARTIST,
+                PROPAGATE_SAVE_COMMENT,
+                PROPAGATE_SAVE_GENRE,
+                PROPAGATE_SAVE_YEAR};
+        }
+
+        public static SettingsKey[] getRules() {
+            return new SettingsKey[] {RULE_ALBUM_ARTIST, RULE_COMMENT, RULE_FILENAME};
         }
     }
 
@@ -113,29 +132,16 @@ public class Settings implements Logger {
 
     private void resetToDefaults() {
         map.clear();
-        map.put(SettingsKey.PROPAGATE_SAVE_ARTIST, new SettingsTableViewMeta(SettingsKey.PROPAGATE_SAVE_ARTIST, "true"));
-        map.put(SettingsKey.PROPAGATE_SAVE_ALBUM, new SettingsTableViewMeta(SettingsKey.PROPAGATE_SAVE_ALBUM, "true"));
-        map.put(SettingsKey.PROPAGATE_SAVE_ALBUM_ARTIST, new SettingsTableViewMeta(SettingsKey.PROPAGATE_SAVE_ALBUM_ARTIST, "true"));
-        map.put(SettingsKey.PROPAGATE_SAVE_YEAR, new SettingsTableViewMeta(SettingsKey.PROPAGATE_SAVE_YEAR, "true"));
-        map.put(SettingsKey.PROPAGATE_SAVE_GENRE, new SettingsTableViewMeta(SettingsKey.PROPAGATE_SAVE_GENRE, "true"));
-        map.put(SettingsKey.PROPAGATE_SAVE_COMMENT, new SettingsTableViewMeta(SettingsKey.PROPAGATE_SAVE_COMMENT, "true"));
-        map.put(SettingsKey.PROPAGATE_SAVE_ALBUM_ART, new SettingsTableViewMeta(SettingsKey.PROPAGATE_SAVE_ALBUM_ART, "true"));
-        map.put(SettingsKey.RULE_FILENAME, new SettingsTableViewMeta(SettingsKey.RULE_FILENAME, ""));
-        // map.add(new SettingsLabelMeta(SettingsKey.RULE_TITLE, ""));
-        // map.put(SettingsKey.RULE_ARTIST, new SettingsLabelMeta(SettingsKey.RULE_ARTIST, ""));
-        // map.add(new SettingsLabelMeta(SettingsKey.RULE_ALBUM, ""));
-        map.put(SettingsKey.RULE_ALBUM_ARTIST, new SettingsTableViewMeta(SettingsKey.RULE_ALBUM_ARTIST, ""));
-        // map.add(new SettingsLabelMeta(SettingsKey.RULE_TRACK, ""));
-        // map.add(new SettingsLabelMeta(SettingsKey.RULE_YEAR, ""));
-        // map.add(new SettingsLabelMeta(SettingsKey.RULE_GENRE, ""));
-        map.put(SettingsKey.RULE_COMMENT, new SettingsTableViewMeta(SettingsKey.RULE_COMMENT, ""));
+        for(SettingsKey key : SettingsKey.values()) {
+            map.put(key, new SettingsTableViewMeta(key, "true"));
+        }
     }
 
     /**
      * Load settings
      */
     private void loadSettings() {
-        Scanner sc;
+        Scanner sc = null;
         try {
             sc = new Scanner(settingsFile);
             while(sc.hasNextLine()) {
@@ -146,12 +152,15 @@ public class Settings implements Logger {
                 if(key != null) {
                     map.put(key, new SettingsTableViewMeta(key, splitLine[1]));
                 }
-//                dumpMap();
             }
-            
         }
         catch (FileNotFoundException e) {
             // Should not come here since file is confirmed first
+        }
+        finally {
+            if(sc != null) {
+                sc.close();
+            }
         }
     }
 
@@ -186,13 +195,11 @@ public class Settings implements Logger {
     }
 
     public boolean isAnyPropagateSaveOn() {
-        return isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_ALBUM) ||
-               isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_ALBUM_ART) ||
-               isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_ALBUM_ARTIST) ||
-               isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_ARTIST) ||
-               isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_COMMENT) ||
-               isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_GENRE) ||
-               isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_YEAR);
+        boolean flag = true;
+        for(SettingsKey key : SettingsKey.getPropagates()) {
+            flag |= isPropagateSaveOn(key);
+        }
+        return flag;
     }
 
     public boolean isPropagateSaveOn(SettingsKey key) {

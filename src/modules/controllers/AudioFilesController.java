@@ -1,4 +1,4 @@
-package model.information;
+package modules.controllers;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -35,7 +35,17 @@ import support.util.Utilities.EditorTag;
 
 
 
-public class AudioFilesModel implements InformationBase, Logger {
+/**
+ * Controller class for handling audio files.
+ * Stores list of files in workspace and indices for selected to view in editor.
+ * 
+ * @author Tony
+ *
+ */
+public class AudioFilesController implements InformationBase, Logger {
+    /**
+     * Call back interface
+     */
     public interface AudioFilesModelTagInfo {
         public void getTags(TagDetails details);
     }
@@ -47,17 +57,13 @@ public class AudioFilesModel implements InformationBase, Logger {
     // audio files, null placeholders for album headers
     private ArrayList<AudioFile> songListMP3Files;
 
-    // currently selected information //TODO remove, use cb and set value in combobox
-    private TagDetails editorMeta;
-
     private List<Integer> selectedindices; // index of selected file
     private TagDetails selectedTagInfo; // info of selected file
 
 
-    public AudioFilesModel() {
+    public AudioFilesController() {
         songListFileNames = new SimpleListProperty<String>();
         songListFileNames.set(FXCollections.observableArrayList());
-        editorMeta = new TagDetails();
         reset();
     }
 
@@ -67,7 +73,6 @@ public class AudioFilesModel implements InformationBase, Logger {
         songListMP3Files = new ArrayList<>();
         selectedindices = new ArrayList<Integer>();
         selectedTagInfo = null;
-        editorMeta.reset();
     }
 
     /**
@@ -169,21 +174,19 @@ public class AudioFilesModel implements InformationBase, Logger {
                             tagsFinalized = temp;
                         }
                         else {
-                            setTagDetails(tagsFinalized, temp);
+                            tagsFinalized = getCombinedTagDetails(tagsFinalized, temp);
                         }
                     }
                 }
                 else if(!processed.contains(index)) {
-
                     processed.add(index); // add to processed in-case it is part of indices
                     if(tagsFinalized == null) {
                         TagDetails temp = getSelectedTag(index);
                         tagsFinalized = temp;
                     }
                     else {
-                        setTagDetails(tagsFinalized, getSelectedTag(index));
+                        getCombinedTagDetails(tagsFinalized, getSelectedTag(index));
                     }
-
                 }
             }
         }
@@ -208,8 +211,9 @@ public class AudioFilesModel implements InformationBase, Logger {
      * 
      * @param original One to modify if different
      * @param newTag Compare to TagDetails
+     * @return TagDetails
      */
-    private void setTagDetails(TagDetails original, TagDetails newTag) {
+    private TagDetails getCombinedTagDetails(TagDetails original, TagDetails newTag) {
         // compare with each other and set as "different values" if not matching 
         for(EditorTag tag : EditorTag.values()) {
             if(tag == EditorTag.ALBUM_ART) {
@@ -218,13 +222,12 @@ public class AudioFilesModel implements InformationBase, Logger {
             }
             else {
                 String newVal = StringUtil.getComparedName(newTag.get(tag), original.get(tag));
-                //                debug("original: " + original.get(tag) + " new: " + newTag.get(tag));
                 if(original.get(tag) == null || !original.get(tag).equals(newVal)) {
-                    //                    debug("replacing with new val: " + newVal);
                     original.set(tag, newVal);
                 }
             }
         }
+        return original;
     }
 
     /**
@@ -250,12 +253,17 @@ public class AudioFilesModel implements InformationBase, Logger {
     // Getters & Setters //
     // ~~~~~~~~~~~~~~~~~ //
 
+    /**
+     * Workspace file list property
+     * 
+     * @return ListProperty<String>
+     */
     public ListProperty<String> fileNamesProperty() {
         return songListFileNames;
     }
 
     /**
-     * Returns the display list of folders with audio files within them
+     * Returns the workspace of audio files and folder names
      * 
      * @return n Folders + n Audio Files
      */
@@ -263,33 +271,31 @@ public class AudioFilesModel implements InformationBase, Logger {
         return songListFileNames.get();
     }
 
-
     @Override
     public String getDisplayKeywordTagClassName() {
         return "Audio";
     }
 
     @Override
-    public void setAlbumArtFromFile(File file) {
+    public void setAlbumArt(Object obj) {
         try {
-            BufferedImage buffImage = ImageIO.read(file);
-            Image image = SwingFXUtils.toFXImage(buffImage, null);
-            if(selectedTagInfo != null) {
-                selectedTagInfo.setAlbumArt(image);
+            // get image based on object type
+            BufferedImage buffImage = null;
+            if(obj instanceof File) {
+                File file = (File)obj;
+                buffImage = ImageIO.read(file);
             }
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+            else if(obj instanceof String) {
+                String url = (String)obj;
+                buffImage = ImageIO.read(new URL(url));
+            }
 
-    @Override
-    public void setAlbumArtFromURL(String url) {
-        try {
-            BufferedImage buffImage = ImageIO.read(new URL(url));
-            Image image = SwingFXUtils.toFXImage(buffImage, null);
-            if(selectedTagInfo != null) {
-                selectedTagInfo.setAlbumArt(image);
+            // if successfully parsed image
+            if(buffImage != null) {
+                Image image = SwingFXUtils.toFXImage(buffImage, null);
+                if(selectedTagInfo != null) {
+                    selectedTagInfo.setAlbumArt(image);
+                }
             }
         }
         catch (IOException e) {
@@ -305,12 +311,10 @@ public class AudioFilesModel implements InformationBase, Logger {
      * @param overrideFileName true = save with original name
      */
     private void saveForIndex(int index, TagDetails tags, boolean overrideFileName) {
-        //        info("Save for [" + index + "] tags: " + tags);
         AudioFile file = songListMP3Files.get(index);
         for(EditorTag tag : EditorTag.values()) {
             String tagVal = tags.get(tag);
             if(tagVal != null && !tagVal.isEmpty() && !StringUtil.isKeyword(tagVal)) {
-
                 file.setField(tag, tagVal);
             }
         }
@@ -333,18 +337,13 @@ public class AudioFilesModel implements InformationBase, Logger {
         Set<Integer> processed = new HashSet<Integer>();
         // go through each index
         for(int index : selectedindices) {
-            // if file isnt keyword
+            // if file isn't keyword
             if(!StringUtil.isKeyword(songListFileNames.get(index))) {
                 // save with values and ignore fileName if multiple indices selected
                 saveForIndex(index, tags, selectedindices.size() > 1 ? true : false);
             }
-
             processed.add(index);
         }
-        // TODO Propagate saving
-        //      if(Settings.getInstance().isAnyPropagateSaveOn()) {
-        //          List<Integer> sameAlbumIndicies = getAllIndexFromAlbum(index, false);
-        //      }
     }
 
     @Override
@@ -379,15 +378,10 @@ public class AudioFilesModel implements InformationBase, Logger {
      */
     @Override
     public String getDataForTag(TagBase<?> tag, String... extraArgs) {
-        if(selectedTagInfo == null) {
-            return null;
-        }
-        else {
-            return selectedTagInfo.get((EditorTag)tag);
-        }
+        // if no file is selected return null
+        return selectedTagInfo == null ? "" : selectedTagInfo.get((EditorTag)tag);
     }
 
-    // 
     /**
      * Replace meta info for tag
      * 
@@ -403,7 +397,6 @@ public class AudioFilesModel implements InformationBase, Logger {
 
     @Override
     public List<String> getPossibleDataForTag(TagBase<?> tag, String values) {
-        // TODO Auto-generated method stub
         return null;
     }
 }

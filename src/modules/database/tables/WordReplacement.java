@@ -1,4 +1,4 @@
-package model.database.tables;
+package modules.database.tables;
 
 public enum WordReplacement {
     BEFORE, AFTER

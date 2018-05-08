@@ -3,7 +3,6 @@ package modules;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
-import model.KeywordInterpreter;
 import model.Settings;
 import model.base.InformationBase;
 import model.base.TagBase;

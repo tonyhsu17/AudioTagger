@@ -12,10 +12,10 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import model.base.InformationBase;
 import model.base.TagBase;
-import model.database.DatabaseController;
-import model.information.AudioFilesModel;
-import model.information.VGMDBParser;
-import modules.EditorDataController;
+import modules.controllers.AudioFilesController;
+import modules.controllers.DatabaseController;
+import modules.controllers.EditorDataController;
+import modules.controllers.VGMDBParser;
 import support.Genres;
 import support.Logger;
 import support.structure.EditorComboBoxMeta;
@@ -41,7 +41,7 @@ public class DataCompilationModel implements Logger {
 
     private ListProperty<String> fileNamesList; // currently working files
     private DatabaseController dbManagement; // database for prediction of common tag fields
-    private AudioFilesModel audioFilesModel; // audio files meta
+    private AudioFilesController audioFilesModel; // audio files meta
 
     private VGMDBParser vgmdbModel; // data handler for vgmdb website
 
@@ -49,7 +49,7 @@ public class DataCompilationModel implements Logger {
     public DataCompilationModel(DatabaseController dbManagement, EditorDataController editorMap) {
         this.dbManagement = dbManagement;
         this.editorMap = editorMap;
-        audioFilesModel = new AudioFilesModel();
+        audioFilesModel = new AudioFilesController();
 
         fileNamesList = new SimpleListProperty<String>();
         fileNamesList.set(FXCollections.observableArrayList());
@@ -77,7 +77,7 @@ public class DataCompilationModel implements Logger {
             for(EditorTag tag : EditorTag.values()) {
                 editorMap.setDataForTag(tag, tagDetails.get(tag)); // No formatting needed since its read from file
             }
-            editorMap.setAlbumArtFromImage(tagDetails.getAlbumArt());
+            editorMap.setAlbumArt(tagDetails.getAlbumArt());
             cb.done("DONE");
         });
     }
@@ -285,7 +285,7 @@ public class DataCompilationModel implements Logger {
             case URL:
                 break;
             case VGMDB:
-                editorMap.setAlbumArtFromImage(vgmdbModel.getAlbumArt());
+                editorMap.setAlbumArt(vgmdbModel.getAlbumArt());
                 break;
             default:
                 break;
@@ -318,13 +318,9 @@ public class DataCompilationModel implements Logger {
     public void appendWorkingDirectory(File[] array) {
         audioFilesModel.appendWorkingDirectory(array);
     }
-
-    public void changeAlbumArtFromFile(File f) {
-        editorMap.setAlbumArtFromFile(f);
-    }
-
-    public void changeAlbumArtFromURL(String url) {
-        editorMap.setAlbumArtFromURL(url);
+    
+    public void setAlbumArt(Object obj) {
+        editorMap.setAlbumArt(obj);
     }
 
     public List<String> getSongList() {

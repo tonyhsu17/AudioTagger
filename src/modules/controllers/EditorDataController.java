@@ -1,6 +1,5 @@
-package modules;
+package modules.controllers;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.IllegalFormatException;
@@ -11,7 +10,8 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.image.Image;
 import model.base.InformationBase;
 import model.base.TagBase;
-import model.database.DatabaseController;
+import modules.AutoCompleter;
+import modules.AutoCorrecter;
 import support.EventCenter;
 import support.EventCenter.Events;
 import support.Logger;
@@ -109,13 +109,11 @@ public class EditorDataController implements InformationBase, Logger {
     }
 
     @Override
-    public void setAlbumArtFromFile(File file) {}
-
-    @Override
-    public void setAlbumArtFromURL(String url) {}
-
-    public void setAlbumArtFromImage(Image img) {
-        albumArt.set(img);
+    public void setAlbumArt(Object obj) {
+        if(obj instanceof Image) {
+            Image img = (Image)obj;
+            albumArt.set(img);
+        }
     }
     
     @Override

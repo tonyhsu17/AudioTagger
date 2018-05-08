@@ -20,7 +20,7 @@ import org.testng.annotations.Test;
 import model.Settings;
 import model.Settings.SettingsKey;
 import model.base.TagBase;
-import model.information.AudioFilesModel;
+import modules.controllers.AudioFilesController;
 import support.Constants;
 import support.structure.TagDetails;
 import support.util.Utilities.EditorTag;
@@ -39,7 +39,7 @@ public class AudioFilesTest extends ModelInformationTestBase {
     private static final String TEMP_DIR = "TestResources/Temp/";
 
     private File tempDir;
-    private AudioFilesModel audioList;
+    private AudioFilesController audioList;
 
     @BeforeClass
     public void setUp() {
@@ -61,7 +61,7 @@ public class AudioFilesTest extends ModelInformationTestBase {
 
     @BeforeMethod
     public void beforeMethod() {
-        audioList = new AudioFilesModel();
+        audioList = new AudioFilesController();
     }
 
     @AfterClass

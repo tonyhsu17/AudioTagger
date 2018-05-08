@@ -1,7 +1,6 @@
-package model.information;
+package modules.controllers;
 
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -456,10 +455,7 @@ public class VGMDBParser implements InformationBase, Logger {
     public void setDataForTag(TagBase<?> tag, String... values) {}
 
     @Override
-    public void setAlbumArtFromFile(File file) {}
-
-    @Override
-    public void setAlbumArtFromURL(String url) {}
+    public void setAlbumArt(Object obj) {}
 
     @Override
     public void save(TagDetails details) {}

@@ -13,8 +13,8 @@ import org.testng.annotations.Test;
 
 import javafx.application.Application;
 import model.base.TagBase;
-import model.information.VGMDBParser;
-import model.information.VGMDBParser.VGMDBParserCB;
+import modules.controllers.VGMDBParser;
+import modules.controllers.VGMDBParser.VGMDBParserCB;
 import support.util.Utilities.EditorTag;
 
 

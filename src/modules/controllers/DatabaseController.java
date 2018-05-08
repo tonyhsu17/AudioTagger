@@ -1,6 +1,5 @@
-package model.database;
+package modules.controllers;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -15,11 +14,11 @@ import java.util.List;
 import javafx.scene.image.Image;
 import model.base.InformationBase;
 import model.base.TagBase;
-import model.database.tables.AlbumArtist;
-import model.database.tables.Artist;
-import model.database.tables.ArtistToGroup;
-import model.database.tables.GroupArtist;
-import model.database.tables.WordReplacement;
+import modules.database.tables.AlbumArtist;
+import modules.database.tables.Artist;
+import modules.database.tables.ArtistToGroup;
+import modules.database.tables.GroupArtist;
+import modules.database.tables.WordReplacement;
 import support.Logger;
 import support.structure.TagDetails;
 import support.util.StringUtil;
@@ -950,10 +949,7 @@ public class DatabaseController implements InformationBase, Logger {
     public void save(TagDetails details) {}
 
     @Override
-    public void setAlbumArtFromFile(File file) {}
-
-    @Override
-    public void setAlbumArtFromURL(String url) {}
+    public void setAlbumArt(Object obj) {}
 
     @Override
     public TagBase<?>[] getAdditionalTags() {

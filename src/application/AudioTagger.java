@@ -70,6 +70,5 @@ public class AudioTagger extends Application {
 
     public static void main(String[] args) {
         launch(args);
-        // mp3MetaData asd = new mp3MetaData("asd");
     }
 }
