@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 
 import model.Settings;
-import model.base.InformationBase;
-import model.base.TagBase;
+import modules.controllers.base.InformationBase;
+import modules.controllers.base.TagBase;
 import support.EventCenter;
 import support.EventCenter.Events;
 import support.Logger;

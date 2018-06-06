@@ -31,7 +31,7 @@ import model.DataCompilationModel;
 import model.DataCompilationModel.ImageFrom;
 import modules.controllers.DatabaseController;
 import modules.controllers.EditorDataController;
-import modules.controllers.VGMDBParser;
+import modules.controllers.VGMDBController;
 import support.EventCenter;
 import support.EventCenter.Events;
 import support.Logger;
@@ -98,20 +98,20 @@ public class AudioTaggerVC implements Logger {
     private DataCompilationModel model;
     private DatabaseController dbManagement; // database for prediction of common tag fields
     private EditorDataController editorFields; // ComboBox controller (editor text and drop down)
-    private VGMDBParser vgmdbParserModel;
+    private VGMDBController vgmdbParserModel;
     private HashMap<ComboBox<String>, EditorTag> comboBoxToTag;
 
     /**
      * Initializes view controller including the other back-end components.
      */
     public AudioTaggerVC() {
-        vgmdbParserModel = new VGMDBParser();
+        vgmdbParserModel = new VGMDBController();
         dbManagement = new DatabaseController("");
         editorFields = new EditorDataController(dbManagement);
         model = new DataCompilationModel(dbManagement, editorFields);
 
         pressedIndex = 0;
-        model.setVGMDBParser(vgmdbParserModel);
+        model.setVGMDBController(vgmdbParserModel);
     }
 
     @FXML
@@ -416,7 +416,7 @@ public class AudioTaggerVC implements Logger {
     private void vgmdbInfoLVOnMouseClicked(MouseEvent event) {
         if(event.getButton().equals(MouseButton.PRIMARY)) {
             if(event.getClickCount() >= 2) {
-                vgmdbParserModel.selectOption(vgmdbInfoLV.getSelectionModel().getSelectedIndex());
+                vgmdbParserModel.selectResult(vgmdbInfoLV.getSelectionModel().getSelectedIndex());
                 debug("Double clicked");
             }
         }

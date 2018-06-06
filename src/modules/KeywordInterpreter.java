@@ -3,8 +3,8 @@ package modules;
 import java.util.ArrayList;
 import java.util.List;
 
-import model.base.InformationBase;
-import model.base.TagBase;
+import modules.controllers.base.InformationBase;
+import modules.controllers.base.TagBase;
 import support.Constants;
 import support.util.StringUtil;
 

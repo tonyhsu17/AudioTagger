@@ -10,12 +10,12 @@ import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import model.base.InformationBase;
-import model.base.TagBase;
 import modules.controllers.AudioFilesController;
 import modules.controllers.DatabaseController;
 import modules.controllers.EditorDataController;
-import modules.controllers.VGMDBParser;
+import modules.controllers.VGMDBController;
+import modules.controllers.base.InformationBase;
+import modules.controllers.base.TagBase;
 import support.Genres;
 import support.Logger;
 import support.structure.EditorComboBoxMeta;
@@ -43,7 +43,7 @@ public class DataCompilationModel implements Logger {
     private DatabaseController dbManagement; // database for prediction of common tag fields
     private AudioFilesController audioFilesModel; // audio files meta
 
-    private VGMDBParser vgmdbModel; // data handler for vgmdb website
+    private VGMDBController vgmdbModel; // data handler for vgmdb website
 
 
     public DataCompilationModel(DatabaseController dbManagement, EditorDataController editorMap) {
@@ -64,7 +64,7 @@ public class DataCompilationModel implements Logger {
         editorMap.clearAllTags();
     }
 
-    public void setVGMDBParser(VGMDBParser parser) {
+    public void setVGMDBController(VGMDBController parser) {
         vgmdbModel = parser;
         setPossibleKeywordTag();
         editorMap.autoCompleter().updateAutoFillRules();

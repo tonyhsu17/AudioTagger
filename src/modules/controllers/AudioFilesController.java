@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -23,8 +24,9 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
-import model.base.InformationBase;
-import model.base.TagBase;
+import model.Settings.SettingsKey;
+import modules.controllers.base.InformationBase;
+import modules.controllers.base.TagBase;
 import support.Constants;
 import support.Logger;
 import support.structure.AudioFile;
@@ -49,22 +51,29 @@ public class AudioFilesController implements InformationBase, Logger {
     public interface AudioFilesModelTagInfo {
         public void getTags(TagDetails details);
     }
+    private ArrayList<String> songListDirectories; // directories of files
 
-    private ArrayList<String> songListDirectories;
-
-    // list view display, includes album headers
-    private ListProperty<String> songListFileNames;
-    // audio files, null placeholders for album headers
-    private ArrayList<AudioFile> songListMP3Files;
+    private ListProperty<String> songListFileNames; // list view display, includes album headers
+    private ArrayList<AudioFile> songListMP3Files; // audio files with null placeholders for album headers
 
     private List<Integer> selectedindices; // index of selected file
     private TagDetails selectedTagInfo; // info of selected file
-
+    
+    private HashMap<SettingsKey, EditorTag> settingsToEditor;
 
     public AudioFilesController() {
         songListFileNames = new SimpleListProperty<String>();
         songListFileNames.set(FXCollections.observableArrayList());
         reset();
+        
+        settingsToEditor = new HashMap<SettingsKey, EditorTag>();
+        settingsToEditor.put(SettingsKey.PROPAGATE_SAVE_ALBUM, EditorTag.ALBUM);
+        settingsToEditor.put(SettingsKey.PROPAGATE_SAVE_ALBUM_ART, EditorTag.ALBUM_ART);
+        settingsToEditor.put(SettingsKey.PROPAGATE_SAVE_ALBUM_ARTIST, EditorTag.ALBUM_ARTIST);
+        settingsToEditor.put(SettingsKey.PROPAGATE_SAVE_ARTIST, EditorTag.ARTIST);
+        settingsToEditor.put(SettingsKey.PROPAGATE_SAVE_COMMENT, EditorTag.COMMENT);
+        settingsToEditor.put(SettingsKey.PROPAGATE_SAVE_GENRE, EditorTag.GENRE);
+        settingsToEditor.put(SettingsKey.PROPAGATE_SAVE_YEAR, EditorTag.YEAR);
     }
 
     private void reset() {
@@ -144,7 +153,6 @@ public class AudioFilesController implements InformationBase, Logger {
         while(index < songListMP3Files.size() && !songListFileNames.get(index).startsWith(Constants.HEADER_ALBUM)) {
             debug("added: " + index);
             indices.add(index++);
-
         }
         debug(Arrays.toString(indices.toArray(new Integer[0])));
 
@@ -312,6 +320,17 @@ public class AudioFilesController implements InformationBase, Logger {
      */
     private void saveForIndex(int index, TagDetails tags, boolean overrideFileName) {
         AudioFile file = songListMP3Files.get(index);
+        
+     // handle propagate saving
+//        if(Settings.getInstance().isAnyPropagateSaveOn()) {
+//            TagDetails tempDetails = new TagDetails();
+//            for(Entry<SettingsKey, EditorTag> entry : settingsToEditor.entrySet()) {
+//                if(Settings.getInstance().isPropagateSaveOn(entry.getKey())) {
+//                    tempDetails.set(entry.getValue(), tags.get(entry.getValue()));
+//                }
+//            }
+//        }
+        
         for(EditorTag tag : EditorTag.values()) {
             String tagVal = tags.get(tag);
             if(tagVal != null && !tagVal.isEmpty() && !StringUtil.isKeyword(tagVal)) {
@@ -333,8 +352,18 @@ public class AudioFilesController implements InformationBase, Logger {
 
     @Override
     public void save(TagDetails tags) {
-        //        info("Starting Save: " + Arrays.toString(selectedindices.toArray(new Integer[0])));
+                info("Starting Save: " + Arrays.toString(selectedindices.toArray(new Integer[0])));
         Set<Integer> processed = new HashSet<Integer>();
+        
+     // handle propagate saving
+//        if(Settings.getInstance().isAnyPropagateSaveOn()) {
+//            TagDetails tempDetails = new TagDetails();
+//            for(Entry<SettingsKey, EditorTag> entry : settingsToEditor.entrySet()) {
+//                if(Settings.getInstance().isPropagateSaveOn(entry.getKey())) {
+//                    tempDetails.set(entry.getValue(), tags.get(entry.getValue()));
+//                }
+//            }
+//        }
         // go through each index
         for(int index : selectedindices) {
             // if file isn't keyword
@@ -374,7 +403,7 @@ public class AudioFilesController implements InformationBase, Logger {
     /**
      * Get meta for a specific tag
      * 
-     * @see model.base.InformationBase#getDataForTag(model.base.TagBase, java.lang.String[])
+     * @see modules.controllers.base.InformationBase#getDataForTag(modules.controllers.base.TagBase, java.lang.String[])
      */
     @Override
     public String getDataForTag(TagBase<?> tag, String... extraArgs) {
@@ -382,17 +411,8 @@ public class AudioFilesController implements InformationBase, Logger {
         return selectedTagInfo == null ? "" : selectedTagInfo.get((EditorTag)tag);
     }
 
-    /**
-     * Replace meta info for tag
-     * 
-     * @see model.base.InformationBase#setDataForTag(model.base.TagBase, java.lang.String[])
-     */
     @Override
     public void setDataForTag(TagBase<?> tag, String... values) {
-        if(selectedTagInfo == null) {
-            return;
-        }
-        selectedTagInfo.set((EditorTag)tag, values[0]);
     }
 
     @Override

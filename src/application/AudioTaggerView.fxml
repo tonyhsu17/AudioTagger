@@ -45,7 +45,7 @@
                   <ComboBox id="commentCB" fx:id="commentCB" editable="true" layoutX="10.0" layoutY="313.0" prefWidth="690.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="17.0" AnchorPane.topAnchor="312.0" />
                   <TabPane layoutX="5.0" layoutY="351.0" prefHeight="223.0" prefWidth="711.0" side="BOTTOM" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.topAnchor="351.0">
                     <tabs>
-                      <Tab text="Untitled Tab 2">
+                      <Tab text="VGMDB">
                         <content>
                           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                  <children>
@@ -54,7 +54,7 @@
                                  </children></AnchorPane>
                         </content>
                       </Tab>
-                      <Tab text="Untitled Tab 1">
+                      <Tab text="CD Japan">
                         <content>
                           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="120.0" prefWidth="711.0">
                                  <children>

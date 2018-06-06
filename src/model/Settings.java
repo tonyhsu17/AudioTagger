@@ -13,9 +13,9 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Scanner;
 
-import model.base.InformationBase;
-import model.base.TagBase;
 import modules.KeywordInterpreter;
+import modules.controllers.base.InformationBase;
+import modules.controllers.base.TagBase;
 import support.EventCenter;
 import support.EventCenter.Events;
 import support.Logger;

@@ -1,4 +1,4 @@
-package model.base;
+package modules.controllers.base;
 
 import java.util.List;
 

@@ -12,8 +12,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import javafx.scene.image.Image;
-import model.base.InformationBase;
-import model.base.TagBase;
+import modules.controllers.base.InformationBase;
+import modules.controllers.base.TagBase;
 import modules.database.tables.AlbumArtist;
 import modules.database.tables.Artist;
 import modules.database.tables.ArtistToGroup;

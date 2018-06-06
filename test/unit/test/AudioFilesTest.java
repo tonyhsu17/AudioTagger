@@ -19,8 +19,8 @@ import org.testng.annotations.Test;
 
 import model.Settings;
 import model.Settings.SettingsKey;
-import model.base.TagBase;
 import modules.controllers.AudioFilesController;
+import modules.controllers.base.TagBase;
 import support.Constants;
 import support.structure.TagDetails;
 import support.util.Utilities.EditorTag;

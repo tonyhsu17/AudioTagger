@@ -16,8 +16,8 @@ public class AudioTagger extends Application {
     private Stage primaryStage;
     private BorderPane rootLayout;
 
-    RootVC rootVC;
-    AudioTaggerVC audioTaggerTaggerVC;
+    private RootVC rootVC;
+    private AudioTaggerVC audioTaggerTaggerVC;
 
     @Override
     public void start(Stage primaryStage) {
