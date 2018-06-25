@@ -171,6 +171,7 @@ public class VGMDBParser implements Logger {
                 VGMDBDetails details = parseAlbum(json);
                 albumDetails = details;
                 selectedIndex = index;
+                debug("album result: " + details);
                 for(VGMDBParserCB cb : callbacks) {
                     cb.done(details);
                 }
@@ -205,14 +206,13 @@ public class VGMDBParser implements Logger {
         VGMDBDetails details = new VGMDBDetails();
 
         try {
-            debug(JsonPath.read(json, VGMDBPaths.SERIES.varience(Variences.JAPANESE).path()));
             details.setSeries(((JSONArray)JsonPath.read(json, VGMDBPaths.SERIES.varience(Variences.JAPANESE).path())).get(0).toString());
         }
-        catch (PathNotFoundException e) {
+        catch (PathNotFoundException | IndexOutOfBoundsException e) {
             details.setSeries(((JSONArray)JsonPath.read(json, VGMDBPaths.SERIES.varience(Variences.ENGLISH).path())).get(0).toString());
         }
 
-        details.setAlbumArtThumb(JsonPath.read(json, VGMDBPaths.ALBUM_ART_THUMB_URL.path()));
+        details.setAlbumArtThumbUrl(JsonPath.read(json, VGMDBPaths.ALBUM_ART_THUMB_URL.path()));
         details.setAlbumArtFull(JsonPath.read(json, VGMDBPaths.ALBUM_ART_FULL_URL.path()));
         details.setAlbumName(JsonPath.read(json, VGMDBPaths.ALBUM_NAME.path()));
 
@@ -224,10 +224,13 @@ public class VGMDBParser implements Logger {
         }
 
         details.setAlbumName(JsonPath.read(json, VGMDBPaths.ALBUM_NAME.path()));
-        details.setReleaseDate(JsonPath.read(json, VGMDBPaths.RELEAST_DATE.path()));
-
         try {
-            info("japanese: " + VGMDBPaths.TRACKS.varience(Variences.JAPANESE).path());
+            details.setReleaseDate(JsonPath.read(json, VGMDBPaths.RELEAST_DATE.path()));
+        }
+        catch (PathNotFoundException e) {
+        } 
+        
+        try {
             details.setTracks(JsonPath.read(json, VGMDBPaths.TRACKS.varience(Variences.JAPANESE).path()));
             // somehow if path not found it still returned an empty list, so throw an error to be caught
             if(details.getTracks().isEmpty()) {
@@ -236,25 +239,27 @@ public class VGMDBParser implements Logger {
         }
         catch (PathNotFoundException e) {
             try {
-                info("eng: " + VGMDBPaths.TRACKS.varience(Variences.ENGLISH).path());
                 details.setTracks(JsonPath.read(json, VGMDBPaths.TRACKS.varience(Variences.ENGLISH).path()));
             }
             catch (PathNotFoundException e2) {
-                error(e2);
                 details.setTracks(JsonPath.read(json, VGMDBPaths.TRACKS.varience(Variences.ROMANJI).path()));
             }
         }
         details.setCatalog(JsonPath.read(json, VGMDBPaths.CATALOG.path()));
         details.setAdditionNotes(JsonPath.read(json, VGMDBPaths.ADDITIONAL_NOTES.path()));
 
-        List<String> siteNames = JsonPath.read(json, VGMDBPaths.OTHER_SITE_NAMES.path());
-        List<String> siteUrls = JsonPath.read(json, VGMDBPaths.OTHER_SITE_URLS.path());
         List<String> sites = new ArrayList<String>();
         sites.add(JsonPath.read(json, VGMDBPaths.SITE_URL.path()));
-        for(int i = 0; i < siteNames.size(); i++) {
-            if(siteNames.get(i).contains("CD Japan") || siteNames.get(i).contains("Play-Asia")) {
-                sites.add(siteUrls.get(i));
+        try {
+            List<String> siteNames = JsonPath.read(json, VGMDBPaths.OTHER_SITE_NAMES.path());
+            List<String> siteUrls = JsonPath.read(json, VGMDBPaths.OTHER_SITE_URLS.path());
+            for(int i = 0; i < siteNames.size(); i++) {
+                if(siteNames.get(i).contains("CD Japan") || siteNames.get(i).contains("Play-Asia")) {
+                    sites.add(siteUrls.get(i));
+                }
             }
+        }
+        catch (PathNotFoundException e) {
         }
         details.setOtherSites(sites);
 

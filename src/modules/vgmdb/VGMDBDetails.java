@@ -10,8 +10,8 @@ public class VGMDBDetails {
     private List<String> tracks;
     private String catalog;
     private String additionNotes;
-    private String albumArtThumb;
-    private String albumArtFull;
+    private String albumArtThumbUrl;
+    private String albumArtFullUrl;
     private List<String> otherSites;
     private String notes;
 
@@ -57,17 +57,17 @@ public class VGMDBDetails {
     public void setAdditionNotes(String additionNotes) {
         this.additionNotes = additionNotes;
     }
-    public String getAlbumArtThumb() {
-        return albumArtThumb;
+    public String getAlbumArtThumbUrl() {
+        return albumArtThumbUrl;
     }
-    public void setAlbumArtThumb(String albumArtThumb) {
-        this.albumArtThumb = albumArtThumb;
+    public void setAlbumArtThumbUrl(String albumArtThumb) {
+        this.albumArtThumbUrl = albumArtThumb;
     }
-    public String getAlbumArtFull() {
-        return albumArtFull;
+    public String getAlbumArtFullUrl() {
+        return albumArtFullUrl;
     }
-    public void setAlbumArtFull(String albumArtFull) {
-        this.albumArtFull = albumArtFull;
+    public void setAlbumArtFull(String albumArtFullUrl) {
+        this.albumArtFullUrl = albumArtFullUrl;
     }
     public List<String> getSites() {
         return otherSites;
@@ -99,9 +99,9 @@ public class VGMDBDetails {
                ", additionNotes=" +
                additionNotes +
                ", albumArtThumb=" +
-               albumArtThumb +
+               albumArtThumbUrl +
                ", albumArtFull=" +
-               albumArtFull +
+               albumArtFullUrl +
                "]";
     }
 }

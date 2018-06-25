@@ -1,6 +1,7 @@
 package application;
 
 import java.io.File;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -103,8 +104,9 @@ public class AudioTaggerVC implements Logger {
 
     /**
      * Initializes view controller including the other back-end components.
+     * @throws SQLException 
      */
-    public AudioTaggerVC() {
+    public AudioTaggerVC() throws SQLException {
         vgmdbParserModel = new VGMDBController();
         dbManagement = new DatabaseController("");
         editorFields = new EditorDataController(dbManagement);

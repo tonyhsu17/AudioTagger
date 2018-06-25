@@ -74,7 +74,7 @@ public interface InformationBase {
      * 
      * @return List<TagBase<?>>
      */
-    public List<TagBase<?>> getKeywordTags(); //  
+    public List<TagBase<?>> getKeywordTags();  
 
     /**
      * Extra tags not part of TagBase. Returns null if unused.

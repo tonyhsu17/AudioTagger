@@ -37,8 +37,6 @@ public class VGMDBControllerTest extends ModelInformationTestBase implements Log
         };
         t.setDaemon(true);
         t.start();
-        parser = new VGMDBController();
-        viewInfo = parser.vgmdbInfoProperty();
     }
 
     @AfterClass
@@ -46,7 +44,8 @@ public class VGMDBControllerTest extends ModelInformationTestBase implements Log
 
     @BeforeMethod
     public void beforeMethod() {
-        viewInfo.clear();
+        parser = new VGMDBController();
+        viewInfo = parser.vgmdbInfoProperty();
     }
 
     @AfterMethod
@@ -69,9 +68,8 @@ public class VGMDBControllerTest extends ModelInformationTestBase implements Log
         waitForData();
         assertAlbumView();
 
-//        parser.selectOption(0); // go back;
-//        waitForData();
-//        assertSearchView();
+        parser.selectResult(0); // go back;
+        assertSearchView(); // no need to wait, should be cached and instant
     }
 
     private void assertSearchView() {
@@ -98,7 +96,6 @@ public class VGMDBControllerTest extends ModelInformationTestBase implements Log
         assertEquals(viewInfo.get(11), "http://www.cdjapan.co.jp/detailview.html?KEY=GNCA-151");
         assertEquals(viewInfo.get(12), "http://www.play-asia.com/paOS-13-71-9x-49-en-70-3iu7.html");
 
-        
         assertEquals(parser.getDataForTag(EditorTag.ALBUM), "only my railgun");
         assertEquals(parser.getDataForTag(EditorTag.ALBUM_ART_META), "");
         assertEquals(parser.getDataForTag(EditorTag.ALBUM_ARTIST), "");
@@ -137,6 +134,7 @@ public class VGMDBControllerTest extends ModelInformationTestBase implements Log
         viewInfo.clear();
         while(timer-- > 0) {
             if(!viewInfo.isEmpty()) {
+                info("data retrieved");
                 return;
             }
             else {
