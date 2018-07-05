@@ -122,7 +122,8 @@ public class StringUtilTest {
         return new Object[][] {
             {"High Free Spirits (TV Size)", "High Free Spirits (TV Size)", ""},
             {"High Free Spirits [TV.ver]", "High Free Spirits (TV Size)", "[TV.ver]", "(TV Size)"},
-            {"level 5 ~judgelight~ [TVver](remix)", "Level 5 -Judgelight- (TV Size) (remix)", "~judgelight~", "-Judgelight-", "[TVver]", "(TV Size)"}};
+            {"level 5 ~judgelight~ [TVver](remix)", "Level 5 -Judgelight- (TV Size) (remix)", "~judgelight~", "-Judgelight-", "[TVver]", "(TV Size)"},
+            {"<Different Values>", "<Different Values>", ""}};
     }
 
     @Test(dataProvider = "dataGetDiffInDelim")

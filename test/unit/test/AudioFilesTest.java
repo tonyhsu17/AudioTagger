@@ -25,7 +25,7 @@ import support.Constants;
 import support.structure.TagDetails;
 import support.util.Utilities.EditorTag;
 
-
+// TODO include album art
 
 public class AudioFilesTest extends ModelInformationTestBase {
     private static final String WORKING_DIR = "TestResources/Audios/";
@@ -495,7 +495,7 @@ public class AudioFilesTest extends ModelInformationTestBase {
 
                 audioList.selectTag(index2, (info3) -> {
                     if(newVal.equals(Constants.KEYWORD_DIFF_VALUE) || tag == EditorTag.FILE_NAME) {
-                        assertEquals(info3.get(tag), origVal2, "arg2 - " + testDesc);  // value that should stay original
+                        assertEquals(info3.get(tag), origVal2, "arg2 - " + testDesc); // value that should stay original
                     }
                     else {
                         assertEquals(info3.get(tag), newVal, "arg2 - " + testDesc);
@@ -509,6 +509,53 @@ public class AudioFilesTest extends ModelInformationTestBase {
         catch (IOException e) {
             fail("Unable to copy test resources");
         }
+    }
+    
+    @Test
+    public void testGetNonHeadersOnly() {
+        audioList.setWorkingDirectory(WORKING_DIR + FOLDER_A);
+        audioList.selectTags(Arrays.asList(0), (info)-> {});
+        List<Integer> indicies = audioList.removeHeaderIndicies();
+        assertEquals(indicies.size(), 2);
+        
+        audioList.selectTags(Arrays.asList(0, 1, 2), (info)-> {});
+        indicies = audioList.removeHeaderIndicies();
+        assertEquals(indicies.size(), 2);
+    }
+
+    @Test
+    public void testSaveByHeader() {
+
+        try {
+            FileUtils.copyDirectory(new File(WORKING_DIR), tempDir);
+        }
+        catch (IOException e) {
+            fail("Unable to copy test resources");
+        }
+
+        audioList.setWorkingDirectory(TEMP_DIR);
+        audioList.selectTag(0, (info) -> {
+        });
+
+        TagDetails expectedTags = makeTagDetails("testFileA.mp3",
+            "testA",
+            "ArtistA",
+            "AlbumA",
+            "TestCollection",
+            "02",
+            "2011",
+            "Anime",
+            "FolderA Comments");
+        audioList.save(expectedTags);
+
+        audioList.setWorkingDirectory(TEMP_DIR);
+        audioList.selectTag(1, (info) -> {
+            TagDetails details = info;
+
+            for(EditorTag tag : EditorTag.values()) {
+                assertEquals(details.get(tag), expectedTags.get(tag), "failed to save for header");
+            }
+        });
     }
 
     @Test

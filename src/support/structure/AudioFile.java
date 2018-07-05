@@ -98,6 +98,15 @@ public class AudioFile implements Logger {
         }
         return str;
     }
+    
+    public void setAlbumArt(Artwork img) {
+        try {
+            tags.setField(img);
+        }
+        catch (FieldDataInvalidException e) {
+            e.printStackTrace();
+        }
+    }
 
     public void setField(EditorTag tag, String str) {
         try {

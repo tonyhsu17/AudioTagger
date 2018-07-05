@@ -231,7 +231,7 @@ public class VGMDBParser implements Logger {
         } 
         
         try {
-            details.setTracks(JsonPath.read(json, VGMDBPaths.TRACKS.varience(Variences.JAPANESE).path()));
+            details.setTracks(JsonPath.read(json, VGMDBPaths.TRACKS.varience(Variences.ENGLISH).path()));
             // somehow if path not found it still returned an empty list, so throw an error to be caught
             if(details.getTracks().isEmpty()) {
                 throw new PathNotFoundException();
@@ -239,10 +239,10 @@ public class VGMDBParser implements Logger {
         }
         catch (PathNotFoundException e) {
             try {
-                details.setTracks(JsonPath.read(json, VGMDBPaths.TRACKS.varience(Variences.ENGLISH).path()));
+                details.setTracks(JsonPath.read(json, VGMDBPaths.TRACKS.varience(Variences.ROMANJI).path()));
             }
             catch (PathNotFoundException e2) {
-                details.setTracks(JsonPath.read(json, VGMDBPaths.TRACKS.varience(Variences.ROMANJI).path()));
+                details.setTracks(JsonPath.read(json, VGMDBPaths.TRACKS.varience(Variences.JAPANESE).path()));
             }
         }
         details.setCatalog(JsonPath.read(json, VGMDBPaths.CATALOG.path()));

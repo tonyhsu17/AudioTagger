@@ -18,6 +18,7 @@ import org.jaudiotagger.audio.exceptions.CannotReadException;
 import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
 import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
 import org.jaudiotagger.tag.TagException;
+import org.jaudiotagger.tag.images.ArtworkFactory;
 
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
@@ -51,6 +52,7 @@ public class AudioFilesController implements InformationBase, Logger {
     public interface AudioFilesModelTagInfo {
         public void getTags(TagDetails details);
     }
+
     private ArrayList<String> songListDirectories; // directories of files
 
     private ListProperty<String> songListFileNames; // list view display, includes album headers
@@ -58,14 +60,14 @@ public class AudioFilesController implements InformationBase, Logger {
 
     private List<Integer> selectedindices; // index of selected file
     private TagDetails selectedTagInfo; // info of selected file
-    
+
     private HashMap<SettingsKey, EditorTag> settingsToEditor;
 
     public AudioFilesController() {
         songListFileNames = new SimpleListProperty<String>();
         songListFileNames.set(FXCollections.observableArrayList());
         reset();
-        
+
         settingsToEditor = new HashMap<SettingsKey, EditorTag>();
         settingsToEditor.put(SettingsKey.PROPAGATE_SAVE_ALBUM, EditorTag.ALBUM);
         settingsToEditor.put(SettingsKey.PROPAGATE_SAVE_ALBUM_ART, EditorTag.ALBUM_ART);
@@ -147,7 +149,10 @@ public class AudioFilesController implements InformationBase, Logger {
      * @param n Must be a header
      * @return list of indices part of the album
      */
-    private List<Integer> getAllIndexForHeader(int n) {
+    public List<Integer> getAllIndexForHeader(int n) {
+        if(!isHeader(n)) {
+            return null;
+        }
         List<Integer> indices = new ArrayList<Integer>();
         int index = n + 1;
         while(index < songListMP3Files.size() && !songListFileNames.get(index).startsWith(Constants.HEADER_ALBUM)) {
@@ -320,17 +325,6 @@ public class AudioFilesController implements InformationBase, Logger {
      */
     private void saveForIndex(int index, TagDetails tags, boolean overrideFileName) {
         AudioFile file = songListMP3Files.get(index);
-        
-     // handle propagate saving
-//        if(Settings.getInstance().isAnyPropagateSaveOn()) {
-//            TagDetails tempDetails = new TagDetails();
-//            for(Entry<SettingsKey, EditorTag> entry : settingsToEditor.entrySet()) {
-//                if(Settings.getInstance().isPropagateSaveOn(entry.getKey())) {
-//                    tempDetails.set(entry.getValue(), tags.get(entry.getValue()));
-//                }
-//            }
-//        }
-        
         for(EditorTag tag : EditorTag.values()) {
             String tagVal = tags.get(tag);
             if(tagVal != null && !tagVal.isEmpty() && !StringUtil.isKeyword(tagVal)) {
@@ -340,6 +334,21 @@ public class AudioFilesController implements InformationBase, Logger {
         if(overrideFileName) {
             file.setField(EditorTag.FILE_NAME, file.getOriginalFileName());
         }
+        // save album art
+        if(tags.getAlbumArt() != null) {
+            try {
+
+                File temp = ImageUtil.saveImage(tags.getAlbumArt());
+                file.getRawTags().deleteArtworkField();
+                file.setAlbumArt(ArtworkFactory.createArtworkFromFile(temp));
+                temp.delete();
+            }
+            catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+
         file.save();
         // update ui list view TODO
         //        songListMP3Files.remove(index); // remove original file
@@ -350,28 +359,57 @@ public class AudioFilesController implements InformationBase, Logger {
         // (order matters, causes an ui update and triggering a selectIndex which changes selected Index)
     }
 
+    public boolean isHeader(int index) {
+        if(songListFileNames.get(index).startsWith(Constants.HEADER_ALBUM)) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    /**
+     * Converts header indices into file indices
+     * 
+     * @param selected
+     * @return
+     */
+    public List<Integer> removeHeaderIndicies() {
+        Set<Integer> nonHeaders = new HashSet<Integer>();
+        for(int index : selectedindices) {
+            if(isHeader(index)) {
+                // if header selected, go through each track
+                for(int subIndex : getAllIndexForHeader(index)) {
+                    nonHeaders.add(subIndex);
+                }
+            }
+            else if(!nonHeaders.contains(index)) {
+                nonHeaders.add(index);
+            }
+        }
+        return new ArrayList<Integer>(nonHeaders);
+    }
+
     @Override
     public void save(TagDetails tags) {
-                info("Starting Save: " + Arrays.toString(selectedindices.toArray(new Integer[0])));
-        Set<Integer> processed = new HashSet<Integer>();
+        info("Starting Save: " + Arrays.toString(selectedindices.toArray(new Integer[0])));
+        List<Integer> indicesToProcess = removeHeaderIndicies();
+        // handle propagate saving
+        //        if(Settings.getInstance().isAnyPropagateSaveOn()) {
+        //            TagDetails tempDetails = new TagDetails();
+        //            for(Entry<SettingsKey, EditorTag> entry : settingsToEditor.entrySet()) {
+        //                if(Settings.getInstance().isPropagateSaveOn(entry.getKey())) {
+        //                    tempDetails.set(entry.getValue(), tags.get(entry.getValue()));
+        //                }
+        //            }
+        //        }
         
-     // handle propagate saving
-//        if(Settings.getInstance().isAnyPropagateSaveOn()) {
-//            TagDetails tempDetails = new TagDetails();
-//            for(Entry<SettingsKey, EditorTag> entry : settingsToEditor.entrySet()) {
-//                if(Settings.getInstance().isPropagateSaveOn(entry.getKey())) {
-//                    tempDetails.set(entry.getValue(), tags.get(entry.getValue()));
-//                }
-//            }
-//        }
         // go through each index
-        for(int index : selectedindices) {
-            // if file isn't keyword
+        for(int index : indicesToProcess) {
             if(!StringUtil.isKeyword(songListFileNames.get(index))) {
                 // save with values and ignore fileName if multiple indices selected
                 saveForIndex(index, tags, selectedindices.size() > 1 ? true : false);
             }
-            processed.add(index);
         }
     }
 
@@ -403,7 +441,8 @@ public class AudioFilesController implements InformationBase, Logger {
     /**
      * Get meta for a specific tag
      * 
-     * @see modules.controllers.base.InformationBase#getDataForTag(modules.controllers.base.TagBase, java.lang.String[])
+     * @see modules.controllers.base.InformationBase#getDataForTag(modules.controllers.base.TagBase,
+     *      java.lang.String[])
      */
     @Override
     public String getDataForTag(TagBase<?> tag, String... extraArgs) {
@@ -412,8 +451,7 @@ public class AudioFilesController implements InformationBase, Logger {
     }
 
     @Override
-    public void setDataForTag(TagBase<?> tag, String... values) {
-    }
+    public void setDataForTag(TagBase<?> tag, String... values) {}
 
     @Override
     public List<String> getPossibleDataForTag(TagBase<?> tag, String values) {

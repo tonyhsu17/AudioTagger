@@ -204,7 +204,7 @@ public class AudioTaggerDB extends Database {
     }
 
     /**
-     * Get the Anime name from DB
+     * Get the Anime name from DB. Uses AlbumArtist
      * 
      * @param anime
      * @return
@@ -235,6 +235,12 @@ public class AudioTaggerDB extends Database {
         return result;
     }
 
+    /**
+     * Get possible Anime. Uses AlbunArtist
+     * 
+     * @param compareValue value to match
+     * @return
+     */
     public List<String> getResultsForAnime(String compareValue) {
         List<String> possibleAnimes = new ArrayList<>();
 
@@ -256,15 +262,18 @@ public class AudioTaggerDB extends Database {
                 rs.close();
             }
             catch (SQLException e) {
-                // TODO Auto-generated catch block
-                error("termination");
-                e.printStackTrace();
-                System.exit(1);
+                error(e);
             }
         }
         return possibleAnimes;
     }
 
+    /**
+     * Get preferred word choice for word
+     * 
+     * @param before
+     * @return
+     */
     public String getReplacementWord(String before) {
         String result = "";
         if(before == null || before.isEmpty()) {
@@ -292,20 +301,13 @@ public class AudioTaggerDB extends Database {
     }
 
     /**
-     * Add as new values or increases use count
+     * Inserts a new value into table or increases use frequency. If it is a group 
      * Prepares values to execute insert, will convert group artist into idHash
      * 
-     * @param table {@link TableBase}
-     * @param values <br>
-     *        TableNames.Artist = "firstName", "lastName"
-     *        <br>
-     *        TableNames.Anime = "animeName"
-     *        <br>
-     *        TableNames.Group = "groupName", "artistName1", artistNameX...
-     *        <br>
-     *        TableNames.ArtistToGroup = "artistId", "groupId"
-     *        <br>
-     *        TableNames.AlbumArtist =
+     * @param table {@link TableBase} or {@link AlbumArtist}, {@link Artist}, {@link ArtistToGroup}, {@link GroupArtist},
+     *        {@link WordReplacement}
+     * @param values
+     *        
      */
     public void add(TableBase table, Object... values) {
         //      System.out.println("--DB: Add TableNames." + table + " values: " + Arrays.toString(values));

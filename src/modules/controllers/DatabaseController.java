@@ -119,15 +119,11 @@ public class DatabaseController implements InformationBase, Logger {
                 } 
             }
             else {
-                // param name, artist1, artist2, ...
-                //tagToEditorTextMapping.get(Tag.Artist).get()
-                //                System.err.println("GroupSaving not implemented");
-                //                System.exit(0);
-                db.add(GroupArtist.instance(), values);
+                db.add(GroupArtist.instance(), (Object[])values);
             }
         }
         else if(tag == AdditionalTag.REPLACE_WORD) {
-            db.add(WordReplacement.instance(), values);
+            db.add(WordReplacement.instance(), (Object[])values);
         }
     }
 

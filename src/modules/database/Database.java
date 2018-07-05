@@ -18,12 +18,14 @@ import support.util.StringUtil;
 
 
 public abstract class Database implements Logger {
-    private String dbName = "default";
+    private String dbName = "defaultDB";
     protected Connection conn;
     protected Statement statement;
 
     public Database(String dbName) throws SQLException {
-        this.dbName = dbName;
+        if(!dbName.isEmpty()) {
+            this.dbName = dbName;
+        }
         initializeDB();
         initializeTables();
     }
@@ -177,7 +179,7 @@ public abstract class Database implements Logger {
                 statements.setObject(i, values[i - 1]);
             }
             rs = statements.executeQuery();
-            
+
         }
         catch (SQLException e) {
             error(e);
@@ -210,6 +212,7 @@ public abstract class Database implements Logger {
      * @param values field value to match
      * @return id or -1 if not matched
      */
+    @SuppressWarnings("unchecked")
     protected int getId(TableBase table, Entry<FieldBase, Object>... entries) {
         StringBuilder query = new StringBuilder("SELECT " + table.id() + " FROM " + table.tableName() + " WHERE");
         int id = -1;

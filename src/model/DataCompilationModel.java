@@ -45,7 +45,6 @@ public class DataCompilationModel implements Logger {
 
     private VGMDBController vgmdbModel; // data handler for vgmdb website
 
-
     public DataCompilationModel(DatabaseController dbManagement, EditorDataController editorMap) {
         this.dbManagement = dbManagement;
         this.editorMap = editorMap;
@@ -95,7 +94,8 @@ public class DataCompilationModel implements Logger {
             cb.done(0);
         }
         else {
-            List<String> possibleValues = getPossibleDataForTag(tag, text, ""); // TODO defaults add file defaults?
+            List<String> possibleValues = getPossibleDataForTag(tag, text, "");
+            // TODO defaults add file defaults?
             //            int size = addPossibleDataForTag(tag, text);
             ObservableList<String> list = FXCollections.observableArrayList(possibleValues);
             cb.done(list);
@@ -155,9 +155,12 @@ public class DataCompilationModel implements Logger {
 
         // add from vgmdb
         if(vgmdbModel != null) {
-            String temp = vgmdbModel.getDataForTag(tag, "");
+            String temp;
             if(tag == EditorTag.TITLE) { // special case, where more info is needed for tag
                 temp = vgmdbModel.getDataForTag(EditorTag.TRACK, audioFilesModel.getDataForTag(EditorTag.TRACK));
+            }
+            else {
+                temp = vgmdbModel.getDataForTag(tag, "");
             }
 
             if(temp != null && !temp.isEmpty() && !returnList.contains(temp)) {
@@ -190,7 +193,7 @@ public class DataCompilationModel implements Logger {
         String[] splitArtists = StringUtil.splitBySeparators(editorMap.getMeta(EditorTag.ARTIST).getTextProperty().get());
         dbManagement.setDataForTag(EditorTag.ARTIST, splitArtists);
 
-        saveDelimTagInDB();
+        
         // store meta info to db - end
 
         // go through each element and set tag
@@ -204,14 +207,21 @@ public class DataCompilationModel implements Logger {
         details.setAlbumArt(editorMap.getAlbumArt());
 
         audioFilesModel.save(details);
+        
+        saveDelimTagInDB();
     }
 
     /**
      * hella inelegant code.
      * Check each editor field's final value and store delim tag diff compared to VGMDB and original
      * audio file's tag
+     * TODO if Different Values, get audio file default values
      */
     private void saveDelimTagInDB() {
+        List<Integer> selected = audioFilesModel.removeHeaderIndicies();
+        for(int index : selected) {
+            
+        }
         List<String[]> delimDiffs = StringUtil.getDiffInDelim(vgmdbModel.getDataForTag(EditorTag.FILE_NAME),
             editorMap.getMeta(EditorTag.FILE_NAME).getTextProperty().get());
         for(String[] delimDiff : delimDiffs) {
@@ -225,10 +235,10 @@ public class DataCompilationModel implements Logger {
 
         int trackNum = 1;
         try {
-            trackNum = Integer.valueOf(editorMap.getDataForTag(EditorTag.TRACK));
+            trackNum = Integer.valueOf(editorMap.getDataForTag(EditorTag.TRACK, trackNum + ""));
         }
         catch (NumberFormatException e) {
-            info("track number: " + trackNum + " isn't an int, default to 1");
+            info("track number: " + editorMap.getDataForTag(EditorTag.TRACK, trackNum + "") + " isn't an int, default to 1");
         }
         delimDiffs = StringUtil.getDiffInDelim(vgmdbModel.getDataForTag(EditorTag.TRACK, trackNum + ""),
             editorMap.getMeta(EditorTag.TITLE).getTextProperty().get());
@@ -318,7 +328,7 @@ public class DataCompilationModel implements Logger {
     public void appendWorkingDirectory(File[] array) {
         audioFilesModel.appendWorkingDirectory(array);
     }
-    
+
     public void setAlbumArt(Object obj) {
         editorMap.setAlbumArt(obj);
     }
