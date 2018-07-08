@@ -123,7 +123,9 @@ public class StringUtilTest {
             {"High Free Spirits (TV Size)", "High Free Spirits (TV Size)", ""},
             {"High Free Spirits [TV.ver]", "High Free Spirits (TV Size)", "[TV.ver]", "(TV Size)"},
             {"level 5 ~judgelight~ [TVver](remix)", "Level 5 -Judgelight- (TV Size) (remix)", "~judgelight~", "-Judgelight-", "[TVver]", "(TV Size)"},
-            {"<Different Values>", "<Different Values>", ""}};
+            {"<Different Values>", "<Different Values>", ""}, 
+            {"gibberish ", "<Different Values>", ""},
+            {"Blue Field Instrumental ver. ", "Blue Field (Instrumental)", ""}}; // TODO should it account for non delims?
     }
 
     @Test(dataProvider = "dataGetDiffInDelim")

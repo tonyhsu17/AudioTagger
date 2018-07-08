@@ -8,7 +8,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -170,7 +169,7 @@ public abstract class Database implements Logger {
     }
 
     protected ResultSet getResults(String query, Object... values) {
-        debug(query + " with values: " + Arrays.toString(values));
+//        debug(query + " with values: " + Arrays.toString(values));
         PreparedStatement statements;
         ResultSet rs = null;
         try {

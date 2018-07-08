@@ -193,7 +193,7 @@ public class DataCompilationModel implements Logger {
         String[] splitArtists = StringUtil.splitBySeparators(editorMap.getMeta(EditorTag.ARTIST).getTextProperty().get());
         dbManagement.setDataForTag(EditorTag.ARTIST, splitArtists);
 
-        
+
         // store meta info to db - end
 
         // go through each element and set tag
@@ -207,83 +207,42 @@ public class DataCompilationModel implements Logger {
         details.setAlbumArt(editorMap.getAlbumArt());
 
         audioFilesModel.save(details);
-        
+
         saveDelimTagInDB();
     }
 
     /**
-     * hella inelegant code.
-     * Check each editor field's final value and store delim tag diff compared to VGMDB and original
-     * audio file's tag
-     * TODO if Different Values, get audio file default values
+     * Check each editor field's final value and store delim tag diff compared to VGMDB
      */
     private void saveDelimTagInDB() {
         List<Integer> selected = audioFilesModel.removeHeaderIndicies();
+
         for(int index : selected) {
-            
+            // get audio file's info and compare against vgmdb's info
+            audioFilesModel.selectTag(index, (info) -> {
+                addDelimsToDB(EditorTag.ARTIST, info);
+                addDelimsToDB(EditorTag.TITLE, info);
+                addDelimsToDB(EditorTag.ALBUM, info);
+                addDelimsToDB(EditorTag.ALBUM_ARTIST, info);
+            });
         }
-        List<String[]> delimDiffs = StringUtil.getDiffInDelim(vgmdbModel.getDataForTag(EditorTag.FILE_NAME),
-            editorMap.getMeta(EditorTag.FILE_NAME).getTextProperty().get());
-        for(String[] delimDiff : delimDiffs) {
-            dbManagement.setDataForTag(DatabaseController.AdditionalTag.REPLACE_WORD, delimDiff[0], delimDiff[1]);
+    }
+    
+    private void addDelimsToDB(EditorTag tag, TagDetails info) {
+        List<String[]> delimDiffs;
+
+        if(tag == EditorTag.TITLE) {
+            delimDiffs = StringUtil.getDiffInDelim(vgmdbModel.getDataForTag(tag, info.get(EditorTag.TRACK)), info.get(tag));
         }
-        delimDiffs = StringUtil.getDiffInDelim(audioFilesModel.getDataForTag(EditorTag.FILE_NAME),
-            editorMap.getMeta(EditorTag.FILE_NAME).getTextProperty().get());
-        for(String[] delimDiff : delimDiffs) {
-            dbManagement.setDataForTag(DatabaseController.AdditionalTag.REPLACE_WORD, delimDiff[0], delimDiff[1]);
+        else {
+            delimDiffs = StringUtil.getDiffInDelim(vgmdbModel.getDataForTag(tag), info.get(tag));
         }
 
-        int trackNum = 1;
-        try {
-            trackNum = Integer.valueOf(editorMap.getDataForTag(EditorTag.TRACK, trackNum + ""));
-        }
-        catch (NumberFormatException e) {
-            info("track number: " + editorMap.getDataForTag(EditorTag.TRACK, trackNum + "") + " isn't an int, default to 1");
-        }
-        delimDiffs = StringUtil.getDiffInDelim(vgmdbModel.getDataForTag(EditorTag.TRACK, trackNum + ""),
-            editorMap.getMeta(EditorTag.TITLE).getTextProperty().get());
-        for(String[] delimDiff : delimDiffs) {
-            dbManagement.setDataForTag(DatabaseController.AdditionalTag.REPLACE_WORD, delimDiff[0], delimDiff[1]);
-        }
-        delimDiffs = StringUtil.getDiffInDelim(audioFilesModel.getDataForTag(EditorTag.TITLE),
-            editorMap.getMeta(EditorTag.TITLE).getTextProperty().get());
-        for(String[] delimDiff : delimDiffs) {
-            dbManagement.setDataForTag(DatabaseController.AdditionalTag.REPLACE_WORD, delimDiff[0], delimDiff[1]);
-        }
-
-        delimDiffs = StringUtil.getDiffInDelim(vgmdbModel.getDataForTag(EditorTag.ARTIST),
-            editorMap.getMeta(EditorTag.ARTIST).getTextProperty().get());
-        for(String[] delimDiff : delimDiffs) {
-            dbManagement.setDataForTag(DatabaseController.AdditionalTag.REPLACE_WORD, delimDiff[0], delimDiff[1]);
-        }
-        delimDiffs = StringUtil.getDiffInDelim(audioFilesModel.getDataForTag(EditorTag.ARTIST),
-            editorMap.getMeta(EditorTag.ARTIST).getTextProperty().get());
-        for(String[] delimDiff : delimDiffs) {
-            dbManagement.setDataForTag(DatabaseController.AdditionalTag.REPLACE_WORD, delimDiff[0], delimDiff[1]);
-        }
-
-        delimDiffs = StringUtil.getDiffInDelim(vgmdbModel.getDataForTag(EditorTag.ALBUM),
-            editorMap.getMeta(EditorTag.ALBUM).getTextProperty().get());
-        for(String[] delimDiff : delimDiffs) {
-            dbManagement.setDataForTag(DatabaseController.AdditionalTag.REPLACE_WORD, delimDiff[0], delimDiff[1]);
-        }
-        delimDiffs = StringUtil.getDiffInDelim(audioFilesModel.getDataForTag(EditorTag.ALBUM),
-            editorMap.getMeta(EditorTag.ALBUM).getTextProperty().get());
-        for(String[] delimDiff : delimDiffs) {
-            dbManagement.setDataForTag(DatabaseController.AdditionalTag.REPLACE_WORD, delimDiff[0], delimDiff[1]);
-        }
-
-        delimDiffs = StringUtil.getDiffInDelim(vgmdbModel.getDataForTag(EditorTag.ALBUM_ARTIST),
-            editorMap.getMeta(EditorTag.ALBUM_ARTIST).getTextProperty().get());
-        for(String[] delimDiff : delimDiffs) {
-            dbManagement.setDataForTag(DatabaseController.AdditionalTag.REPLACE_WORD, delimDiff[0], delimDiff[1]);
-        }
-        delimDiffs = StringUtil.getDiffInDelim(audioFilesModel.getDataForTag(EditorTag.ALBUM_ARTIST),
-            editorMap.getMeta(EditorTag.ALBUM_ARTIST).getTextProperty().get());
         for(String[] delimDiff : delimDiffs) {
             dbManagement.setDataForTag(DatabaseController.AdditionalTag.REPLACE_WORD, delimDiff[0], delimDiff[1]);
         }
     }
+
 
     public void setImage(ImageFrom type, String ummm) {
         // TODO set meta too

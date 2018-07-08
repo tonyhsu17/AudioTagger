@@ -37,8 +37,6 @@ import support.EventCenter;
 import support.EventCenter.Events;
 import support.Logger;
 import support.Scheduler;
-import support.structure.Range;
-import support.util.Utilities;
 import support.util.Utilities.EditorTag;
 
 
@@ -92,7 +90,7 @@ public class AudioTaggerVC implements Logger {
     private ImageView vgmdbAlbumArtIV;
 
     @FXML
-    private Label autofillEnabledLabel;
+    private Label infoLabel;
 
     int pressedIndex; // used for mouse dragging range
     // HashMap<String, KeyAndName> idToName; // TextFieldId to SuggestorKey and DisplayName
@@ -179,6 +177,12 @@ public class AudioTaggerVC implements Logger {
      */
     public void saveTags() {
         model.save();
+        infoLabel.setText("Tags Saved");
+        new Scheduler(3, () -> {
+            Platform.runLater(() -> {
+                infoLabel.setText("");
+            });
+        }).runNTimes(1);
     }
 
     /**
@@ -188,10 +192,10 @@ public class AudioTaggerVC implements Logger {
     public void triggerAutoFill() {
         EventCenter.getInstance().postEvent(Events.TRIGGER_AUTO_FILL, null);
 
-        autofillEnabledLabel.setText("Autofill Triggered");
+        infoLabel.setText("Autofill Triggered");
         new Scheduler(3, () -> {
             Platform.runLater(() -> {
-                autofillEnabledLabel.setText("");
+                infoLabel.setText("");
             });
         }).runNTimes(1);
     }
@@ -281,19 +285,19 @@ public class AudioTaggerVC implements Logger {
         });
 
         // ComboBox dropdown - Show dropdown items when clicked on textfield
-        for(Entry<ComboBox<String>, EditorTag> entry : comboBoxToTag.entrySet()) {
-            ComboBox<String> temp = entry.getKey();
-            TextField tf = temp.getEditor();
-
-            tf.setOnMouseClicked((mouseEvent) -> {
-                // highlighting is removed when showing dropdown, so need to rehighlight
-                Range range = Utilities.getRange(tf.getText(), tf.getCaretPosition(), tf.getSelectedText());
-                model.requestDropdownForTag(entry.getValue(), tf.getText(), temp.getItems(), (size) -> {
-                    tf.selectRange(range.start(), range.end());
-                    temp.show();
-                });
-            });
-        }
+//        for(Entry<ComboBox<String>, EditorTag> entry : comboBoxToTag.entrySet()) {
+//            ComboBox<String> temp = entry.getKey();
+//            TextField tf = temp.getEditor();
+//
+//            tf.setOnMouseClicked((mouseEvent) -> {
+//                // highlighting is removed when showing dropdown, so need to rehighlight
+//                Range range = Utilities.getRange(tf.getText(), tf.getCaretPosition(), tf.getSelectedText());
+//                model.requestDropdownForTag(entry.getValue(), tf.getText(), temp.getItems(), (size) -> {
+//                    tf.selectRange(range.start(), range.end());
+//                    temp.show();
+//                });
+//            });
+//        }
     }
 
     /**
@@ -303,21 +307,16 @@ public class AudioTaggerVC implements Logger {
     private void addOnChangeListeners() {
         for(Entry<ComboBox<String>, EditorTag> entry : comboBoxToTag.entrySet()) {
             ComboBox<String> temp = entry.getKey();
-            if(temp == artistCB || temp == albumArtistCB || temp == genreCB) {
+            if((temp == artistCB || temp == albumArtistCB || temp == genreCB)) {
                 TextField tf = temp.getEditor();
                 tf.textProperty().addListener((obs, oldVal, newVal) -> {
-                    if(oldVal != null && !oldVal.isEmpty()) {
+                    // refresh dropdown if there is value within textbox
+                    if(oldVal != null && !oldVal.isEmpty() && temp.isFocused()) {
                         model.requestDropdownForTag(entry.getValue(), newVal, temp.getItems(), (size) -> {
                             temp.hide();
                             temp.setItems((ObservableList<String>)size);
                             temp.visibleRowCountProperty().set(((ObservableList<String>)size).size());
                             temp.show();
-                        });
-                    }
-                    else {
-                        // if oldVal is empty don't show dropdown (first time launch and changing files)
-                        model.requestDropdownForTag(entry.getValue(), newVal, temp.getItems(), (size) -> {
-                            temp.hide();
                         });
                     }
                 });
