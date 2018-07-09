@@ -238,4 +238,11 @@ public class AudioFile implements Logger {
     public String getNewFileName() {
         return currentFileName;
     }
+    
+    /**
+     * @return {@link File}
+     */
+    public File getFile() {
+        return file.getFile();
+    }
 }

@@ -331,8 +331,12 @@ public class AudioFilesController implements InformationBase, Logger {
                 file.setField(tag, tagVal);
             }
         }
+        // fix file name if multisave
         if(overrideFileName) {
             file.setField(EditorTag.FILE_NAME, file.getOriginalFileName());
+        }
+        else {
+            songListFileNames.set(index, tags.get(EditorTag.FILE_NAME));
         }
         // save album art
         if(tags.getAlbumArt() != null) {
@@ -344,19 +348,19 @@ public class AudioFilesController implements InformationBase, Logger {
                 temp.delete();
             }
             catch (IOException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
 
         file.save();
-        // update ui list view TODO
-        //        songListMP3Files.remove(index); // remove original file
-        //        songListMP3Files.add(index, new AudioFile(new File(newNamePath))); // update to new file
-        //
-        //        songListFileNames.add(i, fileName); // add new filename into list
-        //        songListFileNames.remove(i + 1); // remove original filename,
-        // (order matters, causes an ui update and triggering a selectIndex which changes selected Index)
+
+        try {
+            // update reference to file
+            songListMP3Files.set(index,
+                new AudioFile(new File(file.getFile().getParentFile().getPath() + File.separator + file.getNewFileName())));
+        }
+        catch (IOException | TagException | ReadOnlyFileException | CannotReadException | InvalidAudioFrameException e) {
+        }
     }
 
     public boolean isHeader(int index) {
@@ -403,7 +407,7 @@ public class AudioFilesController implements InformationBase, Logger {
         //                }
         //            }
         //        }
-        
+
         // go through each index
         for(int index : indicesToProcess) {
             if(!StringUtil.isKeyword(songListFileNames.get(index))) {
