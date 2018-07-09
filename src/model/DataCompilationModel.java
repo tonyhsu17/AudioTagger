@@ -58,7 +58,7 @@ public class DataCompilationModel implements Logger {
 
     public void reset() {
         info("Clearing everthing");
-        audioFilesModel.setWorkingDirectory("");
+        audioFilesModel.reset();
         fileNamesList.clear();
         editorMap.clearAllTags();
     }
@@ -73,10 +73,12 @@ public class DataCompilationModel implements Logger {
     public void requestDataFor(List<Integer> indices, DataCompilationModelCallback cb) {
         editorMap.clearAllTags();
         audioFilesModel.selectTags(indices, (tagDetails) -> {
-            for(EditorTag tag : EditorTag.values()) {
-                editorMap.setDataForTag(tag, tagDetails.get(tag)); // No formatting needed since its read from file
+            if(tagDetails != null) {
+                for(EditorTag tag : EditorTag.values()) {
+                    editorMap.setDataForTag(tag, tagDetails.get(tag)); // No formatting needed since its read from file
+                }
+                editorMap.setAlbumArt(tagDetails.getAlbumArt());
             }
-            editorMap.setAlbumArt(tagDetails.getAlbumArt());
             cb.done("DONE");
         });
     }

@@ -40,14 +40,11 @@ public class Settings implements Logger {
         PROPAGATE_SAVE_ARTIST("Propagate Save for Artist"), PROPAGATE_SAVE_ALBUM("Propagate Save for Album"),
         PROPAGATE_SAVE_ALBUM_ARTIST("Propagate Save for Album Artist"), PROPAGATE_SAVE_YEAR("Propagate Save for Year"),
         PROPAGATE_SAVE_GENRE("Propagate Save for Genre"), PROPAGATE_SAVE_COMMENT("Propagate Save for Comment"),
-        PROPAGATE_SAVE_ALBUM_ART("Propagate Save for Album Art"), RULE_FILENAME("Autocomplete Filename"),
-        // RULE_TITLE("Autocomplete Title with Rule"),
-        // RULE_ARTIST("Autocomplete Artist with Rule"),
-        // RULE_ALBUM("Autocomplete Album with Rule"),
-        RULE_ALBUM_ARTIST("Autocomplete Album Artist"),
-        // RULE_TRACK("Autocomplete Track with Rule"),
-        // RULE_YEAR("Autocomplete Year with Rule"),
-        // RULE_GENRE("Autocomplete Genere wih Rule"),
+        PROPAGATE_SAVE_ALBUM_ART("Propagate Save for Album Art"),
+        RULE_FILENAME("Autocomplete Filename"), RULE_TITLE("Autocomplete Title with Rule"),
+        RULE_ARTIST("Autocomplete Artist with Rule"), RULE_ALBUM("Autocomplete Album with Rule"),
+        RULE_ALBUM_ARTIST("Autocomplete Album Artist"), RULE_TRACK("Autocomplete Track with Rule"),
+        RULE_YEAR("Autocomplete Year with Rule"), RULE_GENRE("Autocomplete Genere wih Rule"),
         RULE_COMMENT("Autocomplete Comment"),;
 
         String description;
@@ -84,7 +81,8 @@ public class Settings implements Logger {
         }
 
         public static SettingsKey[] getRules() {
-            return new SettingsKey[] {RULE_ALBUM_ARTIST, RULE_COMMENT, RULE_FILENAME};
+            return new SettingsKey[] {RULE_FILENAME, RULE_TITLE, RULE_ARTIST, RULE_ALBUM, 
+                RULE_ALBUM_ARTIST, RULE_TRACK, RULE_YEAR, RULE_GENRE, RULE_COMMENT};
         }
     }
 
@@ -121,7 +119,7 @@ public class Settings implements Logger {
 
         settingsFile = new File(fileName);
         if(settingsFile.exists()) {
-            // resetToDefaults();
+             resetToDefaults();
             loadSettings();
         }
         else {
@@ -253,6 +251,7 @@ public class Settings implements Logger {
                 rule = map.get(SettingsKey.RULE_FILENAME).getValue();
                 break;
             case GENRE:
+                rule = map.get(SettingsKey.RULE_GENRE).getValue();
                 break;
             case TITLE:
                 break;
@@ -264,7 +263,7 @@ public class Settings implements Logger {
                 break;
         }
 
-        if(rule.isEmpty() || keywordTagsDataMapping.keySet().isEmpty()) {
+        if(rule == null || rule.isEmpty()) {
             return null; // return early if no rule found
         }
 
@@ -273,28 +272,38 @@ public class Settings implements Logger {
         // using string formatter to fill in the valus
 
         KeywordInterpreter builder = new KeywordInterpreter(); // recombination of string
-        String[] splitRule = rule.split("[$]"); // split by prefix
-
+        String[] splitRule;
         int total = 0; // total keywords
         int count = 0; // num of keywords found
-        // for each split
-        for(String parsed : splitRule) {
-            // if the split word (parsed) is not empty
-            if(!parsed.isEmpty()) {
-                total++;
-                // check each keywordTag in Mapping to find a match
-                for(String s : keywordTagsDataMapping.keySet()) {
-                    // if keywordTag matched with parsed text
-                    if(parsed.startsWith(s.substring(1), 0)) {
-                        count++;
-                        // replace keywordTag with string formatter %s
-                        builder.appendToRule("%s" + parsed.substring(s.length() - 1), keywordTagsDataMapping.get(s).getSuggestorClass(),
-                            keywordTagsDataMapping.get(s).getTag());
-                        break;
+        
+        if(rule.contains("$")) {
+            // case - rule
+            splitRule = rule.split("[$]"); // split by prefix
+            
+            // for each split
+            for(String parsed : splitRule) {
+                // if the split word (parsed) is not empty
+                if(!parsed.isEmpty()) {
+                    total++;
+                    // check each keywordTag in Mapping to find a match
+                    for(String s : keywordTagsDataMapping.keySet()) {
+                        // if keywordTag matched with parsed text
+                        if(parsed.startsWith(s.substring(1), 0)) {
+                            count++;
+                            // replace keywordTag with string formatter %s
+                            builder.appendToRule("%s" + parsed.substring(s.length() - 1), keywordTagsDataMapping.get(s).getSuggestorClass(),
+                                keywordTagsDataMapping.get(s).getTag());
+                            break;
+                        }
                     }
                 }
             }
+        } else {
+            // case - only text
+            splitRule = new String[0];
+            builder.appendToRule(rule);
         }
+        
         // return builder only is same number of keywords
         return total == count ? builder : null;
     }

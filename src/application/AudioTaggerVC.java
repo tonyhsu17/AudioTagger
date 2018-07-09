@@ -191,6 +191,8 @@ public class AudioTaggerVC implements Logger {
      */
     public void triggerAutoFill() {
         EventCenter.getInstance().postEvent(Events.TRIGGER_AUTO_FILL, null);
+        // run again because fields can be dependent on another tag
+        EventCenter.getInstance().postEvent(Events.TRIGGER_AUTO_FILL, null);
 
         infoLabel.setText("Autofill Triggered");
         new Scheduler(3, () -> {

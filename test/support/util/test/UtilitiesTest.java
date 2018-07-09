@@ -34,7 +34,8 @@ public class UtilitiesTest {
             {"22nd awards", 22}, 
             {"33rd", 33},
             {"text 4th test", 4}, {"", -1}, {"123 something", 123},
-            {null, -1}};
+            {null, -1},
+            {"M-01 Ending theme", 1}};
     }
     
     @Test(dataProvider = "IntegerValues")

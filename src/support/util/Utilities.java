@@ -42,7 +42,7 @@ public class Utilities {
             return value;
         }
 
-        String[] splitStr = str.split(" ");
+        String[] splitStr = str.split("[ -]+");
         for(int i = splitStr.length - 1; i >= 0; i--) {
             String parseStr = splitStr[i];
             int endIndex = 0;
@@ -55,6 +55,7 @@ public class Utilities {
 
             try {
                 value = Integer.valueOf(parseStr);
+                break;
             }
             catch (NumberFormatException e) {
             }

@@ -147,12 +147,12 @@ public class VGMDBController implements InformationBase, Logger {
         String newNote = "";
         if(notes.toLowerCase().contains("opening")) {
             int end = notes.toLowerCase().indexOf("opening");
-            int value = Utilities.findIntValueWithSuffix(notes.substring(end - 6, end));
+            int value = Utilities.findIntValueWithSuffix(notes.substring((end - 6 < 0 ? 0 : end - 6), end));
             newNote = "OP" + (value != -1 ? value : "");
         }
         if(notes.toLowerCase().contains("ending")) {
             int end = notes.toLowerCase().indexOf("ending");
-            int value = Utilities.findIntValueWithSuffix(notes.substring(end - 6, end));
+            int value = Utilities.findIntValueWithSuffix(notes.substring((end - 6 < 0 ? 0 : end - 6), end));
             String foundTheme = "ED" + (value != -1 ? value : "");
             newNote = newNote.isEmpty() ? foundTheme : newNote + " + " + foundTheme;
         }
@@ -319,7 +319,7 @@ public class VGMDBController implements InformationBase, Logger {
     }
 
     public void searchByAlbum(String searchTerm) {
-        if(!query.equals(searchTerm)) {
+        if(!query.equals(searchTerm) && !searchTerm.isEmpty()) {
             query = searchTerm;
             parser.searchByAlbum(searchTerm);
         }

@@ -78,7 +78,7 @@ public class AudioFilesController implements InformationBase, Logger {
         settingsToEditor.put(SettingsKey.PROPAGATE_SAVE_YEAR, EditorTag.YEAR);
     }
 
-    private void reset() {
+    public void reset() {
         songListDirectories = new ArrayList<String>();
         songListFileNames.clear();
         songListMP3Files = new ArrayList<>();
@@ -354,12 +354,14 @@ public class AudioFilesController implements InformationBase, Logger {
 
         file.save();
 
-        try {
-            // update reference to file
-            songListMP3Files.set(index,
-                new AudioFile(new File(file.getFile().getParentFile().getPath() + File.separator + file.getNewFileName())));
-        }
-        catch (IOException | TagException | ReadOnlyFileException | CannotReadException | InvalidAudioFrameException e) {
+        if(!overrideFileName) { // if it isnt a multisave, update file incase there is a filename change
+            try {
+                // update reference to file
+                songListMP3Files.set(index,
+                    new AudioFile(new File(file.getFile().getParentFile().getPath() + File.separator + file.getNewFileName())));
+            }
+            catch (IOException | TagException | ReadOnlyFileException | CannotReadException | InvalidAudioFrameException e) {
+            }
         }
     }
 
@@ -412,7 +414,7 @@ public class AudioFilesController implements InformationBase, Logger {
         for(int index : indicesToProcess) {
             if(!StringUtil.isKeyword(songListFileNames.get(index))) {
                 // save with values and ignore fileName if multiple indices selected
-                saveForIndex(index, tags, selectedindices.size() > 1 ? true : false);
+                saveForIndex(index, tags, indicesToProcess.size() > 1 ? true : false);
             }
         }
     }
