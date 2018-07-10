@@ -327,7 +327,8 @@ public class AudioFilesController implements InformationBase, Logger {
         AudioFile file = songListMP3Files.get(index);
         for(EditorTag tag : EditorTag.values()) {
             String tagVal = tags.get(tag);
-            if(tagVal != null && !tagVal.isEmpty() && !StringUtil.isKeyword(tagVal)) {
+            // if value isn't null and isn't a keyword, set field. Allow empty fields
+            if(tagVal != null && !StringUtil.isKeyword(tagVal)) {
                 file.setField(tag, tagVal);
             }
         }

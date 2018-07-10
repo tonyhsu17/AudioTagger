@@ -245,7 +245,7 @@ public class VGMDBController implements InformationBase, Logger {
     @Override
     public String getDataForTag(TagBase<?> tag, String... values) {
         String returnValue = "";
-        if(albumDetails == null) {
+        if(albumDetails == null || !isOnAlbumInfo) {
             return null;
         }
         if(tag == EditorTag.ALBUM) {
