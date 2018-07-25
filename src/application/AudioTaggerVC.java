@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.concurrent.Semaphore;
 
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
@@ -102,7 +103,8 @@ public class AudioTaggerVC implements Logger {
 
     /**
      * Initializes view controller including the other back-end components.
-     * @throws SQLException 
+     * 
+     * @throws SQLException
      */
     public AudioTaggerVC() throws SQLException {
         vgmdbParserModel = new VGMDBController();
@@ -177,12 +179,22 @@ public class AudioTaggerVC implements Logger {
      */
     public void saveTags() {
         model.save();
-        infoLabel.setText("Tags Saved");
-        new Scheduler(3, () -> {
-            Platform.runLater(() -> {
-                infoLabel.setText("");
-            });
-        }).runNTimes(1);
+        showStatusUpdate(3, "Tags Saved");
+    }
+
+    /**
+     * @param seconds how long to show for, 0 for forever
+     * @param text Text to show
+     */
+    public void showStatusUpdate(int seconds, String text) {
+        infoLabel.setText(text);
+        if(seconds > 0) {
+            new Scheduler(seconds, () -> {
+                Platform.runLater(() -> {
+                    infoLabel.setText("");
+                });
+            }).runNTimes(1);
+        }
     }
 
     /**
@@ -194,12 +206,7 @@ public class AudioTaggerVC implements Logger {
         // run again because fields can be dependent on another tag
         EventCenter.getInstance().postEvent(Events.TRIGGER_AUTO_FILL, null);
 
-        infoLabel.setText("Autofill Triggered");
-        new Scheduler(3, () -> {
-            Platform.runLater(() -> {
-                infoLabel.setText("");
-            });
-        }).runNTimes(1);
+        showStatusUpdate(3, "Autofill Triggered");
     }
 
     // ~~~~~~~~~~~~~~~~~~~ //
@@ -232,7 +239,7 @@ public class AudioTaggerVC implements Logger {
         paste.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                error("To be Implemented");
+                model.setImage(ImageFrom.CLIPBOARD, "null");
             }
         });
 
@@ -287,20 +294,22 @@ public class AudioTaggerVC implements Logger {
         });
 
         // ComboBox dropdown - Show dropdown items when clicked on textfield
-//        for(Entry<ComboBox<String>, EditorTag> entry : comboBoxToTag.entrySet()) {
-//            ComboBox<String> temp = entry.getKey();
-//            TextField tf = temp.getEditor();
-//
-//            tf.setOnMouseClicked((mouseEvent) -> {
-//                // highlighting is removed when showing dropdown, so need to rehighlight
-//                Range range = Utilities.getRange(tf.getText(), tf.getCaretPosition(), tf.getSelectedText());
-//                model.requestDropdownForTag(entry.getValue(), tf.getText(), temp.getItems(), (size) -> {
-//                    tf.selectRange(range.start(), range.end());
-//                    temp.show();
-//                });
-//            });
-//        }
+        //        for(Entry<ComboBox<String>, EditorTag> entry : comboBoxToTag.entrySet()) {
+        //            ComboBox<String> temp = entry.getKey();
+        //            TextField tf = temp.getEditor();
+        //
+        //            tf.setOnMouseClicked((mouseEvent) -> {
+        //                // highlighting is removed when showing dropdown, so need to rehighlight
+        //                Range range = Utilities.getRange(tf.getText(), tf.getCaretPosition(), tf.getSelectedText());
+        //                model.requestDropdownForTag(entry.getValue(), tf.getText(), temp.getItems(), (size) -> {
+        //                    tf.selectRange(range.start(), range.end());
+        //                    temp.show();
+        //                });
+        //            });
+        //        }
     }
+
+    Semaphore semaphore = new Semaphore(1);
 
     /**
      * Event listeners on change actions for typing in editor's combo box
@@ -312,14 +321,21 @@ public class AudioTaggerVC implements Logger {
             if((temp == artistCB || temp == albumArtistCB || temp == genreCB)) {
                 TextField tf = temp.getEditor();
                 tf.textProperty().addListener((obs, oldVal, newVal) -> {
+                    debug("typed. old: " + oldVal + " new: " + newVal);
                     // refresh dropdown if there is value within textbox
-                    if(oldVal != null && !oldVal.isEmpty() && temp.isFocused()) {
-                        model.requestDropdownForTag(entry.getValue(), newVal, temp.getItems(), (size) -> {
-                            temp.hide();
-                            temp.setItems((ObservableList<String>)size);
-                            temp.visibleRowCountProperty().set(((ObservableList<String>)size).size());
-                            temp.show();
-                        });
+                    if(oldVal != null && !oldVal.isEmpty() && !newVal.isEmpty() && temp.isFocused()) {
+                        // somehow disable listener here
+                        if(semaphore.tryAcquire()) {
+                            model.requestDropdownForTag(entry.getValue(), newVal, temp.getItems(), (newList) -> {
+                                temp.hide();
+                                temp.setItems((ObservableList<String>)newList);
+                                temp.visibleRowCountProperty().set(((ObservableList<String>)newList).size());
+                                temp.show();
+                                tf.setText(newVal);
+                                semaphore.release();
+                            });
+                            
+                        }
                     }
                 });
             }

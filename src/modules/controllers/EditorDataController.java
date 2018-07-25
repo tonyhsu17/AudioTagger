@@ -110,7 +110,7 @@ public class EditorDataController implements InformationBase, Logger {
 
     @Override
     public void setAlbumArt(Object obj) {
-        if(obj instanceof Image) {
+        if(obj instanceof Image ) {
             Image img = (Image)obj;
             albumArt.set(img);
         }

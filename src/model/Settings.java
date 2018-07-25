@@ -234,6 +234,7 @@ public class Settings implements Logger {
         // set rule
         switch (tag) {
             case ALBUM:
+                rule = map.get(SettingsKey.RULE_ALBUM).getValue();
                 break;
             case ALBUM_ART:
                 break;
@@ -243,6 +244,7 @@ public class Settings implements Logger {
             case ALBUM_ART_META:
                 break;
             case ARTIST:
+                rule = map.get(SettingsKey.RULE_ARTIST).getValue();
                 break;
             case COMMENT:
                 rule = map.get(SettingsKey.RULE_COMMENT).getValue();
@@ -254,10 +256,12 @@ public class Settings implements Logger {
                 rule = map.get(SettingsKey.RULE_GENRE).getValue();
                 break;
             case TITLE:
+                rule = map.get(SettingsKey.RULE_TITLE).getValue();
                 break;
             case TRACK:
                 break;
             case YEAR:
+                rule = map.get(SettingsKey.RULE_YEAR).getValue();
                 break;
             default:
                 break;

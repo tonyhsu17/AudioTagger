@@ -98,7 +98,7 @@ public class AudioFile implements Logger {
         }
         return str;
     }
-    
+
     public void setAlbumArt(Artwork img) {
         try {
             tags.setField(img);
@@ -109,6 +109,12 @@ public class AudioFile implements Logger {
     }
 
     public void setField(EditorTag tag, String str) {
+        if(str == null) {
+            str = "";
+        }
+        else {
+            str = str.trim();
+        }
         try {
             switch (tag) {
                 case ALBUM:
@@ -155,7 +161,6 @@ public class AudioFile implements Logger {
         }
     }
 
-
     public void save() {
         try {
             file.setID3v2Tag(tags);
@@ -170,12 +175,12 @@ public class AudioFile implements Logger {
                 // delete original file
                 Files.delete(Paths.get(path + File.separator + originalName));
 
-//                // update ui list view
-//                songListMP3Files.remove(i); // remove original file
-//                songListMP3Files.add(i, new MP3File(new File(newNamePath))); // update to new file
-//
-//                songListFileNames.add(i, fileName); // add new filename into list
-//                songListFileNames.remove(i + 1); // remove original filename,
+                //                // update ui list view
+                //                songListMP3Files.remove(i); // remove original file
+                //                songListMP3Files.add(i, new MP3File(new File(newNamePath))); // update to new file
+                //
+                //                songListFileNames.add(i, fileName); // add new filename into list
+                //                songListFileNames.remove(i + 1); // remove original filename,
                 // (order matters, causes an ui update and triggering a selectIndex which changes selected Index)
             }
         }
@@ -238,7 +243,7 @@ public class AudioFile implements Logger {
     public String getNewFileName() {
         return currentFileName;
     }
-    
+
     /**
      * @return {@link File}
      */

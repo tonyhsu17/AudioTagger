@@ -1,6 +1,12 @@
 package model;
 
+import java.awt.Toolkit;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -10,6 +16,7 @@ import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.embed.swing.SwingFXUtils;
 import modules.controllers.AudioFilesController;
 import modules.controllers.DatabaseController;
 import modules.controllers.EditorDataController;
@@ -229,7 +236,7 @@ public class DataCompilationModel implements Logger {
             });
         }
     }
-    
+
     private void addDelimsToDB(EditorTag tag, TagDetails info) {
         List<String[]> delimDiffs;
 
@@ -250,6 +257,24 @@ public class DataCompilationModel implements Logger {
         // TODO set meta too
         switch (type) {
             case CLIPBOARD:
+                Transferable transferable = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
+                if(transferable != null) {
+                    DataFlavor[] flavors = transferable.getTransferDataFlavors();
+                    for(int i = flavors.length - 1; i >= 0; i--) {
+                        if(flavors[i].isMimeTypeEqual(DataFlavor.imageFlavor)) {
+                            try {
+                                editorMap
+                                    .setAlbumArt(SwingFXUtils.toFXImage((BufferedImage)transferable.getTransferData(flavors[i]), null));
+                            }
+                            catch (IOException | UnsupportedFlavorException e) {
+                                error("failed to get image: " + e.getMessage());
+                            }
+                        }
+                    }
+                }
+                else {
+                    error("That wasn't an image!");
+                }
                 break;
             case FILE:
                 break;

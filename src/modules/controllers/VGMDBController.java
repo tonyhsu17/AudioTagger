@@ -158,7 +158,8 @@ public class VGMDBController implements InformationBase, Logger {
         }
         if(notes.toLowerCase().contains("insert")) {
             int end = notes.toLowerCase().indexOf("insert");
-            int value = Utilities.findIntValueWithSuffix(notes.substring(end - 6, end));
+            int begin = end - 6 < 0 ? 0 : end -6;
+            int value = Utilities.findIntValueWithSuffix(notes.substring(begin, end));
             String foundTheme = "IN" + (value != -1 ? value : "");
             newNote = newNote.isEmpty() ? foundTheme : newNote + " + " + foundTheme;
         }

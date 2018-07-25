@@ -79,7 +79,6 @@ public class KeywordInterpreter {
             replaceVal = replaceStrings.get(i);
             temp = temp.replaceFirst("%s", replaceVal != null ? replaceVal : "");
         }
-
         return temp;
     }
 
