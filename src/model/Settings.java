@@ -6,14 +6,16 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Scanner;
 
-import model.base.InformationBase;
-import model.base.TagBase;
+import modules.KeywordInterpreter;
+import modules.controllers.base.InformationBase;
+import modules.controllers.base.TagBase;
 import support.EventCenter;
 import support.EventCenter.Events;
 import support.Logger;
@@ -35,17 +37,14 @@ public class Settings implements Logger {
     private static Settings self = new Settings();
 
     public static enum SettingsKey {
-        PROPAGATE_SAVE_ARTIST("Propagate Save for Artist"), PROPAGATE_SAVE_ALBUM("Propagate Save for Artist"),
-        PROPAGATE_SAVE_ALBUM_ARTIST("Propagate Save for Artist"), PROPAGATE_SAVE_YEAR("Propagate Save for Artist"),
-        PROPAGATE_SAVE_GENRE("Propagate Save for Artist"), PROPAGATE_SAVE_COMMENT("Propagate Save for Artist"),
-        PROPAGATE_SAVE_ALBUM_ART("Propagate Save for Artist"), RULE_FILENAME("Autocomplete Filename"),
-        // RULE_TITLE("Autocomplete Title with Rule"),
-        // RULE_ARTIST("Autocomplete Artist with Rule"),
-        // RULE_ALBUM("Autocomplete Album with Rule"),
-        RULE_ALBUM_ARTIST("Autocomplete Album Artist"),
-        // RULE_TRACK("Autocomplete Track with Rule"),
-        // RULE_YEAR("Autocomplete Year with Rule"),
-        // RULE_GENRE("Autocomplete Genere wih Rule"),
+        PROPAGATE_SAVE_ARTIST("Propagate Save for Artist"), PROPAGATE_SAVE_ALBUM("Propagate Save for Album"),
+        PROPAGATE_SAVE_ALBUM_ARTIST("Propagate Save for Album Artist"), PROPAGATE_SAVE_YEAR("Propagate Save for Year"),
+        PROPAGATE_SAVE_GENRE("Propagate Save for Genre"), PROPAGATE_SAVE_COMMENT("Propagate Save for Comment"),
+        PROPAGATE_SAVE_ALBUM_ART("Propagate Save for Album Art"),
+        RULE_FILENAME("Autocomplete Filename"), RULE_TITLE("Autocomplete Title with Rule"),
+        RULE_ARTIST("Autocomplete Artist with Rule"), RULE_ALBUM("Autocomplete Album with Rule"),
+        RULE_ALBUM_ARTIST("Autocomplete Album Artist"), RULE_TRACK("Autocomplete Track with Rule"),
+        RULE_YEAR("Autocomplete Year with Rule"), RULE_GENRE("Autocomplete Genere wih Rule"),
         RULE_COMMENT("Autocomplete Comment"),;
 
         String description;
@@ -58,6 +57,10 @@ public class Settings implements Logger {
             return description;
         }
 
+        public String debug() {
+            return "SettingsKey [name=" + name() + ", description=" + description + "]";
+        }
+
         public static SettingsKey toKey(String str) {
             for(SettingsKey key : SettingsKey.values()) {
                 if(key.toString().equals(str)) {
@@ -65,6 +68,21 @@ public class Settings implements Logger {
                 }
             }
             return null;
+        }
+
+        public static SettingsKey[] getPropagates() {
+            return new SettingsKey[] {PROPAGATE_SAVE_ALBUM,
+                PROPAGATE_SAVE_ALBUM_ART,
+                PROPAGATE_SAVE_ALBUM_ARTIST,
+                PROPAGATE_SAVE_ARTIST,
+                PROPAGATE_SAVE_COMMENT,
+                PROPAGATE_SAVE_GENRE,
+                PROPAGATE_SAVE_YEAR};
+        }
+
+        public static SettingsKey[] getRules() {
+            return new SettingsKey[] {RULE_FILENAME, RULE_TITLE, RULE_ARTIST, RULE_ALBUM, 
+                RULE_ALBUM_ARTIST, RULE_TRACK, RULE_YEAR, RULE_GENRE, RULE_COMMENT};
         }
     }
 
@@ -101,7 +119,7 @@ public class Settings implements Logger {
 
         settingsFile = new File(fileName);
         if(settingsFile.exists()) {
-            // resetToDefaults();
+             resetToDefaults();
             loadSettings();
         }
         else {
@@ -112,38 +130,23 @@ public class Settings implements Logger {
 
     private void resetToDefaults() {
         map.clear();
-        map.put(SettingsKey.PROPAGATE_SAVE_ARTIST, new SettingsTableViewMeta(SettingsKey.PROPAGATE_SAVE_ARTIST, "true"));
-        map.put(SettingsKey.PROPAGATE_SAVE_ALBUM, new SettingsTableViewMeta(SettingsKey.PROPAGATE_SAVE_ALBUM, "true"));
-        map.put(SettingsKey.PROPAGATE_SAVE_ALBUM_ARTIST, new SettingsTableViewMeta(SettingsKey.PROPAGATE_SAVE_ALBUM_ARTIST, "true"));
-        map.put(SettingsKey.PROPAGATE_SAVE_YEAR, new SettingsTableViewMeta(SettingsKey.PROPAGATE_SAVE_YEAR, "true"));
-        map.put(SettingsKey.PROPAGATE_SAVE_GENRE, new SettingsTableViewMeta(SettingsKey.PROPAGATE_SAVE_GENRE, "true"));
-        map.put(SettingsKey.PROPAGATE_SAVE_COMMENT, new SettingsTableViewMeta(SettingsKey.PROPAGATE_SAVE_COMMENT, "true"));
-        map.put(SettingsKey.PROPAGATE_SAVE_ALBUM_ART, new SettingsTableViewMeta(SettingsKey.PROPAGATE_SAVE_ALBUM_ART, "true"));
-        map.put(SettingsKey.RULE_FILENAME, new SettingsTableViewMeta(SettingsKey.RULE_FILENAME, ""));
-        // map.add(new SettingsLabelMeta(SettingsKey.RULE_TITLE, ""));
-        // map.put(SettingsKey.RULE_ARTIST, new SettingsLabelMeta(SettingsKey.RULE_ARTIST, ""));
-        // map.add(new SettingsLabelMeta(SettingsKey.RULE_ALBUM, ""));
-        map.put(SettingsKey.RULE_ALBUM_ARTIST, new SettingsTableViewMeta(SettingsKey.RULE_ALBUM_ARTIST, ""));
-        // map.add(new SettingsLabelMeta(SettingsKey.RULE_TRACK, ""));
-        // map.add(new SettingsLabelMeta(SettingsKey.RULE_YEAR, ""));
-        // map.add(new SettingsLabelMeta(SettingsKey.RULE_GENRE, ""));
-        map.put(SettingsKey.RULE_COMMENT, new SettingsTableViewMeta(SettingsKey.RULE_COMMENT, ""));
+        for(SettingsKey key : SettingsKey.values()) {
+            map.put(key, new SettingsTableViewMeta(key, "true"));
+        }
     }
 
     /**
      * Load settings
      */
     private void loadSettings() {
-        Scanner sc;
+        Scanner sc = null;
         try {
             sc = new Scanner(settingsFile);
             while(sc.hasNextLine()) {
                 String line = sc.nextLine(); // Grab each setting line
                 String[] splitLine = line.split("=", 2); // parse setting to [key, value]
-
+                info(Arrays.toString(splitLine));
                 SettingsKey key = SettingsKey.toKey(splitLine[0]);
-                info(key.toString());
-
                 if(key != null) {
                     map.put(key, new SettingsTableViewMeta(key, splitLine[1]));
                 }
@@ -151,6 +154,11 @@ public class Settings implements Logger {
         }
         catch (FileNotFoundException e) {
             // Should not come here since file is confirmed first
+        }
+        finally {
+            if(sc != null) {
+                sc.close();
+            }
         }
     }
 
@@ -185,13 +193,11 @@ public class Settings implements Logger {
     }
 
     public boolean isAnyPropagateSaveOn() {
-        return isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_ALBUM) ||
-               isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_ALBUM_ART) ||
-               isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_ALBUM_ARTIST) ||
-               isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_ARTIST) ||
-               isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_COMMENT) ||
-               isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_GENRE) ||
-               isPropagateSaveOn(SettingsKey.PROPAGATE_SAVE_YEAR);
+        boolean flag = true;
+        for(SettingsKey key : SettingsKey.getPropagates()) {
+            flag |= isPropagateSaveOn(key);
+        }
+        return flag;
     }
 
     public boolean isPropagateSaveOn(SettingsKey key) {
@@ -228,6 +234,7 @@ public class Settings implements Logger {
         // set rule
         switch (tag) {
             case ALBUM:
+                rule = map.get(SettingsKey.RULE_ALBUM).getValue();
                 break;
             case ALBUM_ART:
                 break;
@@ -237,6 +244,7 @@ public class Settings implements Logger {
             case ALBUM_ART_META:
                 break;
             case ARTIST:
+                rule = map.get(SettingsKey.RULE_ARTIST).getValue();
                 break;
             case COMMENT:
                 rule = map.get(SettingsKey.RULE_COMMENT).getValue();
@@ -245,18 +253,21 @@ public class Settings implements Logger {
                 rule = map.get(SettingsKey.RULE_FILENAME).getValue();
                 break;
             case GENRE:
+                rule = map.get(SettingsKey.RULE_GENRE).getValue();
                 break;
             case TITLE:
+                rule = map.get(SettingsKey.RULE_TITLE).getValue();
                 break;
             case TRACK:
                 break;
             case YEAR:
+                rule = map.get(SettingsKey.RULE_YEAR).getValue();
                 break;
             default:
                 break;
         }
 
-        if(rule.isEmpty() || keywordTagsDataMapping.keySet().isEmpty()) {
+        if(rule == null || rule.isEmpty()) {
             return null; // return early if no rule found
         }
 
@@ -265,28 +276,38 @@ public class Settings implements Logger {
         // using string formatter to fill in the valus
 
         KeywordInterpreter builder = new KeywordInterpreter(); // recombination of string
-        String[] splitRule = rule.split("[$]"); // split by prefix
-
+        String[] splitRule;
         int total = 0; // total keywords
         int count = 0; // num of keywords found
-        // for each split
-        for(String parsed : splitRule) {
-            // if the split word (parsed) is not empty
-            if(!parsed.isEmpty()) {
-                total++;
-                // check each keywordTag in Mapping to find a match
-                for(String s : keywordTagsDataMapping.keySet()) {
-                    // if keywordTag matched with parsed text
-                    if(parsed.startsWith(s.substring(1), 0)) {
-                        count++;
-                        // replace keywordTag with string formatter %s
-                        builder.appendToRule("%s" + parsed.substring(s.length() - 1), keywordTagsDataMapping.get(s).getSuggestorClass(),
-                            keywordTagsDataMapping.get(s).getTag());
-                        break;
+        
+        if(rule.contains("$")) {
+            // case - rule
+            splitRule = rule.split("[$]"); // split by prefix
+            
+            // for each split
+            for(String parsed : splitRule) {
+                // if the split word (parsed) is not empty
+                if(!parsed.isEmpty()) {
+                    total++;
+                    // check each keywordTag in Mapping to find a match
+                    for(String s : keywordTagsDataMapping.keySet()) {
+                        // if keywordTag matched with parsed text
+                        if(parsed.startsWith(s.substring(1), 0)) {
+                            count++;
+                            // replace keywordTag with string formatter %s
+                            builder.appendToRule("%s" + parsed.substring(s.length() - 1), keywordTagsDataMapping.get(s).getSuggestorClass(),
+                                keywordTagsDataMapping.get(s).getTag());
+                            break;
+                        }
                     }
                 }
             }
+        } else {
+            // case - only text
+            splitRule = new String[0];
+            builder.appendToRule(rule);
         }
+        
         // return builder only is same number of keywords
         return total == count ? builder : null;
     }
@@ -306,7 +327,7 @@ public class Settings implements Logger {
         }
         writeSettings();
 
-        EventCenter.getInstance().postEvent(Events.SettingChanged, null);
+        EventCenter.getInstance().postEvent(Events.SETTINGS_CHANGED, null);
     }
 
     public void revertSettings() {

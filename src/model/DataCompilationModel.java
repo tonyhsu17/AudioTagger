@@ -1,32 +1,32 @@
 package model;
 
+import java.awt.Toolkit;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.IllegalFormatException;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.regex.Pattern;
 
 import javafx.beans.property.ListProperty;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleListProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
-import javafx.scene.image.Image;
-import model.base.InformationBase;
-import model.base.TagBase;
-import model.database.DatabaseController;
-import model.information.AudioFiles;
-import model.information.EditorComboBoxModel;
-import model.information.VGMDBParser;
-import support.EventCenter;
-import support.EventCenter.Events;
+import javafx.collections.ObservableList;
+import javafx.embed.swing.SwingFXUtils;
+import modules.controllers.AudioFilesController;
+import modules.controllers.DatabaseController;
+import modules.controllers.EditorDataController;
+import modules.controllers.VGMDBController;
+import modules.controllers.base.InformationBase;
+import modules.controllers.base.TagBase;
 import support.Genres;
 import support.Logger;
-import support.Scheduler;
 import support.structure.EditorComboBoxMeta;
-import support.util.ImageUtil;
+import support.structure.TagDetails;
 import support.util.StringUtil;
 import support.util.Utilities.EditorTag;
 
@@ -34,7 +34,7 @@ import support.util.Utilities.EditorTag;
 
 public class DataCompilationModel implements Logger {
     static final String TEMPFOLDER =
-        "D:\\Music\\Japanese - Test\\Anime Album Collection\\To Aru Kagaku no Railgun [Collection]\\To Aru Kagaku no Railgun\\Only My Railgun";
+        "D:\\Music\\Japanese\\Anime Album Collection\\Accel World";
 
     public interface DataCompilationModelCallback {
         public void done(Object obj);
@@ -44,223 +44,104 @@ public class DataCompilationModel implements Logger {
         FILE, URL, CLIPBOARD, VGMDB
     }
 
+    private EditorDataController editorMap; // ComboBox controller (editor text and drop down)
+
     private ListProperty<String> fileNamesList; // currently working files
+    private DatabaseController dbManagement; // database for prediction of common tag fields
+    private AudioFilesController audioFilesModel; // audio files meta
 
-    private ObjectProperty<Image> albumArt; // album art pic
+    private VGMDBController vgmdbModel; // data handler for vgmdb website
 
-    private EditorComboBoxModel editorMap; // Tag to ComboBox data (editor text and drop down)
-    private AudioFiles audioFilesModel; // audio files meta
-    private InformationBase dbManagement; // database for prediction of common tag fields
-    private VGMDBParser vgmdbModel; // data handler for vgmdb website
-
-    private HashMap<EditorTag, KeywordInterpreter> editorAutoComplete; // store auto complete fields
-    private Scheduler editorAutoUpdater; // thread of each polling to update auto compete field
-
-    public DataCompilationModel() {
-        editorMap = new EditorComboBoxModel();
-        audioFilesModel = new AudioFiles();
-        dbManagement = new DatabaseController("");
+    public DataCompilationModel(DatabaseController dbManagement, EditorDataController editorMap) {
+        this.dbManagement = dbManagement;
+        this.editorMap = editorMap;
+        audioFilesModel = new AudioFilesController();
 
         fileNamesList = new SimpleListProperty<String>();
         fileNamesList.set(FXCollections.observableArrayList());
-
-        albumArt = new SimpleObjectProperty<Image>();
-
-        editorAutoComplete = new HashMap<EditorTag, KeywordInterpreter>();
-        // updateAutoCompleteRules(); // activate when vgmdb parser set
-
-        EventCenter.getInstance().subscribeEvent(Events.SettingChanged, this, (obj) -> {
-            updateAutoCompleteRules();
-        });
 
         audioFilesModel.setWorkingDirectory(TEMPFOLDER);
     }
 
     public void reset() {
-        audioFilesModel.setWorkingDirectory("");
+        info("Clearing everthing");
+        audioFilesModel.reset();
         fileNamesList.clear();
-
-        clearAllTags();
+        editorMap.clearAllTags();
     }
 
-    public void setVGMDBParser(VGMDBParser parser) {
+    public void setVGMDBController(VGMDBController parser) {
         vgmdbModel = parser;
         setPossibleKeywordTag();
-        updateAutoCompleteRules();
+        editorMap.autoCompleter().updateAutoFillRules();
     }
-
-    private void updateAutoCompleteRules() {
-        if(editorAutoUpdater != null) // if thread exist, stop thread
-        {
-            editorAutoUpdater.stopThread();
-            editorAutoUpdater = null;
-        }
-
-        editorAutoComplete.clear(); // clear list and add/re-add rules
-        for(EditorTag t : EditorTag.values()) // for each tag
-        {
-            KeywordInterpreter temp = null;
-            // if there is a rule, add to list
-            if((temp = Settings.getInstance().getRuleFor(t)) != null) {
-                info("Adding rule for: " + t);
-                editorAutoComplete.put(t, temp);
-            }
-        }
-
-        // if there is at least one auto-complete, start polling to update field
-        if(editorAutoComplete.size() > 0) {
-            // create polling in a separate thread
-            editorAutoUpdater = new Scheduler(1, () -> {
-                updateAutoFills();
-            });
-            editorAutoUpdater.start();
-        }
-    }
-
-    private void updateAutoFills() {
-        for(Entry<EditorTag, KeywordInterpreter> entry : editorAutoComplete.entrySet()) {
-            EditorComboBoxMeta meta = editorMap.getMeta(entry.getKey()); // get combo box to modify
-
-            if(!meta.isPaused() && meta.shouldStopAutoFill()) {
-                KeywordInterpreter builder = entry.getValue();
-                InformationBase classObj;
-                TagBase<?> tag;
-
-                // pass values into builder to construct the value with given tags and info
-                for(int i = 0; i < builder.getCount(); i++) {
-                    classObj = builder.getClass(i);
-                    tag = builder.getTag(i);
-                    builder.setValue(i, classObj.getDataForTag(tag, "")); // pass data to builder
-                }
-
-                String finalValue = builder.buildString(); // get the final results
-//                                System.out.println("Entry: " + entry.getKey() + " DecodedString: " + finalValue);
-                //                meta.getTextProperty().set(finalValue); // set input box text
-
-                // check db for caps matching text to replace
-                setTextFormattedFromDB(entry.getKey(), finalValue);
-
-                //TODO create class that does text replacement (ie (karoke) -> (intrumental), (tv edit) -> (tv size) etc) 
-            }
-        }
-    }
-
-    public boolean isAutoFillEnabled() {
-        for(Entry<EditorTag, KeywordInterpreter> entry : editorAutoComplete.entrySet()) {
-            EditorComboBoxMeta meta = editorMap.getMeta(entry.getKey()); // get combo box to modify
-            return !meta.isPaused();
-        }
-        return false;
-    }
-
-    private void setPauseAutoFill(boolean flag) {
-        for(Entry<EditorTag, KeywordInterpreter> entry : editorAutoComplete.entrySet()) {
-            EditorComboBoxMeta meta = editorMap.getMeta(entry.getKey()); // get combo box to modify
-            meta.setPaused(flag);
-        }
-    }
-
-    public void toggleAutoFill() {
-        for(Entry<EditorTag, KeywordInterpreter> entry : editorAutoComplete.entrySet()) {
-            EditorComboBoxMeta meta = editorMap.getMeta(entry.getKey()); // get combo box to modify
-            meta.setPaused(!meta.isPaused());
-        }
-    }
-
-    private void setTextFormattedFromDB(EditorTag type, String value) {
-        if(type == EditorTag.ALBUM_ARTIST) {
-            String formattedText = dbManagement.getDataForTag(EditorTag.ALBUM_ARTIST, value);
-
-            if(!formattedText.isEmpty()) {
-                value = formattedText;
-            }
-        }
-        else if(type == EditorTag.ARTIST) {
-            String[] artists = StringUtil.splitBySeparators(value);
-            List<String> formattedArtists = new ArrayList<String>();
-
-            for(String artist : artists) {
-                String[] byFirstLast = StringUtil.splitName(artist);
-                String formattedText = dbManagement.getDataForTag(type, byFirstLast[0], byFirstLast[1]);
-                if(!formattedText.isEmpty()) { // if exist in db use that one
-                    formattedArtists.add(formattedText);
-                }
-                else { // else use original one
-                    formattedArtists.add(artist);
-                }
-            }
-
-            String formattedText = StringUtil.getCommaSeparatedStringWithAnd(formattedArtists);
-            if(!formattedText.isEmpty()) {
-                value = formattedText;
-            }
-        }
-
-        getPropertyForTag(type).getTextProperty().set(value); // set the final value
-    }
-
-    /**
-     * Retrieves standardized tags in delimiters based on user preferences
-     * 
-     * @return New delimieter tag if found in database, else original
-     */
-    private String getDelimTagReplacement(String text) {
-        List<String> tags = StringUtil.getStrInDelim(text); // all delim tags in text
-        ArrayList<String> dbTags = new ArrayList<String>();
-        for(String tag : tags) { // get all user stored delim tags that have been replaced
-            dbTags.add(dbManagement.getDataForTag(DatabaseController.AdditionalTag.REPLACE_WORD, tag));
-        }
-
-        for(int i = 0; i < tags.size(); i++) { // tags.size() == dbTags.size()
-            // db returns empty string for non replaced tags
-            if(!dbTags.get(i).isEmpty()) {
-                info("replacing: " + tags.get(i) + " with: " + dbTags.get(i));
-                //text.re
-                text = text.replaceFirst(Pattern.quote(tags.get(i)), dbTags.get(i));
-            }
-        }
-        return text;
-    }
-
 
     // get the tag data for the selected index
-    public void requestDataFor(int index, DataCompilationModelCallback cb) {
-        clearAllTags();
-        audioFilesModel.selectTag(index);
-        addAudioModelDataToList();
-
-        albumArt.set(audioFilesModel.getAlbumArt());
-        editorMap.getMeta(EditorTag.ALBUM_ART_META).getTextProperty().set(audioFilesModel.getDataForTag(EditorTag.ALBUM_ART_META));
-
-        cb.done("DONE");
+    public void requestDataFor(List<Integer> indices, DataCompilationModelCallback cb) {
+        editorMap.clearAllTags();
+        audioFilesModel.selectTags(indices, (tagDetails) -> {
+            if(tagDetails != null) {
+                for(EditorTag tag : EditorTag.values()) {
+                    editorMap.setDataForTag(tag, tagDetails.get(tag)); // No formatting needed since its read from file
+                }
+                editorMap.setAlbumArt(tagDetails.getAlbumArt());
+            }
+            cb.done("DONE");
+        });
     }
 
-    public void requestDataFor(List<Integer> indicies, DataCompilationModelCallback cb) {
-        clearAllTags();
-        audioFilesModel.selectTags(indicies);
-        addAudioModelDataToList();
 
-        albumArt.set(audioFilesModel.getAlbumArt());
-        editorMap.getMeta(EditorTag.ALBUM_ART_META).getTextProperty().set(audioFilesModel.getDataForTag(EditorTag.ALBUM_ART_META));
-
-        cb.done("DONE");
-    }
-
-    public void updateChoicesForTag(EditorTag tag, String text, DataCompilationModelCallback cb) {
+    /**
+     * Update editor text for selected file
+     * 
+     * @param tag
+     * @param text
+     * @param cb
+     */
+    public void requestDropdownForTag(EditorTag tag, String text, List<String> originalDropDown, DataCompilationModelCallback cb) {
         if(tag.equals(EditorTag.ALBUM_ART) || tag.equals(EditorTag.ALBUM_ART_META)) {
             cb.done(0);
         }
         else {
-            // stop auto-complete since there is human input
-            // unless text is empty then revert back to allow auto-fill
-            // TODO get rid of stop autofill on click?
-            //editorMap.getMeta(tag).setAllowAutoFill(editorMap.getMeta(tag).getTextProperty().get().isEmpty() ? true : false);
-//            String originalText = audioFilesModel.getDataForTag(tag); // unneeded now
-
-            int size = addPossibleDataForTag(tag, text);
-
-            cb.done(size);
+            List<String> possibleValues = getPossibleDataForTag(tag, text, "");
+            // TODO defaults add file defaults?
+            //            int size = addPossibleDataForTag(tag, text);
+            ObservableList<String> list = FXCollections.observableArrayList(possibleValues);
+            cb.done(list);
         }
+    }
+
+    private List<String> getPossibleDataForTag(EditorTag tag, String compareAgainst, String... defaults) {
+        List<String> dropDownList = new ArrayList<String>();
+        // add defaults
+        for(String str : defaults) {
+            if(str != null && !str.isEmpty()) {
+                dropDownList.add(str);
+            }
+        }
+
+        // format the current text
+        editorMap.setFormattedDataForTag(tag, compareAgainst);
+
+        // now handle base on specific
+        switch (tag) {
+            case ALBUM:
+            case ALBUM_ARTIST:
+            case ARTIST:
+            case COMMENT:
+            case FILE_NAME:
+            case TITLE:
+            case YEAR:
+                dropDownList.addAll(getPossibleValues(tag));
+                break;
+            case GENRE:
+                dropDownList.addAll(addPossibleGenres());
+                break;
+            default:
+                break;
+        }
+        debug(tag + " size: " + dropDownList.size() + " : " + Arrays.toString(dropDownList.toArray(new String[0])));
+        return dropDownList;
     }
 
     /**
@@ -270,320 +151,137 @@ public class DataCompilationModel implements Logger {
      * @param additional optional args if needed
      * @return size of dropdown
      */
-    private int addPossibleDataForTag(EditorTag tag, String... additional) {
-        String editorText = getDelimTagReplacement(editorMap.getMeta(tag).getTextProperty().get());
-        List<String> dropDownList = editorMap.getMeta(tag).getDropDownListProperty().get();
-        dropDownList.clear();
-
-        // add original
-        for(String str : additional) {
-            if(str != null && !str.isEmpty() && !dropDownList.contains(str)) {
-                dropDownList.add(str);
-            }
-        }
-
-        setTextFormattedFromDB(tag, editorText);
-
-        // now handle base on specific
-        switch (tag) {
-            case ALBUM:
-                addAdditionalPossibleAlbums(dropDownList);
-                break;
-            case ALBUM_ART:
-                break;
-            case ALBUM_ART_META:
-                break;
-            case ALBUM_ARTIST:
-                addAdditionalPossibleAlbumArtists(dropDownList);
-                break;
-            case ARTIST:
-                addAdditionalPossibleArtists(dropDownList);
-                break;
-            case COMMENT:
-                addAdditionalPossibleComments(dropDownList);
-                break;
-            case FILE_NAME:
-                addAdditionalPossibleFileNames(dropDownList);
-                break;
-            case GENRE:
-                addAdditionalPossibleGenres(dropDownList);
-                break;
-            case TITLE:
-                addAdditionalPossibleTitles(dropDownList);
-                break;
-            case TRACK:
-                try {
-                    editorMap.getMeta(tag).getTextProperty().set(String.format("%02d", editorText));
-                }
-                catch (IllegalFormatException e) {
-                }
-                break;
-            case YEAR:
-                addAdditionalPossibleYears(dropDownList);
-                break;
-            default:
-                break;
-
-        }
-        return dropDownList.size();
-    }
-
-    private void addAdditionalPossibleFileNames(List<String> dropDownList) {
-        //        EditorComboBoxMeta field = editorMap.getMeta(EditorTag.FILE_NAME);
-        //        String textFieldText = field.getTextProperty().get();
-        //        if(!textFieldText.isEmpty() && !Utilities.isKeyword(textFieldText))
-        //        {
-        //            String formatted = String.format("%02d", Integer.valueOf(textFieldText)) + " " +
-        //                fieldMap.getMeta(Tag.TITLE).getTextProperty().get() + "." + audioFilesModel.getSelectedFileType();
-        //            if(!dropDownList.contains(formatted))
-        //            {
-        //                dropDownList.add(formatted);
-        //            }
-        //        }
-    }
-
-    private void addAdditionalPossibleTitles(List<String> dropDownList) {
-        // add from vgmdb
-        if(vgmdbModel != null) {
-            try {
-                String temp = vgmdbModel.getDataForTag(EditorTag.TRACK, audioFilesModel.getDataForTag(EditorTag.TRACK));
-                if(temp != null && !temp.isEmpty() && !dropDownList.contains(temp)) {
-                    dropDownList.add(temp);
-                }
-            }
-            catch (NumberFormatException e) {
-            }
-        }
-    }
-
-    // adding compilation
-    private void addAdditionalPossibleArtists(List<String> dropDownList) {
-        EditorComboBoxMeta field = editorMap.getMeta(EditorTag.ARTIST);
+    private List<String> getPossibleValues(EditorTag tag) {
+        List<String> returnList = new ArrayList<String>();
+        EditorComboBoxMeta field = editorMap.getMeta(tag);
         String textFieldText = field.getTextProperty().get();
+
         // add from db
-        List<String> possibleArtist = dbManagement.getPossibleDataForTag(EditorTag.ARTIST, textFieldText);
+        List<String> possibleArtist = dbManagement.getPossibleDataForTag(tag, textFieldText);
         if(possibleArtist != null) {
-            for(String str : possibleArtist) {
-                if(!dropDownList.contains(str)) {
-                    dropDownList.add(str);
-                }
-            }
+            returnList.addAll(possibleArtist);
         }
 
         // add from vgmdb
         if(vgmdbModel != null) {
-            String temp = vgmdbModel.getDataForTag(EditorTag.ARTIST, "");
-            if(temp != null && !temp.isEmpty() && !dropDownList.contains(temp)) {
-                dropDownList.add(temp);
+            String temp;
+            if(tag == EditorTag.TITLE) { // special case, where more info is needed for tag
+                temp = vgmdbModel.getDataForTag(EditorTag.TRACK, audioFilesModel.getDataForTag(EditorTag.TRACK));
+            }
+            else {
+                temp = vgmdbModel.getDataForTag(tag, "");
+            }
+
+            if(temp != null && !temp.isEmpty() && !returnList.contains(temp)) {
+                returnList.add(temp);
             }
         }
+
+        String audioOriginal = audioFilesModel.getDataForTag(tag);
+        if(audioOriginal != null && !audioOriginal.isEmpty() && !returnList.contains(audioOriginal)) {
+            returnList.add(audioFilesModel.getDataForTag(tag)); // add original value 
+        }
+        return returnList;
     }
 
-    private void addAdditionalPossibleAlbums(List<String> dropDownList) {
-        // add from vgmdb
-        if(vgmdbModel != null) {
-            try {
-                String temp = vgmdbModel.getDataForTag(EditorTag.ALBUM, "");
-                if(temp != null && !temp.isEmpty() && !dropDownList.contains(temp)) {
-                    dropDownList.add(temp);
-                }
-            }
-            catch (NumberFormatException e) {
-            }
-        }
-    }
-
-    // adding compilation
-    private void addAdditionalPossibleAlbumArtists(List<String> dropDownList) {
-        EditorComboBoxMeta field = editorMap.getMeta(EditorTag.ALBUM_ARTIST);
-        String textFieldText = field.getTextProperty().get();
-        // add from db
-        List<String> possibleArtist = dbManagement.getPossibleDataForTag(EditorTag.ALBUM_ARTIST, textFieldText);
-        for(String str : possibleArtist) {
-            if(!dropDownList.contains(str)) {
-                dropDownList.add(str);
-            }
-        }
-
-        // add from vgmdb
-        if(vgmdbModel != null) {
-            String temp = vgmdbModel.getDataForTag(EditorTag.ALBUM_ARTIST);
-            if(temp != null && !temp.isEmpty() && !dropDownList.contains(temp)) {
-                dropDownList.add(temp);
-            }
-        }
-    }
-
-    private void addAdditionalPossibleYears(List<String> dropDownList) {
-        // add from vgmdb
-        if(vgmdbModel != null) {
-            try {
-                String temp = vgmdbModel.getDataForTag(EditorTag.YEAR, "");
-                if(temp != null && !temp.isEmpty() && !dropDownList.contains(temp)) {
-                    dropDownList.add(temp);
-                }
-            }
-            catch (NumberFormatException e) {
-            }
-        }
-    }
-
-    private void addAdditionalPossibleGenres(List<String> dropDownList) {
+    private List<String> addPossibleGenres() {
         EditorComboBoxMeta field = editorMap.getMeta(EditorTag.GENRE);
         String textFieldText = field.getTextProperty().get();
 
         List<String> possibleGenres = Genres.containsIgnoreCase(textFieldText);
-        for(String genre : possibleGenres) {
-            if(!dropDownList.contains(genre)) {
-                dropDownList.add(genre);
-            }
+        if(!possibleGenres.contains(audioFilesModel.getDataForTag(EditorTag.GENRE))) {
+            possibleGenres.add(audioFilesModel.getDataForTag(EditorTag.GENRE)); // add original value 
         }
-    }
-
-    private void addAdditionalPossibleComments(List<String> dropDownList) {
-        // add from vgmdb
-        if(vgmdbModel != null) {
-            String theme = vgmdbModel.getDataForTag(EditorTag.COMMENT, "");
-            if(theme != null) {
-                String albumArtist = editorMap.getMeta(EditorTag.ALBUM_ARTIST).getTextProperty().get();
-                String album = editorMap.getMeta(EditorTag.ALBUM).getTextProperty().get();
-                String artist = editorMap.getMeta(EditorTag.ARTIST).getTextProperty().get();
-                String formatted = albumArtist + " " + theme + " Single - " + album + " [" + artist + "]";
-                if(!dropDownList.contains(formatted)) {
-                    dropDownList.add(formatted);
-                }
-            }
-        }
-    }
-
-    // add file's tag to display list
-    private void addAudioModelDataToList() {
-        for(EditorTag tag : EditorTag.values()) {
-            if(!tag.equals(EditorTag.ALBUM_ART) && !tag.equals(EditorTag.ALBUM_ART_META)) {
-                editorMap.getMeta(tag).getDropDownListProperty().add(audioFilesModel.getDataForTag(tag));
-            }
-        }
-        albumArt.setValue(audioFilesModel.getAlbumArt());
-        editorMap.getMeta(EditorTag.ALBUM_ART_META).getTextProperty().set(audioFilesModel.getDataForTag(EditorTag.ALBUM_ART_META));
+        return possibleGenres;
     }
 
     public void save() {
-        setPauseAutoFill(true); //stop auto fill to prevent corruption
         // store meta info to db - start
         dbManagement.setDataForTag(EditorTag.ALBUM_ARTIST, editorMap.getMeta(EditorTag.ALBUM_ARTIST).getTextProperty().get());
 
         String[] splitArtists = StringUtil.splitBySeparators(editorMap.getMeta(EditorTag.ARTIST).getTextProperty().get());
         dbManagement.setDataForTag(EditorTag.ARTIST, splitArtists);
 
-        saveDelimTagInDB();
+
         // store meta info to db - end
 
         // go through each element and set tag
-        audioFilesModel.setDataForTag(EditorTag.FILE_NAME, editorMap.getMeta(EditorTag.FILE_NAME).getTextProperty().get());
-        audioFilesModel.setDataForTag(EditorTag.TITLE, editorMap.getMeta(EditorTag.TITLE).getTextProperty().get());
-        audioFilesModel.setDataForTag(EditorTag.ARTIST, editorMap.getMeta(EditorTag.ARTIST).getTextProperty().get());
-        audioFilesModel.setDataForTag(EditorTag.ALBUM, editorMap.getMeta(EditorTag.ALBUM).getTextProperty().get());
-        audioFilesModel.setDataForTag(EditorTag.ALBUM_ARTIST, editorMap.getMeta(EditorTag.ALBUM_ARTIST).getTextProperty().get());
-        audioFilesModel.setDataForTag(EditorTag.TRACK, editorMap.getMeta(EditorTag.TRACK).getTextProperty().get());
-        audioFilesModel.setDataForTag(EditorTag.YEAR, editorMap.getMeta(EditorTag.YEAR).getTextProperty().get());
-        audioFilesModel.setDataForTag(EditorTag.GENRE, editorMap.getMeta(EditorTag.GENRE).getTextProperty().get());
-        audioFilesModel.setDataForTag(EditorTag.COMMENT, editorMap.getMeta(EditorTag.COMMENT).getTextProperty().get());
+        TagDetails details = new TagDetails();
+        for(EditorTag tag : EditorTag.values()) {
+            details.set(tag, editorMap.getMeta(tag).getTextProperty().get());
+        }
+        //        File artwork = ImageUtil.saveImage(albumArt.get());
+        //        audioFilesModel.setAlbumArtFromFile(artwork);
+        //     artwork.delete();
+        details.setAlbumArt(editorMap.getAlbumArt());
 
-        File artwork = ImageUtil.saveImage(albumArt.get());
-        audioFilesModel.setAlbumArtFromFile(artwork);
-        artwork.delete();
-        audioFilesModel.save();
+        audioFilesModel.save(details);
 
-
-        setPauseAutoFill(false);
+        saveDelimTagInDB();
     }
 
     /**
-     * hella inelegant code.
-     * Check each editor field's final value and store delim tag diff compared to VGMDB and original audio file's tag
+     * Check each editor field's final value and store delim tag diff compared to VGMDB
      */
     private void saveDelimTagInDB() {
-        List<String[]> delimDiffs = StringUtil.getDiffInDelim(vgmdbModel.getDataForTag(EditorTag.FILE_NAME),
-            editorMap.getMeta(EditorTag.FILE_NAME).getTextProperty().get());
-        for(String[] delimDiff : delimDiffs) {
-            dbManagement.setDataForTag(DatabaseController.AdditionalTag.REPLACE_WORD, delimDiff[0], delimDiff[1]);
+        List<Integer> selected = audioFilesModel.removeHeaderIndicies();
+
+        for(int index : selected) {
+            // get audio file's info and compare against vgmdb's info
+            audioFilesModel.selectTag(index, (info) -> {
+                addDelimsToDB(EditorTag.ARTIST, info);
+                addDelimsToDB(EditorTag.TITLE, info);
+                addDelimsToDB(EditorTag.ALBUM, info);
+                addDelimsToDB(EditorTag.ALBUM_ARTIST, info);
+            });
         }
-        delimDiffs = StringUtil.getDiffInDelim(audioFilesModel.getDataForTag(EditorTag.FILE_NAME),
-            editorMap.getMeta(EditorTag.FILE_NAME).getTextProperty().get());
-        for(String[] delimDiff : delimDiffs) {
-            dbManagement.setDataForTag(DatabaseController.AdditionalTag.REPLACE_WORD, delimDiff[0], delimDiff[1]);
+    }
+
+    private void addDelimsToDB(EditorTag tag, TagDetails info) {
+        List<String[]> delimDiffs;
+
+        if(tag == EditorTag.TITLE) {
+            delimDiffs = StringUtil.getDiffInDelim(vgmdbModel.getDataForTag(tag, info.get(EditorTag.TRACK)), info.get(tag));
+        }
+        else {
+            delimDiffs = StringUtil.getDiffInDelim(vgmdbModel.getDataForTag(tag), info.get(tag));
         }
 
-        int trackNum = 1;
-        try {
-            trackNum = Integer.valueOf(editorMap.getDataForTag(EditorTag.TRACK));
-        }
-        catch (NumberFormatException e) {
-            info("track number: " + trackNum + " isn't an int, default to 1");
-        }
-        delimDiffs = StringUtil.getDiffInDelim(vgmdbModel.getDataForTag(EditorTag.TRACK, trackNum + ""),
-            editorMap.getMeta(EditorTag.TITLE).getTextProperty().get());
-        for(String[] delimDiff : delimDiffs) {
-            dbManagement.setDataForTag(DatabaseController.AdditionalTag.REPLACE_WORD, delimDiff[0], delimDiff[1]);
-        }
-        delimDiffs = StringUtil.getDiffInDelim(audioFilesModel.getDataForTag(EditorTag.TITLE),
-            editorMap.getMeta(EditorTag.TITLE).getTextProperty().get());
-        for(String[] delimDiff : delimDiffs) {
-            dbManagement.setDataForTag(DatabaseController.AdditionalTag.REPLACE_WORD, delimDiff[0], delimDiff[1]);
-        }
-
-        delimDiffs = StringUtil.getDiffInDelim(vgmdbModel.getDataForTag(EditorTag.ARTIST),
-            editorMap.getMeta(EditorTag.ARTIST).getTextProperty().get());
-        for(String[] delimDiff : delimDiffs) {
-            dbManagement.setDataForTag(DatabaseController.AdditionalTag.REPLACE_WORD, delimDiff[0], delimDiff[1]);
-        }
-        delimDiffs = StringUtil.getDiffInDelim(audioFilesModel.getDataForTag(EditorTag.ARTIST),
-            editorMap.getMeta(EditorTag.ARTIST).getTextProperty().get());
-        for(String[] delimDiff : delimDiffs) {
-            dbManagement.setDataForTag(DatabaseController.AdditionalTag.REPLACE_WORD, delimDiff[0], delimDiff[1]);
-        }
-
-        delimDiffs = StringUtil.getDiffInDelim(vgmdbModel.getDataForTag(EditorTag.ALBUM),
-            editorMap.getMeta(EditorTag.ALBUM).getTextProperty().get());
-        for(String[] delimDiff : delimDiffs) {
-            dbManagement.setDataForTag(DatabaseController.AdditionalTag.REPLACE_WORD, delimDiff[0], delimDiff[1]);
-        }
-        delimDiffs = StringUtil.getDiffInDelim(audioFilesModel.getDataForTag(EditorTag.ALBUM),
-            editorMap.getMeta(EditorTag.ALBUM).getTextProperty().get());
-        for(String[] delimDiff : delimDiffs) {
-            dbManagement.setDataForTag(DatabaseController.AdditionalTag.REPLACE_WORD, delimDiff[0], delimDiff[1]);
-        }
-
-        delimDiffs = StringUtil.getDiffInDelim(vgmdbModel.getDataForTag(EditorTag.ALBUM_ARTIST),
-            editorMap.getMeta(EditorTag.ALBUM_ARTIST).getTextProperty().get());
-        for(String[] delimDiff : delimDiffs) {
-            dbManagement.setDataForTag(DatabaseController.AdditionalTag.REPLACE_WORD, delimDiff[0], delimDiff[1]);
-        }
-        delimDiffs = StringUtil.getDiffInDelim(audioFilesModel.getDataForTag(EditorTag.ALBUM_ARTIST),
-            editorMap.getMeta(EditorTag.ALBUM_ARTIST).getTextProperty().get());
         for(String[] delimDiff : delimDiffs) {
             dbManagement.setDataForTag(DatabaseController.AdditionalTag.REPLACE_WORD, delimDiff[0], delimDiff[1]);
         }
     }
 
-    public void clearAllTags() {
-        for(EditorTag t : EditorTag.values()) {
-            editorMap.getMeta(t).clear();
-        }
-        albumArt.set(null);
-    }
 
     public void setImage(ImageFrom type, String ummm) {
         // TODO set meta too
         switch (type) {
             case CLIPBOARD:
+                Transferable transferable = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
+                if(transferable != null) {
+                    DataFlavor[] flavors = transferable.getTransferDataFlavors();
+                    for(int i = flavors.length - 1; i >= 0; i--) {
+                        if(flavors[i].isMimeTypeEqual(DataFlavor.imageFlavor)) {
+                            try {
+                                editorMap
+                                    .setAlbumArt(SwingFXUtils.toFXImage((BufferedImage)transferable.getTransferData(flavors[i]), null));
+                            }
+                            catch (IOException | UnsupportedFlavorException e) {
+                                error("failed to get image: " + e.getMessage());
+                            }
+                        }
+                    }
+                }
+                else {
+                    error("That wasn't an image!");
+                }
                 break;
             case FILE:
                 break;
             case URL:
                 break;
             case VGMDB:
-                albumArt.set(vgmdbModel.getAlbumArt());
+                editorMap.setAlbumArt(vgmdbModel.getAlbumArt());
                 break;
             default:
                 break;
@@ -613,31 +311,17 @@ public class DataCompilationModel implements Logger {
         return audioFilesModel.getFileNames();
     }
 
-    public ObjectProperty<Image> albumArtProperty() {
-        return albumArt;
-    }
-
-    public final Image getAlbumArt() {
-        return albumArt.get();
-    }
-
     public void appendWorkingDirectory(File[] array) {
         audioFilesModel.appendWorkingDirectory(array);
     }
 
-    public void changeAlbumArtFromFile(File f) {
-        audioFilesModel.setAlbumArtFromFile(f);
-    }
-
-    public void changeAlbumArtFromURL(String url) {
-        audioFilesModel.setAlbumArtFromURL(url);
+    public void setAlbumArt(Object obj) {
+        editorMap.setAlbumArt(obj);
     }
 
     public List<String> getSongList() {
         return audioFilesModel.getFileNames();
     }
 
-    public EditorComboBoxMeta getPropertyForTag(EditorTag t) {
-        return editorMap.getMeta(t);
-    }
+
 }

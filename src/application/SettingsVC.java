@@ -78,17 +78,18 @@ public class SettingsVC implements Logger
     {
         for(SettingsKey key : SettingsKey.values())
         {
+            debug(key.debug());
             data.add(settings.getKeyValuePair(key));
         }
-        
+        table.refresh();
     }
     
     @FXML
     private void valueChanged(CellEditEvent<SettingsTableViewMeta, String> t) {
-        info("value changed: " + t.getNewValue());
-        ((SettingsTableViewMeta)t.getTableView().getItems().get(
-                t.getTablePosition().getRow())
-                ).setDisplayValue(t.getNewValue());
+        info("value changed: " + t.getNewValue() + "for " + t.getTableView().getItems().get(
+            t.getTablePosition().getRow()).getKeyDescription());
+        t.getTableView().getItems().get(
+                t.getTablePosition().getRow()).setDisplayValue(t.getNewValue());
     }
     
     @FXML

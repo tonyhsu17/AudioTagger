@@ -160,4 +160,18 @@ public class StringUtil {
 
         return results;
     }
+    
+//    /**
+//     * Creates a number of %s comman separtered etc
+//     * 
+//     * @param size
+//     * @return
+//     */
+//    public static String getSchemaStringFormatter(int size) {
+//        StringBuilder builder = new StringBuilder();
+//        for(int i = 0; i < size; i++) {
+//            builder.append("%s %s" + ((i != (size - 1)) ? "," : ""));
+//        }
+//        return builder.toString();
+//    }
 }

@@ -1,4 +1,4 @@
-package model.base;
+package modules.controllers.base;
 
 public interface TagBase<T extends Enum<T>>
 {

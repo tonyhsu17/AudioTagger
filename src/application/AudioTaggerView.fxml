@@ -11,13 +11,13 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane prefHeight="650.0" prefWidth="942.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.MP3TaggerVC">
+<AnchorPane prefHeight="650.0" prefWidth="942.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.AudioTaggerVC">
    <children>
       <SplitPane dividerPositions="0.23370786516853934" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="470.0" prefWidth="942.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <items>
           <AnchorPane minHeight="0.0" minWidth="50.0" prefWidth="100.0">
                <children>
-                  <ListView fx:id="songListLV" onDragDropped="#songListLVDropped" onDragOver="#songListLVDragOver" onMouseDragged="#songListLVOnMouseDragged" onMousePressed="#songListLVOnMousePressed" prefWidth="217.0" AnchorPane.bottomAnchor="26.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                  <ListView fx:id="songListLV" onDragDropped="#songListLVDropped" onDragOver="#songListLVDragOver" onMouseDragged="#songListLVOnMouseDragged" onMousePressed="#songListLVOnMousePressed" prefHeight="621.0" prefWidth="217.0" AnchorPane.bottomAnchor="27.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                   <Button layoutY="548.0" mnemonicParsing="false" onAction="#clearListOnAction" prefHeight="25.0" prefWidth="217.0" text="Clear All" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
                </children>
             </AnchorPane>
@@ -45,7 +45,7 @@
                   <ComboBox id="commentCB" fx:id="commentCB" editable="true" layoutX="10.0" layoutY="313.0" prefWidth="690.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="17.0" AnchorPane.topAnchor="312.0" />
                   <TabPane layoutX="5.0" layoutY="351.0" prefHeight="223.0" prefWidth="711.0" side="BOTTOM" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.topAnchor="351.0">
                     <tabs>
-                      <Tab text="Untitled Tab 2">
+                      <Tab text="VGMDB">
                         <content>
                           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                  <children>
@@ -54,7 +54,7 @@
                                  </children></AnchorPane>
                         </content>
                       </Tab>
-                      <Tab text="Untitled Tab 1">
+                      <Tab text="CD Japan">
                         <content>
                           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="120.0" prefWidth="711.0">
                                  <children>
@@ -69,7 +69,7 @@
                     </tabs>
                   </TabPane>
                   <TextField id="searchAlbumTF" fx:id="searchAlbumTF" layoutX="566.0" layoutY="622.0" onAction="#searchAlbumTFOnEnterPressed" prefHeight="25.0" prefWidth="250.0" AnchorPane.bottomAnchor="3.0" AnchorPane.rightAnchor="1.0" />
-                  <Label fx:id="autofillEnabledLabel" text="HELLO WORLD" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="350.0" />
+                  <Label fx:id="infoLabel" text="HELLO WORLD" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="350.0" />
                </children>
             </AnchorPane>
         </items>
