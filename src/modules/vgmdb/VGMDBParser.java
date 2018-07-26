@@ -240,6 +240,9 @@ public class VGMDBParser implements Logger {
         catch (PathNotFoundException e) {
             try {
                 details.setTracks(JsonPath.read(json, VGMDBPaths.TRACKS.varience(Variences.ROMANJI).path()));
+                if(details.getTracks().isEmpty()) {
+                    throw new PathNotFoundException();
+                }
             }
             catch (PathNotFoundException e2) {
                 details.setTracks(JsonPath.read(json, VGMDBPaths.TRACKS.varience(Variences.JAPANESE).path()));
