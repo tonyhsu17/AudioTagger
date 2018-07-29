@@ -199,7 +199,7 @@ public class AudioTaggerVC implements Logger {
 
     /**
      * Trigger an auto-fill to replace editor values with pre-defined rules. Notification lasts for
-     * 5 seconds.
+     * 3 seconds.
      */
     public void triggerAutoFill() {
         EventCenter.getInstance().postEvent(Events.TRIGGER_AUTO_FILL, null);
@@ -207,6 +207,14 @@ public class AudioTaggerVC implements Logger {
         EventCenter.getInstance().postEvent(Events.TRIGGER_AUTO_FILL, null);
 
         showStatusUpdate(3, "Autofill Triggered");
+    }
+    
+    /**
+     * Trigger an auto-correct to replace editor values with previous results.
+     */
+    public void triggerAutoCorrect() {
+        editorFields.autocorrectAllTags();
+        showStatusUpdate(3, "AutoCorrect Triggered");
     }
 
     // ~~~~~~~~~~~~~~~~~~~ //

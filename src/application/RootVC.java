@@ -62,6 +62,10 @@ public class RootVC implements Logger
                     info("Hotkey AutoFill Toggle");
                     taggerVC.triggerAutoFill();
                     break;
+                case "e":
+                    info("Hotkey Autocorrect Triggered");
+                    taggerVC.triggerAutoCorrect();
+                    break;
             }
         }
     }

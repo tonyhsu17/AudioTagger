@@ -175,5 +175,15 @@ public class EditorDataController implements InformationBase, Logger {
         autoCompleter.triggerAutoFill((type, value) -> {
             setFormattedDataForTag(type, autoCorrecter.getFormattedText(type, value));
         });
+        autocorrectAllTags();
+    }
+    
+    /**
+     * Replace all fields with known preferences
+     */
+    public void autocorrectAllTags() {
+        for(EditorTag tag : EditorTag.values()) {
+            setFormattedDataForTag(tag, getDataForTag(tag));
+        }
     }
 }

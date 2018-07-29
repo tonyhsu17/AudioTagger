@@ -209,7 +209,11 @@ public class VGMDBParser implements Logger {
             details.setSeries(((JSONArray)JsonPath.read(json, VGMDBPaths.SERIES.varience(Variences.JAPANESE).path())).get(0).toString());
         }
         catch (PathNotFoundException | IndexOutOfBoundsException e) {
-            details.setSeries(((JSONArray)JsonPath.read(json, VGMDBPaths.SERIES.varience(Variences.ENGLISH).path())).get(0).toString());
+            try {
+                details.setSeries(((JSONArray)JsonPath.read(json, VGMDBPaths.SERIES.varience(Variences.ENGLISH).path())).get(0).toString());
+            }
+            catch (PathNotFoundException | IndexOutOfBoundsException e2) {
+            }
         }
 
         details.setAlbumArtThumbUrl(JsonPath.read(json, VGMDBPaths.ALBUM_ART_THUMB_URL.path()));
@@ -228,8 +232,8 @@ public class VGMDBParser implements Logger {
             details.setReleaseDate(JsonPath.read(json, VGMDBPaths.RELEAST_DATE.path()));
         }
         catch (PathNotFoundException e) {
-        } 
-        
+        }
+
         try {
             details.setTracks(JsonPath.read(json, VGMDBPaths.TRACKS.varience(Variences.ENGLISH).path()));
             // somehow if path not found it still returned an empty list, so throw an error to be caught

@@ -3,9 +3,6 @@ package support.structure;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
@@ -168,12 +165,11 @@ public class AudioFile implements Logger {
             if(!currentFileName.equals(getOriginalFileName())) // saving to a different name
             {
                 String path = file.getFile().getParentFile().getPath();
-                String originalName = getOriginalFileName();
                 String newNamePath = path + File.separator + currentFileName; // name of new file
                 info("File: " + getOriginalFileName() + " saving as: " + newNamePath);
-                Files.copy(Paths.get(path + File.separator + originalName), Paths.get(newNamePath), StandardCopyOption.REPLACE_EXISTING);
-                // delete original file
-                Files.delete(Paths.get(path + File.separator + originalName));
+                if(!file.getFile().renameTo(new File(newNamePath))) {
+                    error("unable to save");
+                }
 
                 //                // update ui list view
                 //                songListMP3Files.remove(i); // remove original file
