@@ -9,6 +9,8 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
+import org.ikersaro.utilities.Logger;
+
 import javafx.application.Platform;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
@@ -26,7 +28,6 @@ import modules.vgmdb.VGMDBDetails;
 import modules.vgmdb.VGMDBParser;
 import modules.vgmdb.VGMDBParser.VGMDBParserCB;
 import modules.vgmdb.VGMDBSearchDetails;
-import support.Logger;
 import support.structure.TagDetails;
 import support.util.ImageUtil;
 import support.util.StringUtil;

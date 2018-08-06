@@ -14,6 +14,7 @@ import java.util.Set;
 import javax.imageio.ImageIO;
 
 import org.apache.commons.io.FilenameUtils;
+import org.ikersaro.utilities.Logger;
 import org.jaudiotagger.audio.exceptions.CannotReadException;
 import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
 import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
@@ -29,7 +30,6 @@ import model.Settings.SettingsKey;
 import modules.controllers.base.InformationBase;
 import modules.controllers.base.TagBase;
 import support.Constants;
-import support.Logger;
 import support.structure.AudioFile;
 import support.structure.TagDetails;
 import support.util.ImageUtil;

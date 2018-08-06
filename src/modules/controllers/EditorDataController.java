@@ -5,6 +5,10 @@ import java.util.HashMap;
 import java.util.IllegalFormatException;
 import java.util.List;
 
+import org.ikersaro.utilities.EventCenter;
+import org.ikersaro.utilities.Logger;
+import org.ikersaro.utilities.EventCenter.Events;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.image.Image;
@@ -12,9 +16,6 @@ import modules.AutoCompleter;
 import modules.AutoCorrecter;
 import modules.controllers.base.InformationBase;
 import modules.controllers.base.TagBase;
-import support.EventCenter;
-import support.EventCenter.Events;
-import support.Logger;
 import support.structure.EditorComboBoxMeta;
 import support.structure.TagDetails;
 import support.util.Utilities.EditorTag;

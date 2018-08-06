@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.ikersaro.utilities.Logger;
+
 import javafx.scene.image.Image;
 import modules.controllers.base.InformationBase;
 import modules.controllers.base.TagBase;
@@ -14,7 +16,6 @@ import modules.database.tables.AlbumArtist;
 import modules.database.tables.Artist;
 import modules.database.tables.GroupArtist;
 import modules.database.tables.WordReplacement;
-import support.Logger;
 import support.structure.TagDetails;
 import support.util.StringUtil;
 import support.util.Utilities.EditorTag;

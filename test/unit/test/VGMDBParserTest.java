@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
+import org.ikersaro.utilities.Logger;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
@@ -18,7 +19,6 @@ import modules.vgmdb.VGMDBDetails;
 import modules.vgmdb.VGMDBParser;
 import modules.vgmdb.VGMDBParser.VGMDBParserCB;
 import modules.vgmdb.VGMDBSearchDetails;
-import support.Logger;
 import support.util.StringUtil;
 
 

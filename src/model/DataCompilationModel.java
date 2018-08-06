@@ -12,6 +12,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import org.ikersaro.utilities.Logger;
+
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
@@ -24,7 +26,6 @@ import modules.controllers.VGMDBController;
 import modules.controllers.base.InformationBase;
 import modules.controllers.base.TagBase;
 import support.Genres;
-import support.Logger;
 import support.structure.EditorComboBoxMeta;
 import support.structure.TagDetails;
 import support.util.StringUtil;

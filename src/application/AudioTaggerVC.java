@@ -7,6 +7,11 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.Semaphore;
 
+import org.ikersaro.utilities.EventCenter;
+import org.ikersaro.utilities.Logger;
+import org.ikersaro.utilities.Scheduler;
+import org.ikersaro.utilities.EventCenter.Events;
+
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
@@ -34,10 +39,6 @@ import model.DataCompilationModel.ImageFrom;
 import modules.controllers.DatabaseController;
 import modules.controllers.EditorDataController;
 import modules.controllers.VGMDBController;
-import support.EventCenter;
-import support.EventCenter.Events;
-import support.Logger;
-import support.Scheduler;
 import support.util.Utilities.EditorTag;
 
 

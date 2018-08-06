@@ -2,6 +2,8 @@ package application;
 
 import java.io.IOException;
 
+import org.ikersaro.utilities.Logger;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -11,7 +13,6 @@ import javafx.scene.control.CheckMenuItem;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import support.Logger;
 
 public class RootVC implements Logger
 {

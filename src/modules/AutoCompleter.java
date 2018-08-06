@@ -3,12 +3,13 @@ package modules;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
+import org.ikersaro.utilities.EventCenter;
+import org.ikersaro.utilities.Logger;
+import org.ikersaro.utilities.EventCenter.Events;
+
 import model.Settings;
 import modules.controllers.base.InformationBase;
 import modules.controllers.base.TagBase;
-import support.EventCenter;
-import support.EventCenter.Events;
-import support.Logger;
 import support.util.Utilities.EditorTag;
 
 public class AutoCompleter implements Logger{

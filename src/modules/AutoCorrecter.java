@@ -4,8 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.ikersaro.utilities.Logger;
+
 import modules.controllers.DatabaseController;
-import support.Logger;
 import support.util.StringUtil;
 import support.util.Utilities.EditorTag;
 

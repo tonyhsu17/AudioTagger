@@ -1,5 +1,7 @@
 package application;
 
+import org.ikersaro.utilities.Logger;
+
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
@@ -16,7 +18,6 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Stage;
 import model.Settings;
 import model.Settings.SettingsKey;
-import support.Logger;
 import support.structure.SettingsTableViewMeta;
 
 

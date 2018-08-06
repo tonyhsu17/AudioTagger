@@ -11,7 +11,8 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 import java.util.Map.Entry;
 
-import support.Logger;
+import org.ikersaro.utilities.Logger;
+
 import support.util.StringUtil;
 
 
