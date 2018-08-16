@@ -284,9 +284,9 @@ public class AudioTaggerDB extends Database {
             ResultSet rs;
             try {
                 // Individuals: first - dbFirst, last - dbLast
-                String query = String.format("SELECT %s FROM %s WHERE LOWER(%s) = ?",
+                String query = String.format("SELECT %s FROM %s WHERE LOWER(%s) = ? ORDER BY %s DESC FETCH FIRST ROW ONLY",
                     WordReplacement.Fields.AFTER.fieldName(), WordReplacement.instance().tableName(),
-                    WordReplacement.Fields.BEFORE.fieldName());
+                    WordReplacement.Fields.BEFORE.fieldName(), WordReplacement.Fields.USE_FREQUENCY);
                 rs = getResults(query, before);
                 if(rs.next()) {
                     result = rs.getString(1).trim();

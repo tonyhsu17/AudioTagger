@@ -1,7 +1,6 @@
 package modules.database.tables;
 
 import java.util.AbstractMap.SimpleEntry;
-import java.util.Arrays;
 import java.util.List;
 
 import modules.database.FieldBase;
@@ -34,6 +33,17 @@ public class WordReplacement implements TableBase {
             public String type() {
                 return "VARCHAR(255)";
             }
+        },
+        USE_FREQUENCY {
+            @Override
+            public String fieldName() {
+                return "use_frequency";
+            }
+
+            @Override
+            public String type() {
+                return "INT";
+            }
         };
     }
     
@@ -52,7 +62,7 @@ public class WordReplacement implements TableBase {
 
     @Override
     public List<FieldBase> primaryKeys() {
-        return Arrays.asList(new Fields[] {Fields.BEFORE});
+        return null;
     }
 
     @Override
