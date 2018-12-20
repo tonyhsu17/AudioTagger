@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.ikersaro.utilities.Logger;
+import org.tonyhsu17.utilities.Logger;
 
 import javafx.scene.image.Image;
 import modules.controllers.base.InformationBase;

@@ -14,12 +14,12 @@ import java.util.Set;
 import javax.imageio.ImageIO;
 
 import org.apache.commons.io.FilenameUtils;
-import org.ikersaro.utilities.Logger;
 import org.jaudiotagger.audio.exceptions.CannotReadException;
 import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
 import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
 import org.jaudiotagger.tag.TagException;
 import org.jaudiotagger.tag.images.ArtworkFactory;
+import org.tonyhsu17.utilities.Logger;
 
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;

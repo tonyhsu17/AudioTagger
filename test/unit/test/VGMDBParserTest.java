@@ -7,13 +7,13 @@ import java.util.Arrays;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import org.ikersaro.utilities.Logger;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import org.tonyhsu17.utilities.Logger;
 
 import modules.vgmdb.VGMDBDetails;
 import modules.vgmdb.VGMDBParser;

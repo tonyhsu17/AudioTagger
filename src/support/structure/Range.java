@@ -1,6 +1,6 @@
 package support.structure;
 
-import org.ikersaro.utilities.Logger;
+import org.tonyhsu17.utilities.Logger;
 
 public class Range implements Logger
 {
