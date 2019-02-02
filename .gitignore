@@ -57,3 +57,4 @@ derby.log
 audioTagger.cfg
 /target/
 /test-output/
+.idea
