@@ -51,7 +51,8 @@ public class VGMDBParserTest extends ModelInformationTestBase implements Logger 
     }
 
     @AfterClass
-    public static void afterClass() {}
+    public static void afterClass() {
+    }
 
     @BeforeMethod
     public void beforeMethod() {
@@ -60,7 +61,8 @@ public class VGMDBParserTest extends ModelInformationTestBase implements Logger 
     }
 
     @AfterMethod
-    public void afterMethod() {}
+    public void afterMethod() {
+    }
 
     @Test
     public void testSearch() {
@@ -95,12 +97,14 @@ public class VGMDBParserTest extends ModelInformationTestBase implements Logger 
         assertEquals(albumDetails.getTracks().get(2), "only my railgun -instrumental-");
         assertEquals(albumDetails.getTracks().get(3), "late in autumn -instrumental-");
         assertEquals(albumDetails.getCatalog(), "GNCA-0151");
-        assertEquals(albumDetails.getSites(), Arrays.asList(new String[]{"https://vgmdb.net/album/23188?perpage=99999", "http://www.cdjapan.co.jp/detailview.html?KEY=GNCA-151", "http://www.play-asia.com/paOS-13-71-9x-49-en-70-3iu7.html"}));
+        assertEquals(albumDetails.getSites(), Arrays.asList(new String[] {"https://vgmdb.net/album/23188?perpage=99999",
+            "http://www.cdjapan.co.jp/detailview.html?KEY=GNCA-151",
+            "http://www.play-asia.com/paOS-13-71-9x-49-en-70-3iu7.html"}));
     }
 
     /**
      * Keep sleeping until data is posted
-     * 
+     *
      * @throws InterruptedException
      */
     private void waitForData() throws RuntimeException {

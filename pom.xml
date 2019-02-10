@@ -4,7 +4,6 @@
  <groupId>org.ikersaro</groupId>
  <version>1.0</version>
  <build>
-  <sourceDirectory>src</sourceDirectory>
   <plugins>
    <plugin>
     <artifactId>maven-compiler-plugin</artifactId>

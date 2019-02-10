@@ -41,7 +41,7 @@ import support.util.Utilities.EditorTag;
 /**
  * Controller class for handling audio files.
  * Stores list of files in workspace and indices for selected to view in editor.
- * 
+ *
  * @author Tony
  *
  */
@@ -88,7 +88,7 @@ public class AudioFilesController implements InformationBase, Logger {
 
     /**
      * Set the working directory and load in all audio files within
-     * 
+     *
      * @param folder Directory Path
      */
     public void setWorkingDirectory(String folder) {
@@ -98,7 +98,7 @@ public class AudioFilesController implements InformationBase, Logger {
 
     /**
      * Append more directories to the list
-     * 
+     *
      * @param files Directories or files
      */
     public void appendWorkingDirectory(File[] files) {
@@ -145,7 +145,7 @@ public class AudioFilesController implements InformationBase, Logger {
 
     /**
      * Returns a list of indices that are part of the album.
-     * 
+     *
      * @param n Must be a header
      * @return list of indices part of the album
      */
@@ -166,7 +166,7 @@ public class AudioFilesController implements InformationBase, Logger {
 
     /**
      * Returns tag data for specified index
-     * 
+     *
      * @param indicies Can be 1 or many
      * @param ob Callback with TagInfo
      */
@@ -209,7 +209,7 @@ public class AudioFilesController implements InformationBase, Logger {
 
     /**
      * Returns tag data for specified index
-     * 
+     *
      * @param indicies Can be 1 or many
      * @param ob Callback with TagInfo
      */
@@ -221,7 +221,7 @@ public class AudioFilesController implements InformationBase, Logger {
 
     /**
      * Compares two sets of TagDetails and sets $0 value to "different values" if they do not match
-     * 
+     *
      * @param original One to modify if different
      * @param newTag Compare to TagDetails
      * @return TagDetails
@@ -245,7 +245,7 @@ public class AudioFilesController implements InformationBase, Logger {
 
     /**
      * Returns tag info for a valid index (not a header)
-     * 
+     *
      * @param index Index
      * @return TagInfo or null if header or array out of bounds
      */
@@ -268,7 +268,7 @@ public class AudioFilesController implements InformationBase, Logger {
 
     /**
      * Workspace file list property
-     * 
+     *
      * @return ListProperty<String>
      */
     public ListProperty<String> fileNamesProperty() {
@@ -277,7 +277,7 @@ public class AudioFilesController implements InformationBase, Logger {
 
     /**
      * Returns the workspace of audio files and folder names
-     * 
+     *
      * @return n Folders + n Audio Files
      */
     public final List<String> getFileNames() {
@@ -318,7 +318,7 @@ public class AudioFilesController implements InformationBase, Logger {
 
     /**
      * Save new tags
-     * 
+     *
      * @param index
      * @param tags TagDetails
      * @param overrideFileName true = save with original name
@@ -377,7 +377,7 @@ public class AudioFilesController implements InformationBase, Logger {
 
     /**
      * Converts header indices into file indices
-     * 
+     *
      * @param selected
      * @return
      */
@@ -447,7 +447,7 @@ public class AudioFilesController implements InformationBase, Logger {
 
     /**
      * Get meta for a specific tag
-     * 
+     *
      * @see modules.controllers.base.InformationBase#getDataForTag(modules.controllers.base.TagBase,
      *      java.lang.String[])
      */
