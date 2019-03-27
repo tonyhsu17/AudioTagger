@@ -46,7 +46,7 @@ import support.util.Utilities.EditorTag;
 /**
  * ViewController for main view. Its job is to handle bindings to view and event listeners.
  * 
- * @author Ikersaro
+ * @author Tony Hsu
  *
  */
 public class AudioTaggerVC implements Logger {

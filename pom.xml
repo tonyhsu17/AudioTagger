@@ -4,7 +4,6 @@
  <groupId>org.ikersaro</groupId>
  <version>1.0</version>
  <build>
-  <sourceDirectory>src</sourceDirectory>
   <plugins>
    <plugin>
     <artifactId>maven-compiler-plugin</artifactId>
@@ -41,6 +40,31 @@
    <groupId>org.apache.httpcomponents</groupId>
    <artifactId>httpcore</artifactId>
    <version>4.4.6</version>
+  </dependency>
+  <!-- https://mvnrepository.com/artifact/org.apache.derby/derby -->
+  <dependency>
+   <groupId>org.apache.derby</groupId>
+   <artifactId>derby</artifactId>
+   <version>10.13.1.1</version>
+   <!--<scope>test</scope>-->
+  </dependency>
+  <!-- https://mvnrepository.com/artifact/org.apache.derby/derbyclient -->
+  <dependency>
+   <groupId>org.apache.derby</groupId>
+   <artifactId>derbyclient</artifactId>
+   <version>10.13.1.1</version>
+  </dependency>
+  <!-- https://mvnrepository.com/artifact/org.apache.derby/derbynet -->
+  <dependency>
+   <groupId>org.apache.derby</groupId>
+   <artifactId>derbynet</artifactId>
+   <version>10.13.1.1</version>
+  </dependency>
+  <!-- https://mvnrepository.com/artifact/org.apache.derby/derbytools -->
+  <dependency>
+   <groupId>org.apache.derby</groupId>
+   <artifactId>derbytools</artifactId>
+   <version>10.13.1.1</version>
   </dependency>
   <!-- https://mvnrepository.com/artifact/org.testng/testng -->
   <dependency>

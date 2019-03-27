@@ -12,6 +12,7 @@ import support.Constants;
 public class StringUtil {
     /**
      * Split name into first and last name. Firstname is everything except last word.
+     *
      * @param fullName Fullname to split
      * @return Array with [0]=first, [1]=last
      */
@@ -40,6 +41,7 @@ public class StringUtil {
 
     /**
      * Parses comma + & dividers into an array.
+     *
      * @param string String to parse
      * @return List of values that was separated
      */
@@ -50,22 +52,13 @@ public class StringUtil {
     }
 
     public static String createQuestionMarks(int num) {
-        if(num == 0) {
-            return "";
-        }
-        else if(num == 1) {
-            return "?";
-        }
-        else if(num == 2) {
-            return "?, ?";
-        }
-
+        String comma = "";
         StringBuilder sb = new StringBuilder();
-        int i = 0;
-        for(; i < num - 1; i++) {
-            sb.append("?, ");
+
+        for(int i = 0; i < num; i++) {
+            sb.append(comma + "?");
+            comma = ", ";
         }
-        sb.append("?");
         return sb.toString();
     }
 
@@ -115,7 +108,7 @@ public class StringUtil {
 
     /**
      * Retrieves text within delimiters
-     * 
+     *
      * @param search String to search
      * @return List of text including delimiters matched
      */
@@ -137,11 +130,11 @@ public class StringUtil {
 
     /**
      * Retrieves a list of different values within the delimiters
-     * 
+     *
      * @param before Original string
-     * @param after Modified string
+     * @param after  Modified string
      * @return List of arrays containing original and modified string. array[0] = original, array[1]
-     *         = modified
+     * = modified
      */
     public static List<String[]> getDiffInDelim(String before, String after) {
         List<String[]> results = new ArrayList<String[]>();
@@ -160,18 +153,18 @@ public class StringUtil {
 
         return results;
     }
-    
-//    /**
-//     * Creates a number of %s comman separtered etc
-//     * 
-//     * @param size
-//     * @return
-//     */
-//    public static String getSchemaStringFormatter(int size) {
-//        StringBuilder builder = new StringBuilder();
-//        for(int i = 0; i < size; i++) {
-//            builder.append("%s %s" + ((i != (size - 1)) ? "," : ""));
-//        }
-//        return builder.toString();
-//    }
+
+    //    /**
+    //     * Creates a number of %s comman separtered etc
+    //     *
+    //     * @param size
+    //     * @return
+    //     */
+    //    public static String getSchemaStringFormatter(int size) {
+    //        StringBuilder builder = new StringBuilder();
+    //        for(int i = 0; i < size; i++) {
+    //            builder.append("%s %s" + ((i != (size - 1)) ? "," : ""));
+    //        }
+    //        return builder.toString();
+    //    }
 }

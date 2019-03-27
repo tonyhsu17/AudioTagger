@@ -23,7 +23,6 @@ public class VGMDBSearchDetails {
 
     /**
      * @param albumTitles List of album names
-     * @param addHeader Append search query text at index 0
      */
     public void setAlbumTitles(List<String> albumTitles) {
         this.albumTitles = albumTitles;
@@ -35,7 +34,6 @@ public class VGMDBSearchDetails {
 
     /**
      * @param urls List of urls to album
-     * @param addHeader Add a filler space at index 0 for matching with album titles list
      */
     public void setIDs(List<String> urls) {
         ids = urls;

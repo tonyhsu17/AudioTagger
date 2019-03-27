@@ -1,19 +1,12 @@
 package modules.database;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
+import org.tonyhsu17.utilities.Logger;
+import support.util.StringUtil;
+
+import java.sql.*;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 import java.util.Map.Entry;
-
-import org.tonyhsu17.utilities.Logger;
-
-import support.util.StringUtil;
 
 
 
@@ -67,7 +60,7 @@ public abstract class Database implements Logger {
     /**
      * Pass in any enum value, as the the rest of the table fields will be retrieved from fields()
      * method
-     * 
+     *
      * @param schema {@link TableBase}
      * @return
      */
@@ -206,13 +199,12 @@ public abstract class Database implements Logger {
 
     /**
      * Get the id of a row
-     * 
+     *
      * @param table {@link TableBase}
-     * @param field {@link FieldBase}
+     * @param Entry {@link FieldBase}
      * @param values field value to match
      * @return id or -1 if not matched
      */
-    @SuppressWarnings("unchecked")
     protected int getId(TableBase table, Entry<FieldBase, Object>... entries) {
         StringBuilder query = new StringBuilder("SELECT " + table.id() + " FROM " + table.tableName() + " WHERE");
         int id = -1;
@@ -242,7 +234,7 @@ public abstract class Database implements Logger {
 
     /**
      * Executes insert sql. Do not call directly, only called from prepareInsertThenExecute().
-     * 
+     *
      * @param table DatabaseController.TableNames
      * @param values <br>
      *        TableNames.Artist = "id", "firstName", "lastName", "useFrequency"
