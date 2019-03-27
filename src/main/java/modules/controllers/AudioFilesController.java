@@ -1,26 +1,5 @@
 package modules.controllers;
 
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.imageio.ImageIO;
-
-import org.apache.commons.io.FilenameUtils;
-import org.jaudiotagger.audio.exceptions.CannotReadException;
-import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
-import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
-import org.jaudiotagger.tag.TagException;
-import org.jaudiotagger.tag.images.ArtworkFactory;
-import org.tonyhsu17.utilities.Logger;
-
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
@@ -29,12 +8,26 @@ import javafx.scene.image.Image;
 import model.Settings.SettingsKey;
 import modules.controllers.base.InformationBase;
 import modules.controllers.base.TagBase;
+import org.apache.commons.io.FilenameUtils;
+import org.jaudiotagger.audio.exceptions.CannotReadException;
+import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
+import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
+import org.jaudiotagger.tag.TagException;
+import org.jaudiotagger.tag.images.ArtworkFactory;
+import org.tonyhsu17.utilities.Logger;
 import support.Constants;
 import support.structure.AudioFile;
 import support.structure.TagDetails;
 import support.util.ImageUtil;
 import support.util.StringUtil;
 import support.util.Utilities.EditorTag;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.*;
 
 
 

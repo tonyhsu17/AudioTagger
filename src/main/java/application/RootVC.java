@@ -14,6 +14,11 @@ import javafx.scene.input.KeyEvent;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+
+
+/**
+ * @author Tony Hsu
+ */
 public class RootVC implements Logger
 {
     private AudioTaggerVC taggerVC;
@@ -77,7 +82,7 @@ public class RootVC implements Logger
         try
         {
             Stage stage = new Stage();
-            Parent loader = FXMLLoader.load(getClass().getResource("../application/SettingsView.fxml"));
+            Parent loader = FXMLLoader.load(getClass().getClassLoader().getResource("SettingsView.fxml"));
             
             stage.setScene(new Scene(loader));
             stage.setTitle("Modal Window");

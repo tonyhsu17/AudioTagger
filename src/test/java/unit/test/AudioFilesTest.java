@@ -6,6 +6,8 @@ import static org.testng.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -28,7 +30,7 @@ import support.util.Utilities.EditorTag;
 // TODO include album art
 
 public class AudioFilesTest extends ModelInformationTestBase {
-    private static final String WORKING_DIR = "TestResources/Audios/";
+    private static String WORKING_DIR;
     private static final String FOLDER_A = "FolderA";
     private static final String FOLDER_B = "FolderB";
     private static final String FOLDER_C = "FolderC";
@@ -36,13 +38,15 @@ public class AudioFilesTest extends ModelInformationTestBase {
     private static final String FILE_B = "testFileB.mp3";
     private static final String FILE_C = "testFileC.mp3";
     private static final String FILE_D = "testFileD.mp3";
-    private static final String TEMP_DIR = "TestResources/Temp/";
+    private static String TEMP_DIR;
 
     private File tempDir;
     private AudioFilesController audioList;
 
     @BeforeClass
-    public void setUp() {
+    public void setUp() throws URISyntaxException {
+        WORKING_DIR = getClass().getClassLoader().getResource("Audios/").toURI().getPath();
+        TEMP_DIR = new File(WORKING_DIR).getParent() + "/Temp";
         tempDir = new File(TEMP_DIR);
         try {
             FileUtils.copyDirectory(new File(WORKING_DIR), tempDir);
@@ -75,6 +79,8 @@ public class AudioFilesTest extends ModelInformationTestBase {
 
     @Test
     public void testWorkingDirectory() {
+        System.out.println(WORKING_DIR + FOLDER_A);
+        System.out.println(new File(WORKING_DIR + FOLDER_A).listFiles().length);
         audioList.setWorkingDirectory(WORKING_DIR + FOLDER_A);
         List<String> files = audioList.getFileNames();
 
@@ -525,7 +531,6 @@ public class AudioFilesTest extends ModelInformationTestBase {
 
     @Test
     public void testSaveByHeader() {
-
         try {
             FileUtils.copyDirectory(new File(WORKING_DIR), tempDir);
         }

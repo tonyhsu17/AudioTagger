@@ -33,17 +33,31 @@ import support.util.Utilities.EditorTag;
 
 
 
+/**
+ * Handles the compiling of multiple sources into one source.
+ *
+ * @author Tony Hsu
+ */
 public class DataCompilationModel implements Logger {
     static final String TEMPFOLDER =
         "D:\\Music\\Japanese\\Anime Album Collection\\Accel World";
 
+
+    /**
+     * Callback for {@link DataCompilationModel} when data is ready.
+     */
     public interface DataCompilationModelCallback {
         public void done(Object obj);
     }
 
+
+    /**
+     * Options to retrieve image from.
+     */
     public enum ImageFrom {
         FILE, URL, CLIPBOARD, VGMDB
     }
+
 
     private EditorDataController editorMap; // ComboBox controller (editor text and drop down)
 
@@ -53,6 +67,10 @@ public class DataCompilationModel implements Logger {
 
     private VGMDBController vgmdbModel; // data handler for vgmdb website
 
+    /**
+     * @param dbManagement Controller for database, {@link DatabaseController}.
+     * @param editorMap    Controller for editor textfields, {@link EditorDataController}.
+     */
     public DataCompilationModel(DatabaseController dbManagement, EditorDataController editorMap) {
         this.dbManagement = dbManagement;
         this.editorMap = editorMap;
@@ -64,6 +82,9 @@ public class DataCompilationModel implements Logger {
         audioFilesModel.setWorkingDirectory(TEMPFOLDER);
     }
 
+    /**
+     * Initiate a reset on data sources.
+     */
     public void reset() {
         info("Clearing everthing");
         audioFilesModel.reset();
@@ -71,13 +92,23 @@ public class DataCompilationModel implements Logger {
         editorMap.clearAllTags();
     }
 
+    /**
+     * Set vgmdb controller.
+     *
+     * @param parser {@link VGMDBController}
+     */
     public void setVGMDBController(VGMDBController parser) {
         vgmdbModel = parser;
         setPossibleKeywordTag();
         editorMap.autoCompleter().updateAutoFillRules();
     }
 
-    // get the tag data for the selected index
+    /**
+     * Display tag meta for the selected index.
+     *
+     * @param indices
+     * @param cb      callback, {@link DataCompilationModelCallback}
+     */
     public void requestDataFor(List<Integer> indices, DataCompilationModelCallback cb) {
         editorMap.clearAllTags();
         audioFilesModel.selectTags(indices, (tagDetails) -> {
@@ -93,18 +124,18 @@ public class DataCompilationModel implements Logger {
 
 
     /**
-     * Update editor text for selected file
-     * 
-     * @param tag
-     * @param text
-     * @param cb
+     * Provide an editor dropdown with fuzzy matching.
+     *
+     * @param tag  Which text field, {@link EditorTag}
+     * @param text Fuzzy match with text
+     * @param cb   callback, {@link DataCompilationModelCallback}
      */
     public void requestDropdownForTag(EditorTag tag, String text, List<String> originalDropDown, DataCompilationModelCallback cb) {
         if(tag.equals(EditorTag.ALBUM_ART) || tag.equals(EditorTag.ALBUM_ART_META)) {
             cb.done(0);
         }
         else {
-            List<String> possibleValues = getPossibleDataForTag(tag, text, "");
+            List<String> possibleValues = getPossibleValuesForString(tag, text, "");
             // TODO defaults add file defaults?
             //            int size = addPossibleDataForTag(tag, text);
             ObservableList<String> list = FXCollections.observableArrayList(possibleValues);
@@ -112,8 +143,15 @@ public class DataCompilationModel implements Logger {
         }
     }
 
-    private List<String> getPossibleDataForTag(EditorTag tag, String compareAgainst, String... defaults) {
-        List<String> dropDownList = new ArrayList<String>();
+    /**
+     * Populate list with all possible values.
+     * @param tag Which text field, {@link EditorTag}
+     * @param compareAgainst Fuzzy match with text
+     * @param defaults Values to add automatiical
+     * @return
+     */
+    private List<String> getPossibleValuesForString(EditorTag tag, String compareAgainst, String... defaults) {
+        List<String> dropDownList = new ArrayList<>();
         // add defaults
         for(String str : defaults) {
             if(str != null && !str.isEmpty()) {
@@ -147,9 +185,8 @@ public class DataCompilationModel implements Logger {
 
     /**
      * Centralized method for setting editor and dropdown text from different sources
-     * 
+     *
      * @param tag EditorTag
-     * @param additional optional args if needed
      * @return size of dropdown
      */
     private List<String> getPossibleValues(EditorTag tag) {
