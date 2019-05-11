@@ -1,10 +1,7 @@
 package support.structure;
 
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-
+import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.image.Image;
 import org.apache.commons.io.FilenameUtils;
 import org.jaudiotagger.audio.exceptions.CannotReadException;
 import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
@@ -17,10 +14,12 @@ import org.jaudiotagger.tag.TagException;
 import org.jaudiotagger.tag.id3.AbstractID3v2Tag;
 import org.jaudiotagger.tag.images.Artwork;
 import org.tonyhsu17.utilities.Logger;
-
-import javafx.embed.swing.SwingFXUtils;
-import javafx.scene.image.Image;
 import support.util.Utilities.EditorTag;
+
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
 
 
@@ -37,6 +36,7 @@ public class AudioFile implements Logger {
 
     public AudioFile(File file) throws IOException, TagException, ReadOnlyFileException, CannotReadException, InvalidAudioFrameException {
         this(new MP3File(file));
+
     }
 
     public AudioFile(MP3File file) {

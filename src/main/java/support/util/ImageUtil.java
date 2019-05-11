@@ -1,16 +1,17 @@
 package support.util;
 
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-
-import javax.imageio.ImageIO;
-
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.scene.paint.Color;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+
+
 
 public class ImageUtil
 {
@@ -60,7 +61,8 @@ public class ImageUtil
         BufferedImage diffImage = null;
         try
         {
-            diffImage = ImageIO.read(new File("Resources/differentImage.jpg"));
+//            URL asd = ImageUtil.class.getClassLoader().getResource("differentImage.jpg");
+            diffImage = ImageIO.read(new File("src/main/resources/differentImage.jpg"));
         }
         catch (IOException e)
         {

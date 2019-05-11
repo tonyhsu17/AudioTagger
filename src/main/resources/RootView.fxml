@@ -5,7 +5,7 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.layout.BorderPane?>
 
-<BorderPane onKeyPressed="#keyPressed" prefHeight="650.0" prefWidth="950.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.RootVC">
+<BorderPane onKeyPressed="#keyPressed" prefHeight="650.0" prefWidth="950.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.RootVC">
    <top>
       <MenuBar BorderPane.alignment="CENTER">
         <menus>
@@ -24,6 +24,7 @@
           </Menu>
           <Menu mnemonicParsing="false" text="Help">
             <items>
+                  <MenuItem mnemonicParsing="false" onAction="#openHotkeysPanel" text="Hotkeys" />
               <MenuItem mnemonicParsing="false" text="About" />
             </items>
           </Menu>

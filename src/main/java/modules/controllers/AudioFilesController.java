@@ -175,7 +175,7 @@ public class AudioFilesController implements InformationBase, Logger {
                     // get all songs from album
                     for(int j : getAllIndexForHeader(index)) {
                         processed.add(j); // add to processed in-case it is part of indices
-                        TagDetails temp = getSelectedTag(j);
+                        TagDetails temp = getTagDetails(j);
                         if(tagsFinalized == null) {
                             tagsFinalized = temp;
                         }
@@ -187,11 +187,11 @@ public class AudioFilesController implements InformationBase, Logger {
                 else if(!processed.contains(index)) {
                     processed.add(index); // add to processed in-case it is part of indices
                     if(tagsFinalized == null) {
-                        TagDetails temp = getSelectedTag(index);
+                        TagDetails temp = getTagDetails(index);
                         tagsFinalized = temp;
                     }
                     else {
-                        getCombinedTagDetails(tagsFinalized, getSelectedTag(index));
+                        getCombinedTagDetails(tagsFinalized, getTagDetails(index));
                     }
                 }
             }
@@ -242,7 +242,7 @@ public class AudioFilesController implements InformationBase, Logger {
      * @param index Index
      * @return TagInfo or null if header or array out of bounds
      */
-    private TagDetails getSelectedTag(Integer index) {
+    public TagDetails getTagDetails(Integer index) {
         TagDetails tagDetails = null;
         if(index >= 0 && index < songListMP3Files.size() && !songListFileNames.get(index).startsWith(Constants.HEADER_ALBUM)) {
             tagDetails = new TagDetails();

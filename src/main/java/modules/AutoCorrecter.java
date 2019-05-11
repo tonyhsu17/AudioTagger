@@ -1,34 +1,39 @@
 package modules;
 
+import modules.controllers.DatabaseController;
+import org.tonyhsu17.utilities.Logger;
+import support.util.StringUtil;
+import support.util.Utilities.EditorTag;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import org.tonyhsu17.utilities.Logger;
-
-import modules.controllers.DatabaseController;
-import support.util.StringUtil;
-import support.util.Utilities.EditorTag;
-
 
 
 /**
- * Helper methods to handle text modifications to previously used styles.
- * @author Ikersaro
+ * Helper class to handle text modifications in delimiters to previously used styles.
  *
+ * @author Tony Hsu
  */
 public class AutoCorrecter implements Logger {
     private DatabaseController dbManagement; // database for prediction of common tag fields
 
+    /**
+     * Helper class to handle text modifications in delimiters to previously used styles.
+     *
+     * @param dbManagement {@link DatabaseController}
+     */
     public AutoCorrecter(DatabaseController dbManagement) {
         this.dbManagement = dbManagement;
     }
 
     /**
-     * Auto-corrects capitalizations and such based on user's historical data
-     * 
-     * @param type
-     * @param value
+     * Auto-corrects capitalizations and such based on user's historical data.
+     *
+     * @param type  {@link EditorTag}
+     * @param value original text
+     * @return Changed text
      */
     public String getFormattedText(EditorTag type, String value) {
         value = getDelimTagReplacement(value);
@@ -64,8 +69,8 @@ public class AutoCorrecter implements Logger {
     }
 
     /**
-     * Retrieves standardized tags in delimiters based on user preferences
-     * 
+     * Retrieves standardized tags in delimiters based on user preferences.
+     *
      * @return New delimieter tag if found in database, else original
      */
     public String getDelimTagReplacement(String text) {
@@ -84,5 +89,4 @@ public class AutoCorrecter implements Logger {
         }
         return text;
     }
-
 }

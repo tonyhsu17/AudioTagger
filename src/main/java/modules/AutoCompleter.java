@@ -1,24 +1,35 @@
 package modules;
 
-import java.util.HashMap;
-import java.util.Map.Entry;
-
-import org.tonyhsu17.utilities.EventCenter;
-import org.tonyhsu17.utilities.EventCenter.Events;
-import org.tonyhsu17.utilities.Logger;
-
 import model.Settings;
 import modules.controllers.base.InformationBase;
 import modules.controllers.base.TagBase;
+import org.tonyhsu17.utilities.EventCenter;
+import org.tonyhsu17.utilities.EventCenter.Events;
+import org.tonyhsu17.utilities.Logger;
 import support.util.Utilities.EditorTag;
 
+import java.util.HashMap;
+import java.util.Map.Entry;
+
+
+
+/**
+ * Helper class to fill in fields based on setting configurations.
+ */
 public class AutoCompleter implements Logger{
     private HashMap<EditorTag, KeywordInterpreter> editorAutoComplete; // store auto complete fields
-    
+
+
+    /**
+     * Callback for when data has been
+     */
     public interface AutoCompleterCB {
         public void result(EditorTag tag, String finalVal);
     }
-    
+
+    /**
+     * Helper class to fill in fields based on setting configurations.
+     */
     public AutoCompleter() {
         editorAutoComplete = new HashMap<EditorTag, KeywordInterpreter>();
         

@@ -1,24 +1,24 @@
 package modules.controllers;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.IllegalFormatException;
-import java.util.List;
-
-import org.tonyhsu17.utilities.EventCenter;
-import org.tonyhsu17.utilities.EventCenter.Events;
-import org.tonyhsu17.utilities.Logger;
-
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.image.Image;
+import modules.AutoCapitalizator;
 import modules.AutoCompleter;
 import modules.AutoCorrecter;
 import modules.controllers.base.InformationBase;
 import modules.controllers.base.TagBase;
+import org.tonyhsu17.utilities.EventCenter;
+import org.tonyhsu17.utilities.EventCenter.Events;
+import org.tonyhsu17.utilities.Logger;
 import support.structure.EditorComboBoxMeta;
 import support.structure.TagDetails;
 import support.util.Utilities.EditorTag;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.IllegalFormatException;
+import java.util.List;
 
 
 
@@ -34,6 +34,7 @@ public class EditorDataController implements InformationBase, Logger {
     // modules
     private AutoCorrecter autoCorrecter;
     private AutoCompleter autoCompleter;
+    private AutoCapitalizator autoCapitalizator;
 
     public EditorDataController(DatabaseController dbManagement) {
         albumArt = new SimpleObjectProperty<Image>();
@@ -45,6 +46,7 @@ public class EditorDataController implements InformationBase, Logger {
 
         autoCorrecter = new AutoCorrecter(dbManagement);
         autoCompleter = new AutoCompleter();
+        autoCapitalizator = new AutoCapitalizator(dbManagement);
         EventCenter.getInstance().subscribeEvent(Events.TRIGGER_AUTO_FILL, this, (obj) -> {
             autoFillForAllTags();
         });
@@ -90,6 +92,7 @@ public class EditorDataController implements InformationBase, Logger {
         else {
             values[0] = autoCorrecter.getFormattedText(type, values[0]);
             values[0] = autoCorrecter.getDelimTagReplacement(values[0]);
+            values[0] = autoCapitalizator.getFormattedText(type, values[0]);
             getMeta(type).getTextProperty().set(values[0]); // set the final value
         }
     }

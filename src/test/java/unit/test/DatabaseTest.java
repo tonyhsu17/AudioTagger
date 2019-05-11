@@ -1,24 +1,17 @@
 package unit.test;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
-
-import java.sql.SQLException;
-import java.util.List;
-
-import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
 import modules.controllers.DatabaseController;
 import modules.database.tables.AlbumArtist;
 import modules.database.tables.Artist;
 import modules.database.tables.GroupArtist;
+import org.testng.Assert;
+import org.testng.annotations.*;
 import support.util.Utilities.EditorTag;
+
+import java.sql.SQLException;
+import java.util.List;
+
+import static org.testng.Assert.*;
 
 
 
@@ -187,4 +180,5 @@ public class DatabaseTest {
         assertEquals(str.get(3), "Misaka & Mikoto Misaka");
         
     }
+
 }

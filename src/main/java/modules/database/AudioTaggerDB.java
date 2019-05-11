@@ -1,5 +1,9 @@
 package modules.database;
 
+import modules.database.tables.*;
+import org.tonyhsu17.utilities.Logger;
+import support.util.StringUtil;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.AbstractMap;
@@ -7,16 +11,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import modules.database.tables.AlbumArtist;
-import modules.database.tables.Artist;
-import modules.database.tables.ArtistToGroup;
-import modules.database.tables.GroupArtist;
-import modules.database.tables.WordReplacement;
-import support.util.StringUtil;
 
 
-
-public class AudioTaggerDB extends Database {
+public class AudioTaggerDB extends Database implements Logger {
 
     public AudioTaggerDB(String dbName) throws SQLException {
         super(dbName);
@@ -51,8 +48,7 @@ public class AudioTaggerDB extends Database {
                 }
             }
             catch (SQLException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                error(e);
             } ;
         }
         return "";
@@ -229,7 +225,7 @@ public class AudioTaggerDB extends Database {
                 rs.close();
             }
             catch (SQLException e) {
-                e.printStackTrace();
+                error(e);
             }
         }
         return result;
@@ -294,7 +290,32 @@ public class AudioTaggerDB extends Database {
                 rs.close();
             }
             catch (SQLException e) {
-                e.printStackTrace();
+                error(e);
+            }
+        }
+        return result;
+    }
+
+    public String getNonCapitalizedWord(String word) {
+        String result = "";
+        if(word == null || word.isEmpty()) {
+            return result;
+        }
+        else {
+            ResultSet rs;
+            try {
+                // Individuals: first - dbFirst, last - dbLast
+                String query = String.format("SELECT %s FROM %s WHERE %s = ?",
+                    NonCapitalization.Fields.WORD.fieldName(), NonCapitalization.instance().tableName(),
+                    NonCapitalization.Fields.WORD.fieldName());
+                rs = getResults(query, word);
+                if(rs.next()) {
+                    result = rs.getString(1).trim();
+                }
+                rs.close();
+            }
+            catch (SQLException e) {
+                error(e);
             }
         }
         return result;
@@ -343,9 +364,16 @@ public class AudioTaggerDB extends Database {
             else if(table instanceof WordReplacement) {
                 insert(table, values[0], values[1]);
             }
+            else if(table instanceof NonCapitalization) {
+                String result = getNonCapitalizedWord((String)values[0]);
+                if(result.isEmpty()) {
+                    insert(table, values[0]);
+                }
+            }
         }
-        else if(id != -1 && table != WordReplacement.instance()) { // if id found
+        else if(id != -1 && table.id() != null) { // if id found
             // execute update statement
+
             // currently Word_Replacement table will not allow overrides or updating
             updateUseFrequency(table, id);
         }
@@ -361,7 +389,7 @@ public class AudioTaggerDB extends Database {
      * Increase use frequency of id by 1
      * 
      * @param table {@link TableBase}
-     * @param values id
+     * @param id
      */
     private void updateUseFrequency(TableBase table, int id) {
         try {
@@ -396,7 +424,7 @@ public class AudioTaggerDB extends Database {
             rs.close();
         }
         catch (SQLException e) {
-            e.printStackTrace();
+            error(e);
         }
     }
 
@@ -497,7 +525,7 @@ public class AudioTaggerDB extends Database {
      * Generates the hash value for the artists.
      * Will add in new artist entry in db if artist does not exist
      * 
-     * @param str Format: [Artist1 (full name), Artist2 (full name), ...]
+     * @param values Format: [Artist1 (full name), Artist2 (full name), ...]
      * @return Hash of artists
      */
     private String getGroupHash(Object[] values) {
@@ -581,6 +609,7 @@ public class AudioTaggerDB extends Database {
             Artist.instance(),
             GroupArtist.instance(),
             ArtistToGroup.instance(),
-            WordReplacement.instance()});
+            WordReplacement.instance(),
+            NonCapitalization.instance()});
     }
 }

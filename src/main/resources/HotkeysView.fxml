@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="106.0" prefWidth="408.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <TextArea editable="false" prefHeight="135.0" prefWidth="478.0" text="Ctrl + S = Save&#10;Ctrl + r = Toggle autofill (Use vgmdb contents to populate tags)&#10;Ctrl + e = Toggle autocorrect (Fix formatting based on past preferences)" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+   </children>
+</AnchorPane>

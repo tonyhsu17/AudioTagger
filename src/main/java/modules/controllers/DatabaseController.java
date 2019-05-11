@@ -1,41 +1,38 @@
 package modules.controllers;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import org.tonyhsu17.utilities.Logger;
-
 import javafx.scene.image.Image;
 import modules.controllers.base.InformationBase;
 import modules.controllers.base.TagBase;
 import modules.database.AudioTaggerDB;
 import modules.database.TableBase;
-import modules.database.tables.AlbumArtist;
-import modules.database.tables.Artist;
-import modules.database.tables.GroupArtist;
-import modules.database.tables.WordReplacement;
+import modules.database.tables.*;
+import org.tonyhsu17.utilities.Logger;
 import support.structure.TagDetails;
 import support.util.StringUtil;
 import support.util.Utilities.EditorTag;
+
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 
 
 /**
  * @author Ikersaro
- *         Group = More than one artist
- *         Artist = Single artist or Group Name
+ * Group = More than one artist
+ * Artist = Single artist or Group Name
  */
 public class DatabaseController implements InformationBase, Logger {
     AudioTaggerDB db;
 
+
     public enum AdditionalTag implements TagBase<AdditionalTag> {
-        REPLACE_WORD
+        REPLACE_WORD, NON_CAPITALIZED
     }
 
     /**
-     * @param name Name of db, empty for default
+     * @param dbName Name of db, empty for default
      * @throws SQLException
      */
     public DatabaseController(String dbName) throws SQLException {
@@ -44,19 +41,19 @@ public class DatabaseController implements InformationBase, Logger {
 
     /**
      * Check if value in db
-     * 
-     * @param table TableNames
+     *
+     * @param table  TableNames
      * @param values <br>
-     *        TableNames.Artist = "firstName", "lastName"
-     *        <br>
-     *        TableNames.Anime = "animeName"
-     *        <br>
-     *        TableNames.Group = "groupName"
+     *               TableNames.Artist = "firstName", "lastName"
+     *               <br>
+     *               TableNames.Anime = "animeName"
+     *               <br>
+     *               TableNames.Group = "groupName"
      */
     public boolean containsCaseSensitive(TableBase table, Object... values) {
         return db.contains(table, values);
     }
-    
+
     public void resetDatabase() {
         db.resetTables();
     }
@@ -72,10 +69,12 @@ public class DatabaseController implements InformationBase, Logger {
     }
 
     @Override
-    public void save(TagDetails details) {}
+    public void save(TagDetails details) {
+    }
 
     @Override
-    public void setAlbumArt(Object obj) {}
+    public void setAlbumArt(Object obj) {
+    }
 
     @Override
     public TagBase<?>[] getAdditionalTags() {
@@ -102,6 +101,9 @@ public class DatabaseController implements InformationBase, Logger {
         else if(tag == AdditionalTag.REPLACE_WORD && extraArgs.length == 1) {
             results = db.getReplacementWord(extraArgs[0]);
         }
+        else if(tag == AdditionalTag.NON_CAPITALIZED && extraArgs.length == 1) {
+            results = db.getNonCapitalizedWord(extraArgs[0]);
+        }
         return results;
     }
 
@@ -117,7 +119,7 @@ public class DatabaseController implements InformationBase, Logger {
                 String[] fullName = StringUtil.splitName(values[0]);
                 if(!fullName[0].isEmpty()) {
                     db.add(Artist.instance(), fullName[0], fullName[1]);
-                } 
+                }
             }
             else {
                 db.add(GroupArtist.instance(), (Object[])values);
@@ -126,6 +128,10 @@ public class DatabaseController implements InformationBase, Logger {
         else if(tag == AdditionalTag.REPLACE_WORD) {
             db.add(WordReplacement.instance(), (Object[])values);
         }
+        else if(tag == AdditionalTag.NON_CAPITALIZED) {
+            db.add(NonCapitalization.instance(), values[0]);
+        }
+
     }
 
     @Override
@@ -139,6 +145,9 @@ public class DatabaseController implements InformationBase, Logger {
             returnValue = db.getResultsForAnime(values);
         }
         else if(tag == AdditionalTag.REPLACE_WORD) {
+
+        }
+        else if(tag == AdditionalTag.NON_CAPITALIZED) {
 
         }
         return returnValue;

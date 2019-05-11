@@ -1,17 +1,5 @@
 package application;
 
-import java.io.File;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.concurrent.Semaphore;
-
-import org.tonyhsu17.utilities.EventCenter;
-import org.tonyhsu17.utilities.EventCenter.Events;
-import org.tonyhsu17.utilities.Logger;
-import org.tonyhsu17.utilities.Scheduler;
-
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
@@ -20,26 +8,27 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.DragEvent;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.input.TransferMode;
+import javafx.scene.input.*;
 import javafx.scene.text.Text;
 import model.DataCompilationModel;
 import model.DataCompilationModel.ImageFrom;
 import modules.controllers.DatabaseController;
 import modules.controllers.EditorDataController;
 import modules.controllers.VGMDBController;
+import org.tonyhsu17.utilities.EventCenter;
+import org.tonyhsu17.utilities.EventCenter.Events;
+import org.tonyhsu17.utilities.Logger;
+import org.tonyhsu17.utilities.Scheduler;
 import support.util.Utilities.EditorTag;
+
+import java.io.File;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.concurrent.Semaphore;
 
 
 
@@ -296,26 +285,12 @@ public class AudioTaggerVC implements Logger {
         // SongList selecting files - display in editor
         songListLV.getSelectionModel().selectedItemProperty().addListener((mouseEvent) -> {
             List<Integer> indices = songListLV.getSelectionModel().getSelectedIndices();
+            debug("orig" + songListLV.getSelectionModel().getSelectedIndices());
             model.requestDataFor(indices, (size) -> {
             });
             // trigger a search on vgmdb
             vgmdbParserModel.searchByAlbum(editorFields.getDataForTag(EditorTag.ALBUM));
         });
-
-        // ComboBox dropdown - Show dropdown items when clicked on textfield
-        //        for(Entry<ComboBox<String>, EditorTag> entry : comboBoxToTag.entrySet()) {
-        //            ComboBox<String> temp = entry.getKey();
-        //            TextField tf = temp.getEditor();
-        //
-        //            tf.setOnMouseClicked((mouseEvent) -> {
-        //                // highlighting is removed when showing dropdown, so need to rehighlight
-        //                Range range = Utilities.getRange(tf.getText(), tf.getCaretPosition(), tf.getSelectedText());
-        //                model.requestDropdownForTag(entry.getValue(), tf.getText(), temp.getItems(), (size) -> {
-        //                    tf.selectRange(range.start(), range.end());
-        //                    temp.show();
-        //                });
-        //            });
-        //        }
     }
 
     Semaphore semaphore = new Semaphore(1);
@@ -338,6 +313,7 @@ public class AudioTaggerVC implements Logger {
                             model.requestDropdownForTag(entry.getValue(), newVal, temp.getItems(), (newList) -> {
                                 temp.hide();
                                 temp.setItems((ObservableList<String>)newList);
+                                temp.setVisibleRowCount(5);
                                 temp.visibleRowCountProperty().set(((ObservableList<String>)newList).size());
                                 temp.show();
                                 tf.setText(newVal);
@@ -358,6 +334,8 @@ public class AudioTaggerVC implements Logger {
     // ~~~~~ songListLV ~~~~~ //
     @FXML
     private void songListLVOnMousePressed(MouseEvent event) {
+//         model.requestDataFor(songListLV.getSelectionModel().getSelectedIndices(), (size) -> {
+//                    });
         try {
             Node textDraggedOver = event.getPickResult().getIntersectedNode(); // get item dragged on
             int indexDraggedOver = model.getSongList().indexOf(((Text)textDraggedOver).getText()); // get index of text of item
@@ -368,11 +346,16 @@ public class AudioTaggerVC implements Logger {
         {
             pressedIndex = model.getSongList().size();
         }
+        model.requestDataFor(songListLV.getSelectionModel().getSelectedIndices(), (size) -> {
+        });
+        debug("@@@@" + songListLV.getSelectionModel().getSelectedIndices());
     }
 
     @FXML
     private void songListLVOnMouseDragged(MouseEvent event) {
         try {
+
+
             Node textDraggedOver = event.getPickResult().getIntersectedNode(); // get item dragged on
             int indexDraggedOver = model.getSongList().indexOf(((Text)textDraggedOver).getText()); // get index of text of item
             songListLV.getSelectionModel().clearSelection(); // reset current selection as selectRange() appends
@@ -383,6 +366,8 @@ public class AudioTaggerVC implements Logger {
             else {
                 songListLV.getSelectionModel().selectRange(pressedIndex, indexDraggedOver + 1);
             }
+//            model.requestDataFor(songListLV.getSelectionModel().getSelectedIndices(), (size) -> {
+//            });
         }
         catch (ClassCastException | NullPointerException | IndexOutOfBoundsException e) // catch invalid item casting
         {
@@ -396,6 +381,7 @@ public class AudioTaggerVC implements Logger {
         if(board.hasFiles()) {
             de.acceptTransferModes(TransferMode.ANY);
         }
+
     }
 
     @FXML

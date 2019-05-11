@@ -1,19 +1,5 @@
 package model;
 
-import java.awt.Toolkit;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-
-import org.tonyhsu17.utilities.Logger;
-
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
@@ -25,11 +11,24 @@ import modules.controllers.EditorDataController;
 import modules.controllers.VGMDBController;
 import modules.controllers.base.InformationBase;
 import modules.controllers.base.TagBase;
+import org.tonyhsu17.utilities.Logger;
 import support.Genres;
 import support.structure.EditorComboBoxMeta;
 import support.structure.TagDetails;
 import support.util.StringUtil;
 import support.util.Utilities.EditorTag;
+
+import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 
 
@@ -145,9 +144,10 @@ public class DataCompilationModel implements Logger {
 
     /**
      * Populate list with all possible values.
-     * @param tag Which text field, {@link EditorTag}
+     *
+     * @param tag            Which text field, {@link EditorTag}
      * @param compareAgainst Fuzzy match with text
-     * @param defaults Values to add automatiical
+     * @param defaults       Values to add automatiical
      * @return
      */
     private List<String> getPossibleValuesForString(EditorTag tag, String compareAgainst, String... defaults) {
@@ -240,7 +240,18 @@ public class DataCompilationModel implements Logger {
         String[] splitArtists = StringUtil.splitBySeparators(editorMap.getMeta(EditorTag.ARTIST).getTextProperty().get());
         dbManagement.setDataForTag(EditorTag.ARTIST, splitArtists);
 
+        // save delim tags into db
+        List<Integer> selected = audioFilesModel.removeHeaderIndicies();
+        for(int index : selected) {
+            // get audio file's info and compare against vgmdb's info
+            TagDetails info = audioFilesModel.getTagDetails(index);
+            addDelimsToDB(EditorTag.ARTIST, info);
+            addDelimsToDB(EditorTag.TITLE, info);
+            addDelimsToDB(EditorTag.ALBUM, info);
+            addDelimsToDB(EditorTag.ALBUM_ARTIST, info);
+        }
 
+        saveNonCapitalizationInDB();
         // store meta info to db - end
 
         // go through each element and set tag
@@ -254,27 +265,28 @@ public class DataCompilationModel implements Logger {
         details.setAlbumArt(editorMap.getAlbumArt());
 
         audioFilesModel.save(details);
-
-        saveDelimTagInDB();
     }
 
     /**
-     * Check each editor field's final value and store delim tag diff compared to VGMDB
+     * Check if first letter of each word in title and determine if word is lowercased.
      */
-    private void saveDelimTagInDB() {
-        List<Integer> selected = audioFilesModel.removeHeaderIndicies();
-
-        for(int index : selected) {
-            // get audio file's info and compare against vgmdb's info
-            audioFilesModel.selectTag(index, (info) -> {
-                addDelimsToDB(EditorTag.ARTIST, info);
-                addDelimsToDB(EditorTag.TITLE, info);
-                addDelimsToDB(EditorTag.ALBUM, info);
-                addDelimsToDB(EditorTag.ALBUM_ARTIST, info);
-            });
+    private void saveNonCapitalizationInDB() {
+        EditorComboBoxMeta titleMeta = editorMap.getMeta(EditorTag.TITLE);
+        String title = titleMeta.getTextProperty().get();
+        for(String word : title.split(" ")) {
+            // if first letter is lowercased, save tag
+            if(word.substring(0, 1).equals(word.substring(0, 1).toLowerCase())) {
+                dbManagement.setDataForTag(DatabaseController.AdditionalTag.NON_CAPITALIZED, word);
+            }
         }
     }
 
+    /**
+     * Parse editor text and determine if there are delimiter modifications, then store in db.
+     *
+     * @param tag
+     * @param info
+     */
     private void addDelimsToDB(EditorTag tag, TagDetails info) {
         List<String[]> delimDiffs;
 

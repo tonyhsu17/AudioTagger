@@ -29,8 +29,6 @@ import support.structure.SettingsTableViewMeta;
 public class SettingsVC implements Logger
 {
     Settings settings;
-    @FXML
-    Stage self;
     
     ObservableList<SettingsTableViewMeta> data;
     ListProperty<String> keywordTags;
