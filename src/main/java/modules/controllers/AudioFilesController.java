@@ -1,5 +1,9 @@
 package modules.controllers;
 
+import ealvatag.audio.exceptions.CannotReadException;
+import ealvatag.audio.exceptions.InvalidAudioFrameException;
+import ealvatag.tag.TagException;
+import ealvatag.tag.images.ArtworkFactory;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
@@ -9,11 +13,6 @@ import model.Settings.SettingsKey;
 import modules.controllers.base.InformationBase;
 import modules.controllers.base.TagBase;
 import org.apache.commons.io.FilenameUtils;
-import org.jaudiotagger.audio.exceptions.CannotReadException;
-import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
-import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
-import org.jaudiotagger.tag.TagException;
-import org.jaudiotagger.tag.images.ArtworkFactory;
 import org.tonyhsu17.utilities.Logger;
 import support.Constants;
 import support.structure.AudioFile;
@@ -121,7 +120,7 @@ public class AudioFilesController implements InformationBase, Logger {
                     songListFileNames.add(FilenameUtils.getName(sub.getPath()));
                     songListMP3Files.add(temp);
                 }
-                catch (IOException | TagException | ReadOnlyFileException | CannotReadException | InvalidAudioFrameException e) {
+                catch (IOException | TagException | CannotReadException | InvalidAudioFrameException e) {
                     error("failed on: " + sub.getPath());
                     e.printStackTrace();
                 }
@@ -160,8 +159,8 @@ public class AudioFilesController implements InformationBase, Logger {
     /**
      * Returns tag data for specified index
      *
-     * @param indicies Can be 1 or many
-     * @param ob Callback with TagInfo
+     * @param indices Can be 1 or many
+     * @param cb Callback with TagInfo
      */
     public void selectTags(List<Integer> indices, AudioFilesModelTagInfo cb) {
         selectedindices = indices;
@@ -203,8 +202,8 @@ public class AudioFilesController implements InformationBase, Logger {
     /**
      * Returns tag data for specified index
      *
-     * @param indicies Can be 1 or many
-     * @param ob Callback with TagInfo
+     * @param index
+     * @param cb Callback with TagInfo
      */
     public void selectTag(int index, AudioFilesModelTagInfo cb) {
         List<Integer> list = new ArrayList<Integer>();
@@ -318,6 +317,16 @@ public class AudioFilesController implements InformationBase, Logger {
      */
     private void saveForIndex(int index, TagDetails tags, boolean overrideFileName) {
         AudioFile file = songListMP3Files.get(index);
+
+        for(EditorTag tag : EditorTag.values()) {
+            String tagVal = tags.get(tag);
+            // replace keyword with original value in tagDetails
+            if(tagVal != null && StringUtil.isKeyword(tagVal)) {
+                tags.set(tag, file.get(tag));
+            }
+        }
+        // delete original tags to clear out junk
+        file.deleteTags();
         for(EditorTag tag : EditorTag.values()) {
             String tagVal = tags.get(tag);
             // if value isn't null and isn't a keyword, set field. Allow empty fields
@@ -325,6 +334,7 @@ public class AudioFilesController implements InformationBase, Logger {
                 file.setField(tag, tagVal);
             }
         }
+
         // fix file name if multisave
         if(overrideFileName) {
             file.setField(EditorTag.FILE_NAME, file.getOriginalFileName());
@@ -337,7 +347,6 @@ public class AudioFilesController implements InformationBase, Logger {
             try {
 
                 File temp = ImageUtil.saveImage(tags.getAlbumArt());
-                file.getRawTags().deleteArtworkField();
                 file.setAlbumArt(ArtworkFactory.createArtworkFromFile(temp));
                 temp.delete();
             }
@@ -354,7 +363,7 @@ public class AudioFilesController implements InformationBase, Logger {
                 songListMP3Files.set(index,
                     new AudioFile(new File(file.getFile().getParentFile().getPath() + File.separator + file.getNewFileName())));
             }
-            catch (IOException | TagException | ReadOnlyFileException | CannotReadException | InvalidAudioFrameException e) {
+            catch (IOException | TagException | CannotReadException | InvalidAudioFrameException e) {
             }
         }
     }
@@ -371,7 +380,6 @@ public class AudioFilesController implements InformationBase, Logger {
     /**
      * Converts header indices into file indices
      *
-     * @param selected
      * @return
      */
     public List<Integer> removeHeaderIndicies() {

@@ -1,51 +1,52 @@
 package support.structure;
 
+import ealvatag.audio.AudioFileIO;
+import ealvatag.audio.exceptions.CannotReadException;
+import ealvatag.audio.exceptions.CannotWriteException;
+import ealvatag.audio.exceptions.InvalidAudioFrameException;
+import ealvatag.tag.FieldDataInvalidException;
+import ealvatag.tag.FieldKey;
+import ealvatag.tag.Tag;
+import ealvatag.tag.TagException;
+import ealvatag.tag.images.Artwork;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
 import org.apache.commons.io.FilenameUtils;
-import org.jaudiotagger.audio.exceptions.CannotReadException;
-import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
-import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
-import org.jaudiotagger.audio.mp3.MP3File;
-import org.jaudiotagger.tag.FieldDataInvalidException;
-import org.jaudiotagger.tag.FieldKey;
-import org.jaudiotagger.tag.KeyNotFoundException;
-import org.jaudiotagger.tag.TagException;
-import org.jaudiotagger.tag.id3.AbstractID3v2Tag;
-import org.jaudiotagger.tag.images.Artwork;
 import org.tonyhsu17.utilities.Logger;
+import org.tonyhsu17.utilities.StringUtils;
 import support.util.Utilities.EditorTag;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 
 
 
 /**
  * Extension of MP3File class for extra functionality
- * 
- * @author Ikersaro
  *
+ * @author Ikersaro
  */
 public class AudioFile implements Logger {
-    private MP3File file;
-    private AbstractID3v2Tag tags;
+    private ealvatag.audio.AudioFile file;
+    private Tag tags;
     private String currentFileName;
 
-    public AudioFile(File file) throws IOException, TagException, ReadOnlyFileException, CannotReadException, InvalidAudioFrameException {
-        this(new MP3File(file));
+    public AudioFile(File file) throws IOException, TagException, CannotReadException, InvalidAudioFrameException {
+        this(AudioFileIO.read(file));
 
     }
 
-    public AudioFile(MP3File file) {
+    public AudioFile(ealvatag.audio.AudioFile file) {
         this.file = file;
-        tags = file.getID3v2Tag();
+        tags = file.getTag().orNull();
         currentFileName = FilenameUtils.getName(file.getFile().getPath());
     }
 
-    public AbstractID3v2Tag getRawTags() {
+    public Tag getRawTags() {
         return tags;
     }
 
@@ -85,7 +86,12 @@ public class AudioFile implements Logger {
                 str = tags.getFirst(FieldKey.TITLE);
                 break;
             case TRACK:
-                str = String.format("%02d", Integer.parseInt(tags.getFirst(FieldKey.TRACK)));
+                try {
+                    str = String.format("%02d", Integer.parseInt(tags.getFirst(FieldKey.TRACK)));
+                }
+                catch (NumberFormatException e) {
+                    str = "";
+                }
                 break;
             case YEAR:
                 str = tags.getFirst(FieldKey.YEAR);
@@ -98,7 +104,7 @@ public class AudioFile implements Logger {
 
     public void setAlbumArt(Artwork img) {
         try {
-            tags.setField(img);
+            tags = tags.deleteArtwork().addArtwork(img);
         }
         catch (FieldDataInvalidException e) {
             e.printStackTrace();
@@ -121,7 +127,8 @@ public class AudioFile implements Logger {
 
                     break;
                 case ALBUM_ARTIST:
-                    tags.setField(FieldKey.ALBUM_ARTIST, str);;
+                    tags.setField(FieldKey.ALBUM_ARTIST, str);
+                    ;
                     break;
                 case ALBUM_ART_META:
                     break;
@@ -147,48 +154,46 @@ public class AudioFile implements Logger {
                     tags.setField(FieldKey.TRACK, str);
                     break;
                 case YEAR:
+                    debug(tags.getValue(FieldKey.YEAR));
                     tags.setField(FieldKey.YEAR, str);
                     break;
                 default:
                     break;
             }
         }
-        catch (KeyNotFoundException | FieldDataInvalidException e) {
+        catch (FieldDataInvalidException e) {
             e.printStackTrace();
         }
     }
 
+    public void deleteTags() {
+        tags = file.setNewDefaultTag();
+    }
+
     public void save() {
         try {
-            file.setID3v2Tag(tags);
-            file.save();
+            //            file.setID3v2Tag(tags);
             if(!currentFileName.equals(getOriginalFileName())) // saving to a different name
             {
-                String path = file.getFile().getParentFile().getPath();
-                String newNamePath = path + File.separator + currentFileName; // name of new file
+                String oldPath = file.getFile().getPath();
+                String parent = file.getFile().getParentFile().getPath();
+                String newNamePath = parent + File.separator + getFileNameNoExtention(StringUtils.santizeFileName(currentFileName, ""), getFileType()); // name of new file
                 info("File: " + getOriginalFileName() + " saving as: " + newNamePath);
-                if(!file.getFile().renameTo(new File(newNamePath))) {
-                    error("unable to save");
-                }
-
-                //                // update ui list view
-                //                songListMP3Files.remove(i); // remove original file
-                //                songListMP3Files.add(i, new MP3File(new File(newNamePath))); // update to new file
-                //
-                //                songListFileNames.add(i, fileName); // add new filename into list
-                //                songListFileNames.remove(i + 1); // remove original filename,
-                // (order matters, causes an ui update and triggering a selectIndex which changes selected Index)
+                file.saveAs(newNamePath);
+                Files.delete(Paths.get(oldPath));
+            }
+            else {
+                file.save();
             }
         }
-        catch (IOException | TagException e) {
+        catch (CannotWriteException | IOException e) {
             e.printStackTrace();
         }
     }
 
     /**
      * Extract the album art image
-     * 
-     * @param tag Audio Tag to extract from
+     *
      * @return Image
      */
     public Image getAlbumArt() {
@@ -245,5 +250,9 @@ public class AudioFile implements Logger {
      */
     public File getFile() {
         return file.getFile();
+    }
+
+    private String getFileNameNoExtention(String str, String ext) {
+        return str.substring(0, str.length() - ext.length() - (ext.startsWith(".") ? 0 : 1));
     }
 }

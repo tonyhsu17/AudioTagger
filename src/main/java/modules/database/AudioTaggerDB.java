@@ -1,6 +1,7 @@
 package modules.database;
 
 import modules.database.tables.*;
+import modules.database.tables.AlbumArtist.Fields;
 import org.tonyhsu17.utilities.Logger;
 import support.util.StringUtil;
 
@@ -250,7 +251,7 @@ public class AudioTaggerDB extends Database implements Logger {
                 String query = String.format("SELECT %s FROM %s WHERE LOWER(%s) LIKE ? " +
                                              "ORDER BY %s DESC FETCH NEXT 10 ROWS ONLY",
                     AlbumArtist.Fields.ANIME_NAME.fieldName(), AlbumArtist.instance().tableName(),
-                    AlbumArtist.Fields.ANIME_NAME.fieldName(), AlbumArtist.Fields.ANIME_NAME.fieldName());
+                    AlbumArtist.Fields.ANIME_NAME.fieldName(), Fields.USE_FREQUENCY.fieldName());
                 ResultSet rs = getResults(query, '%' + compareValue + '%');
                 while(rs.next()) {
                     possibleAnimes.add((rs.getString(1)).trim());
