@@ -35,7 +35,6 @@ import java.util.*;
  * Stores list of files in workspace and indices for selected to view in editor.
  *
  * @author Tony
- *
  */
 public class AudioFilesController implements InformationBase, Logger {
     /**
@@ -44,6 +43,7 @@ public class AudioFilesController implements InformationBase, Logger {
     public interface AudioFilesModelTagInfo {
         public void getTags(TagDetails details);
     }
+
 
     private ArrayList<String> songListDirectories; // directories of files
 
@@ -103,7 +103,9 @@ public class AudioFilesController implements InformationBase, Logger {
                 directoriesQueue.add(f);
             }
             // else if correct file
-            else if(FilenameUtils.getExtension(fullPath).equals("mp3") || FilenameUtils.getExtension(fullPath).equals("m4a")) {// TODO the other formats too
+            else if(FilenameUtils.getExtension(fullPath).equals("mp3") || FilenameUtils.getExtension(fullPath).equals("m4a") ||
+                    FilenameUtils.getExtension(fullPath).equals("flac") || FilenameUtils.getExtension(fullPath).equals(
+                "wav")) {// TODO the other formats too
                 filesInDirQueue.add(f);
             }
         }
@@ -160,7 +162,7 @@ public class AudioFilesController implements InformationBase, Logger {
      * Returns tag data for specified index
      *
      * @param indices Can be 1 or many
-     * @param cb Callback with TagInfo
+     * @param cb      Callback with TagInfo
      */
     public void selectTags(List<Integer> indices, AudioFilesModelTagInfo cb) {
         selectedindices = indices;
@@ -203,7 +205,7 @@ public class AudioFilesController implements InformationBase, Logger {
      * Returns tag data for specified index
      *
      * @param index
-     * @param cb Callback with TagInfo
+     * @param cb    Callback with TagInfo
      */
     public void selectTag(int index, AudioFilesModelTagInfo cb) {
         List<Integer> list = new ArrayList<Integer>();
@@ -215,7 +217,7 @@ public class AudioFilesController implements InformationBase, Logger {
      * Compares two sets of TagDetails and sets $0 value to "different values" if they do not match
      *
      * @param original One to modify if different
-     * @param newTag Compare to TagDetails
+     * @param newTag   Compare to TagDetails
      * @return TagDetails
      */
     private TagDetails getCombinedTagDetails(TagDetails original, TagDetails newTag) {
@@ -312,27 +314,24 @@ public class AudioFilesController implements InformationBase, Logger {
      * Save new tags
      *
      * @param index
-     * @param tags TagDetails
+     * @param tags             TagDetails
      * @param overrideFileName true = save with original name
      */
     private void saveForIndex(int index, TagDetails tags, boolean overrideFileName) {
         AudioFile file = songListMP3Files.get(index);
-
+        TagDetails copy = new TagDetails(tags);
         for(EditorTag tag : EditorTag.values()) {
             String tagVal = tags.get(tag);
             // replace keyword with original value in tagDetails
             if(tagVal != null && StringUtil.isKeyword(tagVal)) {
-                tags.set(tag, file.get(tag));
+                copy.set(tag, file.get(tag));
             }
         }
         // delete original tags to clear out junk
         file.deleteTags();
         for(EditorTag tag : EditorTag.values()) {
-            String tagVal = tags.get(tag);
-            // if value isn't null and isn't a keyword, set field. Allow empty fields
-            if(tagVal != null && !StringUtil.isKeyword(tagVal)) {
-                file.setField(tag, tagVal);
-            }
+            String tagVal = copy.get(tag);
+            file.setField(tag, tagVal);
         }
 
         // fix file name if multisave
@@ -340,13 +339,13 @@ public class AudioFilesController implements InformationBase, Logger {
             file.setField(EditorTag.FILE_NAME, file.getOriginalFileName());
         }
         else {
-            songListFileNames.set(index, tags.get(EditorTag.FILE_NAME));
+            songListFileNames.set(index, copy.get(EditorTag.FILE_NAME));
         }
         // save album art
-        if(tags.getAlbumArt() != null) {
+        if(copy.getAlbumArt() != null) {
             try {
 
-                File temp = ImageUtil.saveImage(tags.getAlbumArt());
+                File temp = ImageUtil.saveImage(copy.getAlbumArt());
                 file.setAlbumArt(ArtworkFactory.createArtworkFromFile(temp));
                 temp.delete();
             }
@@ -450,7 +449,7 @@ public class AudioFilesController implements InformationBase, Logger {
      * Get meta for a specific tag
      *
      * @see modules.controllers.base.InformationBase#getDataForTag(modules.controllers.base.TagBase,
-     *      java.lang.String[])
+     * java.lang.String[])
      */
     @Override
     public String getDataForTag(TagBase<?> tag, String... extraArgs) {
@@ -459,7 +458,8 @@ public class AudioFilesController implements InformationBase, Logger {
     }
 
     @Override
-    public void setDataForTag(TagBase<?> tag, String... values) {}
+    public void setDataForTag(TagBase<?> tag, String... values) {
+    }
 
     @Override
     public List<String> getPossibleDataForTag(TagBase<?> tag, String values) {

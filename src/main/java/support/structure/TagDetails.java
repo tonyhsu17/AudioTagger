@@ -28,6 +28,20 @@ public class TagDetails {
         reset();
     }
 
+    public TagDetails(TagDetails tags) {
+        this.fileName = tags.fileName;
+        this.title = tags.title;
+        this.artist = tags.artist;
+        this.album = tags.album;
+        this.albumArtist = tags.albumArtist;
+        this.track = tags.track;
+        this.year = tags.year;
+        this.genre = tags.genre;
+        this.comment = tags.comment;
+        this.albumArt = tags.albumArt;
+        this.albumArtMeta = tags.albumArtMeta;
+    }
+
     public void reset() {
         fileName = "";
         title = "";

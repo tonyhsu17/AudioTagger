@@ -279,7 +279,7 @@ public class AudioTaggerVC implements Logger {
     }
 
     /**
-     * Event listeners mouse click actions for song list view and editor's combo box
+     * Event listeners mouse click actions for song list view
      */
     private void addOnMouseClickedListners() {
         // SongList selecting files - display in editor
@@ -314,7 +314,7 @@ public class AudioTaggerVC implements Logger {
                                 temp.hide();
                                 temp.setItems((ObservableList<String>)newList);
                                 temp.setVisibleRowCount(5);
-                                temp.visibleRowCountProperty().set(((ObservableList<String>)newList).size());
+                                temp.visibleRowCountProperty().set(5);
                                 temp.show();
                                 tf.setText(newVal);
                                 semaphore.release();
