@@ -177,10 +177,20 @@ public class AudioFile implements Logger {
             {
                 String oldPath = file.getFile().getPath();
                 String parent = file.getFile().getParentFile().getPath();
-                String newNamePath = parent + File.separator + getFileNameNoExtention(StringUtils.santizeFileName(currentFileName, ""), getFileType()); // name of new file
+                String extension = getFileType();
+                // ignore appending extension as saving will automatically append them
+                String newNamePath = parent + File.separator + getFileNameNoExtention(StringUtils.santizeFileName(currentFileName, ""), extension); // name of new file
+                String tempNamePath = newNamePath + ".temp.";
+                // if file name differs by caps, saveAs overrides the file and fails to save properly.
                 info("File: " + getOriginalFileName() + " saving as: " + newNamePath);
-                file.saveAs(newNamePath);
+                file.saveAs(tempNamePath);
+
+                // appending extension on for renaming file
+                newNamePath += "." + extension;
+                tempNamePath += "." + extension;
+
                 Files.delete(Paths.get(oldPath));
+                new File(tempNamePath).renameTo(new File(newNamePath));
             }
             else {
                 file.save();

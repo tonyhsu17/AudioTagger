@@ -8,6 +8,7 @@ import support.util.StringUtil;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -363,7 +364,7 @@ public class AudioTaggerDB extends Database implements Logger {
                 insert(table, values[0], values[1]);
             }
             else if(table instanceof WordReplacement) {
-                insert(table, values[0], values[1]);
+                insert(table, values[0], values[1], 0);
             }
             else if(table instanceof NonCapitalization) {
                 String result = getNonCapitalizedWord((String)values[0]);
@@ -374,8 +375,6 @@ public class AudioTaggerDB extends Database implements Logger {
         }
         else if(id != -1 && table.id() != null) { // if id found
             // execute update statement
-
-            // currently Word_Replacement table will not allow overrides or updating
             updateUseFrequency(table, id);
         }
         try {
@@ -412,6 +411,11 @@ public class AudioTaggerDB extends Database implements Logger {
                 idField = GroupArtist.Fields.ID;
                 useFreqField = GroupArtist.Fields.USE_FREQUENCY;
                 tableName = GroupArtist.instance().tableName();
+            }
+            else if(table instanceof WordReplacement) {
+                idField = WordReplacement.Fields.ID;
+                useFreqField = WordReplacement.Fields.USE_FREQUENCY;
+                tableName = WordReplacement.instance().tableName();
             }
             query = String.format(query,
                 useFreqField.fieldName(), tableName, idField.fieldName());
@@ -467,24 +471,29 @@ public class AudioTaggerDB extends Database implements Logger {
      */
     @SuppressWarnings("unchecked")
     private int getId(TableBase table, Object... values) {
-        debug("params: " + Arrays.toString(values));
+        debug(table.tableName() + " with params: " + Arrays.toString(values));
         int id;
         if(table instanceof Artist) {
             id = getId(table,
-                new AbstractMap.SimpleEntry<FieldBase, Object>(Artist.Fields.ARTIST_FIRST, values[0]),
-                new AbstractMap.SimpleEntry<FieldBase, Object>(Artist.Fields.ARTIST_LAST, values[1]));
+                new AbstractMap.SimpleEntry<>(Artist.Fields.ARTIST_FIRST, values[0]),
+                new AbstractMap.SimpleEntry<>(Artist.Fields.ARTIST_LAST, values[1]));
         }
         else if(table instanceof AlbumArtist) {
-            id = getId(table, new AbstractMap.SimpleEntry<FieldBase, Object>(AlbumArtist.Fields.ANIME_NAME, values[0]));
+            id = getId(table, new AbstractMap.SimpleEntry<>(AlbumArtist.Fields.ANIME_NAME, values[0]));
         }
         else if(table instanceof GroupArtist) {
             String groupHash = getGroupHash(values);
-            id = getId(table, new AbstractMap.SimpleEntry<FieldBase, Object>(GroupArtist.Fields.ARTIST_ID_HASH, groupHash));
+            id = getId(table, new AbstractMap.SimpleEntry<>(GroupArtist.Fields.ARTIST_ID_HASH, groupHash));
+        }
+        else if(table instanceof WordReplacement) {
+            id = getId(table,
+                new SimpleEntry<>(WordReplacement.Fields.BEFORE, values[0]),
+                new SimpleEntry<>(WordReplacement.Fields.AFTER, values[1]));
         }
         else {
             id = -1;
         }
-        debug(id);
+        debug("Table: " + table + " for values " + Arrays.toString(values) + " got id: " + id);
         return id;
     }
 

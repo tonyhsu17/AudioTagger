@@ -1,10 +1,11 @@
 package modules.database.tables;
 
-import java.util.AbstractMap.SimpleEntry;
-import java.util.List;
-
 import modules.database.FieldBase;
 import modules.database.TableBase;
+
+import java.util.AbstractMap.SimpleEntry;
+import java.util.Arrays;
+import java.util.List;
 
 
 
@@ -44,6 +45,17 @@ public class WordReplacement implements TableBase {
             public String type() {
                 return "INT";
             }
+        },
+        ID {
+            @Override
+            public String fieldName() {
+                return "ID";
+            }
+
+            @Override
+            public String type() {
+                return "INT";
+            }
         };
     }
     
@@ -62,12 +74,12 @@ public class WordReplacement implements TableBase {
 
     @Override
     public List<FieldBase> primaryKeys() {
-        return null;
+        return Arrays.asList(Fields.ID);
     }
 
     @Override
     public List<FieldBase> uniqueKeys() {
-        return null;
+        return Arrays.asList(Fields.BEFORE, Fields.AFTER);
     }
 
     @Override
@@ -82,6 +94,6 @@ public class WordReplacement implements TableBase {
     
     @Override
     public FieldBase id() {
-        return null;
+        return Fields.ID;
     }
 }

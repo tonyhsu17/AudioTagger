@@ -14,6 +14,10 @@ public abstract class Database implements Logger {
     private String dbName = "defaultDB";
     protected Connection conn;
     protected Statement statement;
+    protected String host;
+    protected int port ;
+    protected String user;
+    protected String pass;
 
     public Database(String dbName) throws SQLException {
         if(!dbName.isEmpty()) {

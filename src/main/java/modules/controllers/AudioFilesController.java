@@ -329,6 +329,7 @@ public class AudioFilesController implements InformationBase, Logger {
         }
         // delete original tags to clear out junk
         file.deleteTags();
+
         for(EditorTag tag : EditorTag.values()) {
             String tagVal = copy.get(tag);
             file.setField(tag, tagVal);
